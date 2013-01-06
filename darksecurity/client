@@ -1,0 +1,171 @@
+--Title: Dark Client
+--Version: Ver. 2.66
+--Author: Darkrising (minecraft name djhannz)
+--Platform: ComputerCraft Lua Virtual Machine
+--
+-- Global variables
+x, y = term.getSize()
+PrgName = "client"
+-- functions
+AutoUpdate = true
+function GetPBfile(PBCode, uPath)
+  local PBfile = http.get("http://pastebin.com/raw.php?i="..textutils.urlEncode(PBCode))
+  if PBfile then
+  	local PBfileToWrite = PBfile.readAll()
+	  PBfile.close()
+		  
+	  local file = fs.open( uPath, "w" )
+  	file.write(PBfileToWrite)
+	  file.close()
+  end
+end
+function CheckForUpdate(SPrgram, PbinCode)
+term.clear()
+term.setCursorPos(1,1)
+local TVerDB_C = {}
+  if ((http) and (AutoUpdate == true)) then
+    if fs.exists("VerDB_C") == true then
+      dofile("VerDB_C")
+      for i = 1, #TVerDB do
+        table.insert(TVerDB_C, TVerDB[i])
+      end
+      GetPBfile("mTbGjcVB", "VerDB_L")
+      dofile("VerDB_L")
+      if TVerDB[SPrgram] > TVerDB_C[SPrgram] then
+        GetPBfile(PbinCode, PrgName.."_new")
+        if fs.exists(PrgName.."_new") == true then
+          fs.delete(PrgName)
+          fs.move(PrgName.."_new", PrgName)       
+          fs.delete("VerDB_C")
+          fs.move("VerDB_L", "VerDB_C")         
+          print("Update Complete")
+          sleep(1)
+          os.reboot()
+        else
+          print("Error downloading Update")
+          sleep(1)
+          return
+        end
+      else
+        fs.delete("VerDB_L")
+      end
+    else
+      -- Assume this version is the latest version
+      GetPBfile("mTbGjcVB", "VerDB_C")
+      os.reboot()
+    end
+  else
+    print("Can't Check for updates, http is disabled.")
+    sleep(0.5)
+  end
+end
+function findModem() -- finds and opens attached modem
+  for _,s in ipairs(rs.getSides()) do
+    if peripheral.isPresent(s) and peripheral.getType(s) == "modem" then
+      rednet.open(s)
+      return true
+    end
+  end
+  return false
+end
+-- Screen related functions
+function screenwrite(text, line, nextline)
+  local l = string.len(text)
+  local nx = (x/2 - l/2)
+  term.setCursorPos(nx,line)
+  term.write(text)
+  if nextline then
+    term.setCursorPos(1, nextline)
+  end
+end
+function lineacross(text, line, nextline)
+  term.setCursorPos(1,line)
+  for i=1,x do
+    term.setCursorPos(i,line)
+    term.write(text)
+  end
+  
+  if nextline then
+    term.setCursorPos(1, nextline)
+  end
+end
+function Header(text)
+  lineacross("-", 1)
+  screenwrite(text, 2)
+  lineacross("-", 3, 4)
+end
+-- Main functions
+function keycard_mainProgram()
+  while true do
+    event, eventinfo, extrainfo = os.pullEvent("disk") --waiting for a disk.
+    if disk.hasData(eventinfo) == true then
+      dID = tostring(disk.getDiskID(eventinfo)) -- Get disk's id      
+      rednet.send(server, "QUERY#"..dID) -- send disk's id to server
+      S, M = rednet.receive(2) -- get servers response
+      if M == "#GRANTED#" then -- if accepted opens door
+        disk.eject(eventinfo)
+        rs.setOutput(doorside, true)
+        sleep(2.5)
+        rs.setOutput(doorside, false)
+      end
+      disk.eject(eventinfo)
+    else
+      disk.eject(eventinfo)
+    end
+  end
+end
+function userandpassword_mainProgram()
+  while true do
+    term.clear() term.setCursorPos(1,1)
+    Header(terminalLabel)
+    print("") print("")
+    write("User: ") status, User = pcall(read)
+    write("Password: ") status, password = pcall(read, "*")
+    if ((User ~= nil) and (password ~= nil)) then
+      rednet.send(server, "PASSQUERY#"..User.."#"..password)
+      ID, MES = rednet.receive(2)
+      if MES == nil then
+      print("\nNo response from server!")
+      sleep(2)
+      else
+        if MES == "#GRANTED#" then
+          screenwrite("Correct", 4, 4)
+          rs.setOutput(doorside, true)
+          sleep(2.5)
+          rs.setOutput(doorside, false)
+        else
+          print("")
+          screenwrite("Incorrect", 4, 4)
+          sleep(1)
+        end
+      end
+    end
+  end
+end
+
+if not findModem() then print("Please attach Modem") return exit end -- checks for modem
+pcall(CheckForUpdate, 3, "wWcUvNgv")
+
+if fs.exists("DarkC_conf") == false then
+  term.clear()
+  term.setCursorPos(1,1)
+  Header("Dark Client Setup")
+  write("Please type the server / relay id: ")
+  ServerID = io.read()
+  write("Which side do I output redstone? (Door side?) ")
+  DoorSide = io.read()
+  print("What is the 'label' of this terminal? (eg. Workshop, smelting room etc)" )
+  TLabel = io.read()  
+  
+  local file = io.open("DarkC_conf","w")
+  file:write("server = "..ServerID.." doorside = "..[["]]..DoorSide..[["]].." terminalLabel = "..[["]]..TLabel..[["]])
+  file:close()
+  
+  print("\nsetup complete! Restarting...")
+  sleep(1.5)
+  os.reboot()
+  dofile("DarkC_conf")
+else
+  dofile("DarkC_conf")
+end
+parallel.waitForAll(keycard_mainProgram, userandpassword_mainProgram) -- runs keycard function and user function at the same time
