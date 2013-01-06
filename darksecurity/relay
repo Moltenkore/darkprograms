@@ -1,5 +1,5 @@
 --Title: Dark Relay
-Version = 3.0
+Version = 3.1
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 AutoUpdate = true
@@ -17,9 +17,9 @@ else
   os.loadAPI("dark")
 end
 function Header(text)
-  printL("-", 1)
-  printC(text, 2)
-  printL("-", 3, 4)
+  dark.printL("-", 1)
+  dark.printC(text, 2)
+  dark.printL("-", 3, 4)
 end
 -- main program
 function relay()
