@@ -1,5 +1,5 @@
 --Written by darkrising
-DARKversion = 3.0
+DARKversion = 3.1
 
 db = {}
 db.__index = db
@@ -120,6 +120,23 @@ function betterUpdate(ProgramName, PbinCode, Filename, ProgramVersion)
     fs.delete("Version")
     if NVersion[ProgramName].Version > ProgramVersion then
       getPBFile(NVersion[ProgramName].PBCode, Filename)
+      return true
+    end
+  else
+    return false
+  end
+end
+function gitUpdate(ProgramName, Filename, ProgramVersion)
+  if http then
+    local getGit = http.get("https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/programVersions")
+    local getGit = getGit.readAll()
+    NVersion = textutils.unserialize(getGit)
+    if NVersion[ProgramName].Version > ProgramVersion then
+      getGit = http.get(NVersion[ProgramName].GitURL)
+      getGit = getGit.readAll()
+      local file = fs.open(Filename, "w")
+      file.write(getGit)
+      file.close()
       return true
     end
   else
