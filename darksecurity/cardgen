@@ -1,5 +1,5 @@
 --Title: Dark Card Generator
-Version = 2.0
+Version = 3.1
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 AutoUpdate = true
@@ -15,14 +15,6 @@ if fs.exists("dark") == false then -- load darkAPI
   os.reboot()
 else
   os.loadAPI("dark")
-end
-function LOG(Text)
-  local Time = textutils.formatTime(os.time(), true)
-  local Log
-  Log = fs.open("Dark_dglog", "a")
-  Log.writeLine("ID:"..ID.." "..Time..Text)
-  Log.close()
-  print(Text)
 end
 function Header(text)
   dark.printL("-", 1)
@@ -55,11 +47,9 @@ if S == false then
 else
   rednet.open(S)  
 end
-function stealthUpdate()
-  if AutoUpdate == true then 
-    if ((dark.gitUpdate("cardgen", shell.getRunningProgram(), Version) == true) or (dark.gitUpdate("dark", "dark", dark.DARKversion) == true)) then
-      os.reboot()
-    end
+if AutoUpdate == true then 
+  if ((dark.gitUpdate("cardgen", shell.getRunningProgram(), Version) == true) or (dark.gitUpdate("dark", "dark", dark.DARKversion) == true)) then
+    os.reboot()
   end
 end
 print("running cardgen.")
@@ -71,12 +61,12 @@ while true do
   
   if M == "#DENIED#" then
     rednet.send(server, "ADDID#"..ID)
-    LOG("ID Added")
+    print("ID Added")
   elseif M == "#GRANTED#" then
     rednet.send(server, "DELETEID#"..ID)
-    LOG("ID Deleted")
+    print("ID Deleted")
   else
-    LOG("No response from server.")
+    print("No response from server.")
   end  
   disk.eject(DiskSide) 
 end
