@@ -1,12 +1,16 @@
 --Title: Dark Server
-Version = 4.31
+Version = 4.32
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 if fs.exists("dark") == false then -- load darkAPI
   print("Missing DarkAPI")
   sleep(2)
   print("Attempting to download...")
-  shell.run("pastebin", "get", "ZNdhZNPF", "dark")
+  getGit = http.get("https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/dark")
+  getGit = getGit.readAll()
+  file = fs.open("dark", "w")
+  file.write(getGit)
+  file.close()
   os.reboot()
 else
   os.loadAPI("dark")
