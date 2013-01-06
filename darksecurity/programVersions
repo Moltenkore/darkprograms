@@ -1,5 +1,5 @@
 {["cardgen"]={["GitURL"]="https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/cardgen",["Version"]=2.12,},
-["server"]={["GitURL"]="https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/server",["Version"]=4.3,},
+["server"]={["GitURL"]="https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/server",["Version"]=4.31,},
 ["client"]={["GitURL"]="https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/client",["Version"]=2.66,},
 ["relay"]={["GitURL"]="https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/relay",["Version"]=2.11,},
 ["dark"]={["GitURL"]="https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/dark",["Version"]=3.1,},}

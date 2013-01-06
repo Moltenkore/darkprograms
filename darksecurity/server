@@ -1,5 +1,5 @@
 --Title: Dark Server
-Version = 4.3
+Version = 4.31
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 if fs.exists("dark") == false then -- load darkAPI
@@ -242,7 +242,7 @@ print("")
 end
 function stealthUpdate()
   if AutoUpdate == true then 
-    if ((dark.betterUpdate("server", "2EYXBBSq", shell.getRunningProgram(), Version) == true) or (dark.betterUpdate("dark", "2EYXBBSq", "dark", dark.DARKversion) == true)) then
+    if ((dark.gitUpdate("server", shell.getRunningProgram(), Version) == true) or (dark.gitUpdate("dark", "dark", dark.DARKversion) == true)) then
       os.reboot()
     end
   end
