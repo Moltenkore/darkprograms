@@ -1,5 +1,5 @@
 --Title: Dark Client
-Version = 3.5
+Version = 3.6
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 AutoUpdate = true
@@ -56,13 +56,13 @@ function userandpassword_mainProgram()
       sleep(2)
       else
         if MES == "#GRANTED#" then
-          dark.printC("Correct", 4, true)
+          dark.printC("Correct", 4, 4)
           rs.setOutput(doorside, true)
           sleep(2.5)
           rs.setOutput(doorside, false)
         else
           print("")
-          dark.printC("Incorrect", 4, true)
+          dark.printC("Incorrect", 4, 4)
           sleep(1)
         end
       end
