@@ -1,0 +1,36 @@
+term.clear()
+term.setCursorPos(1,1)
+print("Checking if http is enabled...")
+sleep(0.5)
+if http then
+  print("http is enabled!")
+else
+  print("http is not enabled :(")
+  print("please enable it.")
+  return exit
+end
+
+programs = {"cardgen","server","client","relay","dark"}
+
+local getGit = http.get("https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/programVersions")
+local getGit = getGit.readAll()
+NVersion = textutils.unserialize(getGit)
+
+if fs.exists("/darkprograms/") == false then 
+  fs.makeDir("/darkprograms")
+end
+
+for i=1,#programs do
+  print("")
+  write("Downloading: "..programs[i])
+  getGit = http.get(NVersion[programs[i]].GitURL)
+  getGit = getGit.readAll()
+  local file = fs.open("/darkprograms/"..programs[i], "w")
+  file.write(getGit)
+  file.close()
+  write(".. Done")
+  sleep(1)
+end
+
+print("Done, All programs downloaded to: /darkprograms/")
+print("You can now 'cp' them to a floppy disk or other location")
