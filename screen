@@ -1,6 +1,6 @@
 arg = { ... }
 --Title: Dark Screen
-Version = 3.35
+Version = 3.36
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 AutoUpdate = true
@@ -27,6 +27,7 @@ if #arg == 0 then
   print("Note: 'c'entred, 's'ingle, 'm'ultiple.")
   print(ProgramName.." wizard --Automatic startup creation")
   print(ProgramName.." update --checks for updates")
+  print(ProgramName.." version --displays screen version")
   print("Example: "..ProgramName.." -mc 2 5 frame1 frame2")
   return exit
 end
@@ -240,6 +241,9 @@ if arg[1] == "update" then
   else
     print("Everything is up-to-date.")
   end
+end
+if arg[1] == "version" then
+  print("Screen version is: "..Version)
 end
 
 TextScale = tonumber(arg[2])
