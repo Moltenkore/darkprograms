@@ -1,5 +1,5 @@
 --Written by darkrising
-DARKversion = 3.11
+DARKversion = 3.12
 
 db = {}
 db.__index = db
@@ -174,7 +174,7 @@ function cs() -- lazy man's screen clear
   return
 end
 function setCol(Color, BkgColor)
-  if term.isColor() == true then
+  if ((term.isColor) and (term.isColor() == true)) then
     if Color then term.setTextColor(colors[Color]) end
     if BkgColor then term.setBackgroundColor(colors[BkgColor]) end
   else
@@ -182,7 +182,7 @@ function setCol(Color, BkgColor)
   end
 end
 function resetCol(Color, BkgColor)
-  if term.isColor() == true then
+  if ((term.isColor) and (term.isColor() == true)) then
     if Color then term.setTextColor(colors.white) end
     if BkgColor then term.setBackgroundColor(colors.black) end
     return
@@ -204,7 +204,7 @@ function printC(Text, Line, NextLine, Color, BkgColor) -- print centered
 end
 function printL(Text, Line, NextLine, Color, BkgColor) -- print line
   local x, y = term.getSize()
-  if ((term.isColor() == false) and (Text == " ")) then Text = "-" end
+  if ((term.isColor) and (term.isColor() == false) and (Text == " ")) then Text = "-" end
   for i = 1, x do
     term.setCursorPos(i, Line)
     if Color then setCol(Color, BkgColor) end
@@ -263,7 +263,7 @@ end
 -- special functions
 function splash(duration, Text) -- displays dark programs splash (coloured monitors only)
   local x, y = term.getSize()
-  if term.isColor() == true then
+  if ((term.isColor) and (term.isColor() == true)) then
     term.clear() term.setCursorPos(1,1)
     splash = {
       [1]={2,2,2,2,2,2,2,2,2,2,2,2,2},
