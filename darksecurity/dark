@@ -1,5 +1,5 @@
 --Written by darkrising
-DARKversion = 3.12
+DARKversion = 3.2
 
 db = {}
 db.__index = db
@@ -288,4 +288,59 @@ function splash(duration, Text) -- displays dark programs splash (coloured monit
     sleep(duration)    
   end
   return
+end
+function hashSplit(Hash) -- transfers a long hash number into a table
+  local HashTable = {}
+  for i = 1, #tostring(Hash) do
+    local set = i
+    local b = string.sub(Hash, set, set)
+    table.insert(HashTable, b)
+  end
+  return HashTable
+end
+function encrypt(Input, keyN) -- takes a string and returns an encrypted version, if keyN 1 - 9 returns encrypted string with solid number hash
+  local keystore = {}
+  local i = 1
+  local dec = ""
+  local key
+  repeat
+    if keyN then 
+      key = keyN
+    else
+      key = math.random(9)
+    end
+    table.insert(keystore, key)  
+    local tstr = string.char(Input:byte(i) + key)
+    dec = dec .. tstr
+    i = i + 1
+  until Input:byte(i) == nil
+  local cin = ""
+  for i = 1, #keystore do
+    cin = cin..keystore[i]
+  end
+  if keyN then
+    return dec
+  else
+    return dec, cin
+  end
+end
+function decrypt(Input, Hash, keyY) -- takes encrypted string with either hash (or solid hash if keyY is true) and converts it back to readable text
+  local keystore, tstr, i, dec
+  if keyY then
+    keystore = {Hash}
+  else
+    keystore = hashSplit(Hash)
+  end
+  i = 1
+  dec = ""
+  repeat
+    if keyY then
+      tstr = string.char(Input:byte(i) - keystore[1])
+    else
+      tstr = string.char(Input:byte(i) - keystore[i])
+    end
+    dec = dec .. tstr
+    i = i + 1
+  until Input:byte(i) == nil
+  return dec
 end
