@@ -1,8 +1,9 @@
 --Title: Dark Client
-Version = 3.6
+Version = 4.0
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 AutoUpdate = true
+x,y = term.getSize()
 if fs.exists("dark") == false then -- load darkAPI
   print("Missing DarkAPI")
   sleep(2)
@@ -16,24 +17,45 @@ if fs.exists("dark") == false then -- load darkAPI
 else
   os.loadAPI("dark")
 end
+function rednetSendE(ID, Message)
+  if Config.encryption == true then
+    Message = dark.encrypt(Message, 1)
+  end
+  rednet.send(ID, Message)
+end
+function rednetReceiveE(TimeA)
+  local Se,Me,Di = rednet.receive(TimeA)
+  if Config.encryption == true then
+    Me = dark.decrypt(Me, 1, true)
+  end
+  return Se,Me,Di
+end
 function Header(text)
   dark.printL("-", 1)
+  dark.printA("|", x, 2)
+  dark.printA("|", 1, 2)
   dark.printC(text, 2)
-  dark.printL("-", 3)
-  term.setCursorPos(1,4)
+  dark.printL("-", 3, 4)
 end
 function keycard_mainProgram()
   while true do
-    event, eventinfo, extrainfo = os.pullEvent("disk") --waiting for a disk.
+    event, eventinfo, extrainfo = os.pullEvent("disk")
+    ComRay2 = {}
+    ComRay2.computerid = os.getComputerID()
+    ComRay2.area = Config.securityLevel
+    
     if disk.hasData(eventinfo) == true then
-      dID = tostring(disk.getDiskID(eventinfo)) -- Get disk's id      
-      rednet.send(server, "QUERY#"..dID) -- send disk's id to server
-      S, M = rednet.receive(2) -- get servers response
-      if M == "#GRANTED#" then -- if accepted opens door
+      ComRay2.diskQuery = disk.getDiskID(eventinfo) 
+      SendString = textutils.serialize(ComRay2)
+      rednetSendE(Config.serverID, SendString)
+      
+      S, M = rednetReceiveE(2)
+      
+      if M == "#GRANTED#" then
         disk.eject(eventinfo)
-        rs.setOutput(doorside, true)
-        sleep(2.5)
-        rs.setOutput(doorside, false)
+        rs.setOutput(Config.doorside, true)
+        sleep(Config.pulseTime)
+        rs.setOutput(Config.doorside, false)
       end
       disk.eject(eventinfo)
     else
@@ -43,23 +65,36 @@ function keycard_mainProgram()
 end
 function userandpassword_mainProgram()
   while true do
+    ComRay = {}
+    ComRay.computerid = os.getComputerID()
+    ComRay.area = Config.securityLevel
+    
     term.clear() term.setCursorPos(1,1)
-    Header(terminalLabel)
+    Header(Config.tLabel)
     print("") print("")
-    write("User: ") status, User = pcall(read)
-    write("Password: ") status, password = pcall(read, "*")
+    
+    write("User: ") 
+    status, User = pcall(read)
+    ComRay.userQuery = User
+    
+    write("Password: ") 
+    status, password = pcall(read, "*")
+    ComRay.passQuery = password
+    
+    SendString = textutils.serialize(ComRay)
+    
     if ((User ~= nil) and (password ~= nil)) then
-      rednet.send(server, "PASSQUERY#"..User.."#"..password)
-      ID, MES = rednet.receive(2)
+      rednetSendE(Config.serverID , SendString)
+      ID, MES = rednetReceiveE(2)
       if MES == nil then
       print("\nNo response from server!")
       sleep(2)
       else
         if MES == "#GRANTED#" then
           dark.printC("Correct", 4, 4)
-          rs.setOutput(doorside, true)
-          sleep(2.5)
-          rs.setOutput(doorside, false)
+          rs.setOutput(Config.doorside, true)
+          sleep(Config.pulseTime)
+          rs.setOutput(Config.doorside, false)
         else
           print("")
           dark.printC("Incorrect", 4, 4)
@@ -84,26 +119,65 @@ function stealthUpdate()
     end
   end
 end
-if fs.exists("DarkC_conf") == false then
+if fs.exists(".DarkC_conf") == false then
+  Config = {}
+  SideList = rs.getSides()
+  
   term.clear()
   term.setCursorPos(1,1)
   Header("Dark Client Setup")
+  
   write("Please type the server / relay id: ")
-  ServerID = io.read()
-  write("Which side do I output redstone? (Door side?) ")
-  DoorSide = io.read()
-  print("What is the 'label' of this terminal? (eg. Workshop, smelting room etc)" )
-  TLabel = io.read()  
+  Config.serverID = tonumber(io.read())
   
-  local file = io.open("DarkC_conf","w")
-  file:write("server = "..ServerID.." doorside = "..[["]]..DoorSide..[["]].." terminalLabel = "..[["]]..TLabel..[["]])
-  file:close()
+  write("Terminal Security Level: ")
+  Config.securityLevel = io.read()
   
-  print("\nsetup complete! Restarting...")
-  sleep(1.5)
-  os.reboot()
-  dofile("DarkC_conf")
-else
-  dofile("DarkC_conf")
+  repeat
+    write("redstone output side: ")
+    doorside = io.read()
+  until dark.db.search(doorside, SideList) > 0
+  Config.doorside = doorside
+  
+  write("redstone pulse time (in seconds): ")
+  pulseTime = tonumber(io.read())
+  Config.pulseTime = pulseTime
+  
+  print("terminal label: ")
+  Config.tLabel = io.read()
+
+  print("Do you wish to use encryption on rednet communication?")
+  print("Useful for bundle cable information protection!")
+  repeat
+  write("\ny / n : ")
+  encryptq = read()
+  until ((encryptq == "y") or (encryptq == "n"))
+  if encryptq == "y" then
+    Config.encryption = true
+  else
+    Config.encryption = false
+  end
+  
+  print("\nWhat type of terminal is this?")
+  print("options: 'keycard', 'password' or 'both'")
+  repeat
+  write(": ")
+  tType = read()
+  until ((tType == "keycard") or (tType == "password") or (tType == "both"))
+  Config.tType = tType
+  
+  dark.db.save(".DarkC_conf", Config)
+  
+  print("\nsetup complete!")
+  sleep(1)
 end
-parallel.waitForAll(keycard_mainProgram, userandpassword_mainProgram, stealthUpdate) -- runs keycard function and user function at the same time
+
+Config = dark.db.load(".DarkC_conf")
+
+if tType == "keycard" then
+  parallel.waitForAll(keycard_mainProgram, stealthUpdate)
+elseif tType == "password" then
+  parallel.waitForAll(userandpassword_mainProgram, stealthUpdate)
+elseif tType == "both" then
+  parallel.waitForAll(keycard_mainProgram, userandpassword_mainProgram, stealthUpdate)
+end
