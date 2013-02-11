@@ -665,6 +665,7 @@ if fs.exists(".DarkS_conf") == false then
   Config = {}
   masterdb = {}
   Header("Dark Server Setup")
+  print("Computer's id is ".. os.getComputerID())
   repeat
     write("security level amount (must be a number): ")
     securityLevelNumber = io.read()

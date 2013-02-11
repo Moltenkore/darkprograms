@@ -127,6 +127,8 @@ if fs.exists(".DarkC_conf") == false then
   term.setCursorPos(1,1)
   Header("Dark Client Setup")
   
+  print("Computer's id is ".. os.getComputerID())
+  
   write("Please type the server / relay id: ")
   Config.serverID = tonumber(io.read())
   
