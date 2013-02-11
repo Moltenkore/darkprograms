@@ -1,0 +1,71 @@
+term.clear()
+term.setCursorPos(1,1)
+print("Checking if http is enabled...")
+if http then
+  print("http is enabled!")
+else
+  print("http is not enabled :(")
+  print("please enable it.")
+  return exit
+end
+sleep(0.5)
+programs = {}
+
+print("Which program would you like to install?")
+print("Choices: server, client")
+repeat
+  write(": ")
+  answer = read()
+until ((answer == "server") or (answer == "client"))
+
+if answer == "server" then
+  table.insert(programs, "server")
+  table.insert(programs, "dark")
+elseif answer == "client" then
+  table.insert(programs, "client")
+  table.insert(programs, "dark")  
+end
+
+print("Where would you like them downloaded too?")
+print("default is /")
+write("Path: ")
+answer2 = read()
+
+if answer2 == "" then
+  answer2 = "/"
+end
+
+print("Downloading requested programs...")
+local getGit = http.get("https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/programVersions")
+local getGit = getGit.readAll()
+NVersion = textutils.unserialize(getGit)
+
+for i=1,#programs do
+  print("")
+  write("Downloading: "..programs[i])
+  getGit = http.get(NVersion[programs[i]].GitURL)
+  getGit = getGit.readAll()
+  local file = fs.open(answer2..programs[i], "w")
+  file.write(getGit)
+  file.close()
+  write(".. Done")
+  sleep(1)
+end
+
+print("\nPrograms are now downloaded.")
+print("Would you like me to generate a startup file?")
+repeat
+  write("y / n : ")
+  answer3 = read()
+until ((answer3 == "y") or (answer3 == "n"))
+
+if answer3 == "y" then
+  file = fs.open("startup", "w")
+  file.write("shell.run(\"".. programs[1] .."\")")
+  file.close()
+end
+
+print("\nDone!")
+print("Computer will now restart!")
+sleep(1.5)
+os.reboot()
