@@ -1,5 +1,5 @@
 --Title: Dark Server
-Version = 5.1
+Version = 5.2
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 if fs.exists("dark") == false then -- load darkAPI
@@ -24,7 +24,7 @@ else
 end
 
 x, y = term.getSize()
-AutoUpdate = true
+AutoUpdate = false
 GlobalMenuWaitTime = 1
 SLevel = 1
 term.clear() term.setCursorPos(1,1)
@@ -238,10 +238,32 @@ Co = {
     Run = function()
       dark.cs()
       Header("Disk IDs - add")
-      write("Disk ID to add: ")
+      
+      print("Do you want to add the id manually?")
       repeat
-        answer = read()
-      until tonumber(answer)
+        write("y / n : ")
+        answer1 = read()
+      until ((answer1 == "y") or (answer1 == "n"))
+      
+      if answer1 == "y" then
+        repeat
+          write("Disk ID to add: ")
+          answer = read()
+        until tonumber(answer)
+      else
+        repeat
+          print("\nPlease insert a disk into the drive.")
+          _,DSide = os.pullEvent("disk")
+          if disk.hasData(DSide) == true then
+            answer = disk.getDiskID(DSide)
+          else
+            print("\nNot a disk!")
+          end
+        until disk.hasData(DSide) == true
+        disk.eject(DSide)
+        answer = tostring(answer)
+      end
+      
       if dark.db.search(answer,masterdb[SLevel].ids) == 0 then
         table.insert(masterdb[SLevel].ids, answer)
         print("\nAdded!")
@@ -249,7 +271,8 @@ Co = {
       else
         print("\nDisk id already exists.")
       end
-      sleep(GlobalMenuWaitTime)      
+      write("\nPress enter to continue.")
+      read()
     end,
     Parent = "ids"
   },
