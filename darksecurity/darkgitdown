@@ -12,7 +12,7 @@ end
 
 print("Downloading requested programs...")
 
-programs = {"cardgen","server","client","relay","dark"}
+programs = {"server","client","dark"}
 
 local getGit = http.get("https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/programVersions")
 local getGit = getGit.readAll()
