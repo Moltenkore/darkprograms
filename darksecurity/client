@@ -174,10 +174,11 @@ end
 
 Config = dark.db.load(".DarkC_conf")
 
-if tType == "keycard" then
+if Config.tType == "keycard" then
   parallel.waitForAll(keycard_mainProgram, stealthUpdate)
-elseif tType == "password" then
+elseif Config.tType == "password" then
   parallel.waitForAll(userandpassword_mainProgram, stealthUpdate)
-elseif tType == "both" then
+elseif Config.tType == "both" then
+  print("hi")
   parallel.waitForAll(keycard_mainProgram, userandpassword_mainProgram, stealthUpdate)
 end
