@@ -24,7 +24,7 @@ else
 end
 
 x, y = term.getSize()
-AutoUpdate = false
+AutoUpdate = true
 GlobalMenuWaitTime = 1
 SLevel = 1
 term.clear() term.setCursorPos(1,1)
