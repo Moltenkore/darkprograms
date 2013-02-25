@@ -1,0 +1,151 @@
+Version = 1.2
+function findPeripheral(Perihp) 
+  for _,s in ipairs(rs.getSides()) do
+    if peripheral.isPresent(s) and peripheral.getType(s) == Perihp then
+      return s
+    end
+  end
+  return false
+end
+function gitUpdate(ProgramName, Filename, ProgramVersion)
+  if http then
+    local getGit = http.get("https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/programVersions")
+    local getGit = getGit.readAll()
+    NVersion = textutils.unserialize(getGit)
+    if NVersion[ProgramName].Version > ProgramVersion then
+      getGit = http.get(NVersion[ProgramName].GitURL)
+      getGit = getGit.readAll()
+      local file = fs.open(Filename, "w")
+      file.write(getGit)
+      file.close()
+      return true
+    end
+  else
+    return false
+  end
+end
+print("checking for updates...")
+if gitUpdate("chat", shell.getRunningProgram(), Version) == true then
+  print("Download new version, restarting...")
+  sleep(1.5)
+  os.reboot()
+else
+  print("You're running the latest version")
+  sleep(1)
+end
+
+Side = findPeripheral("modem")
+if not Side then
+  print("no modem.")
+  return exit
+end
+rednet.open(Side)
+X, Y = term.getSize()
+chat = {}
+BottomText = "Message: "
+KeyCount = 0
+user = ""
+Header = "Welcome to darkchat "..Version.."!"
+
+function rSend(message, special)
+  local messaget = {}
+  messaget.user = user
+  messaget.message = message  
+  if special then messaget.special = true end
+  messaget = textutils.serialize(messaget)
+  rednet.broadcast(messaget)
+  table.insert(chat, user..": "..message)
+end
+function rReceive()
+  local S, M, D = rednet.receive()
+  M = textutils.unserialize(M)
+  return S, M
+end
+function clears()
+  for i = 1, Y - 2 do
+    term.setCursorPos(1,i)
+    term.write(string.rep(" ", X))
+  end
+  return true
+end
+function getChat()
+  while true do
+    s, m = rReceive()
+    if s ~= os.getComputerID() and m.user ~= user and m.message then
+      if m.special then
+        table.insert(chat, "* ".. m.user .. " " .. m.message)
+      else
+        table.insert(chat, m.user ..": ".. m.message)
+      end
+    end
+    draw()
+  end
+end
+function draw()
+  clears()
+  --term.setCursorPos(1,2)
+  if #chat == Y - 1 then
+    table.remove(chat, 1)
+  end
+  for i = 1, #chat do
+    term.setCursorPos(1,i)
+    term.write(chat[i])
+  end
+  term.setCursorPos(1, Y - 1)
+  term.write(string.rep("-", X))
+  term.setCursorPos(#BottomText + KeyCount + 1, Y)
+  return true
+end
+function sendChat()
+  while true do
+    term.setCursorPos(1, Y)
+    term.write(BottomText)
+    message = read()
+    if message == "/exit" then
+      rSend("has quit.", true)
+      os.reboot()
+    elseif message then
+      rSend(message)
+      draw()
+    end
+  end
+end
+function keyListen()
+  while true do
+    Type, KEY = os.pullEvent("key")
+    if KEY == 28 then 
+      KeyCount = 0
+    elseif KEY == 14 then
+      if KeyCount ~= 0 then
+        KeyCount = KeyCount - 1
+      end
+    elseif KEY then
+      if KEY ~= 54 then
+        KeyCount = KeyCount + 1
+      end
+    end
+  end
+end
+
+--[[
+28: enter
+14: backspace
+]]--
+
+while user == "" do
+  term.clear()
+  term.setCursorPos(X/2 - string.len(Header)/2,1)
+  print(Header)
+  print(string.rep("-", X))
+  write("Nickname: ")
+  user = read()
+  if user == "" then
+    print("\nInvalid Name")
+    sleep(1)
+  end
+end
+
+term.clear()
+term.setCursorPos(1,1)
+rSend("has joined chat!", true)
+parallel.waitForAll(getChat, draw, sendChat, keyListen)
