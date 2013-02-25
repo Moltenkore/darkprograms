@@ -1,5 +1,5 @@
-Version = 1.24
-autoupdate = true
+Version = 1.25
+autoupdate = false
 
 function findPeripheral(Perihp) 
   for _,s in ipairs(rs.getSides()) do
@@ -52,7 +52,7 @@ KeyCount = 0
 user = ""
 Header = "Welcome to darkchat "..Version.."!"
 
-function rSend(message, special)
+function rSend(message, special, hidden)
   local messaget = {}
   messaget.user = user
   messaget.message = message
@@ -60,7 +60,9 @@ function rSend(message, special)
   if special then messaget.special = true end
   messaget = textutils.serialize(messaget)
   rednet.broadcast(messaget)
-  table.insert(chat, user..": "..message)
+  if not hidden then
+    table.insert(chat, user..": "..message)
+  end
 end
 function rReceive()
   local darkchat = false
@@ -159,5 +161,5 @@ end
 
 term.clear()
 term.setCursorPos(1,1)
-rSend("has joined chat!", true)
+rSend("has joined chat!", true, true)
 parallel.waitForAll(getChat, draw, sendChat, keyListen)
