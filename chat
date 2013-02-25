@@ -1,4 +1,4 @@
-Version = 1.2
+Version = 1.21
 function findPeripheral(Perihp) 
   for _,s in ipairs(rs.getSides()) do
     if peripheral.isPresent(s) and peripheral.getType(s) == Perihp then
@@ -24,6 +24,7 @@ function gitUpdate(ProgramName, Filename, ProgramVersion)
     return false
   end
 end
+term.clear() term.setCursorPos(1,1)
 print("checking for updates...")
 if gitUpdate("chat", shell.getRunningProgram(), Version) == true then
   print("Download new version, restarting...")
