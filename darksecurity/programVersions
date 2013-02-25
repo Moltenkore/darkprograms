@@ -2,4 +2,4 @@
 ["client"]={["GitURL"]="https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/client",["Version"]=4.0,},
 ["dark"]={["GitURL"]="https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/dark",["Version"]=3.2,},
 ["screen"]={["GitURL"]="https://github.com/darkrising/darkprograms/raw/darkprograms/screen",["Version"]=3.36,},
-["chat"]={["GitURL"]="https://github.com/darkrising/darkprograms/raw/darkprograms/chat",["Version"]=1.3,},}
+["chat"]={["GitURL"]="https://github.com/darkrising/darkprograms/raw/darkprograms/chat",["Version"]=1.31,},}
