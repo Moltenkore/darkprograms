@@ -1,5 +1,5 @@
 Version = 1.25
-autoupdate = false
+autoupdate = true
 
 function findPeripheral(Perihp) 
   for _,s in ipairs(rs.getSides()) do
