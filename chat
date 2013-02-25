@@ -1,4 +1,6 @@
-Version = 1.22
+Version = 1.23
+autoupdate = true
+
 function findPeripheral(Perihp) 
   for _,s in ipairs(rs.getSides()) do
     if peripheral.isPresent(s) and peripheral.getType(s) == Perihp then
@@ -25,14 +27,16 @@ function gitUpdate(ProgramName, Filename, ProgramVersion)
   end
 end
 term.clear() term.setCursorPos(1,1)
+if autoupdate == true then
 print("Checking for updates...")
-if gitUpdate("chat", shell.getRunningProgram(), Version) == true then
-  print("Download new version, restarting...")
-  sleep(1.5)
-  os.reboot()
-else
-  print("You're running the latest version")
-  sleep(1)
+  if gitUpdate("chat", shell.getRunningProgram(), Version) == true then
+    print("Download new version, restarting...")
+    sleep(1.5)
+    os.reboot()
+  else
+    print("You're running the latest version")
+    sleep(1)
+  end
 end
 
 Side = findPeripheral("modem")
