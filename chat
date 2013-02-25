@@ -1,6 +1,5 @@
-Version = 1.25
+Version = 1.3
 autoupdate = true
-
 function findPeripheral(Perihp) 
   for _,s in ipairs(rs.getSides()) do
     if peripheral.isPresent(s) and peripheral.getType(s) == Perihp then
@@ -26,6 +25,24 @@ function gitUpdate(ProgramName, Filename, ProgramVersion)
     return false
   end
 end
+function split(str, pattern) -- Splits string by pattern, returns table
+  local t = { }
+  local fpat = "(.-)" .. pattern
+  local last_end = 1
+  local s, e, cap = str:find(fpat, 1)
+  while s do
+    if s ~= 1 or cap ~= "" then
+      table.insert(t,cap)
+    end
+    last_end = e+1
+    s, e, cap = str:find(fpat, last_end)
+  end
+  if last_end <= #str then
+    cap = str:sub(last_end)
+    table.insert(t, cap)
+  end
+  return t
+end
 term.clear() term.setCursorPos(1,1)
 if autoupdate == true then
 print("Checking for updates...")
@@ -38,7 +55,6 @@ print("Checking for updates...")
     sleep(1)
   end
 end
-
 Side = findPeripheral("modem")
 if not Side then
   print("no modem.")
@@ -51,7 +67,25 @@ BottomText = "Message: "
 KeyCount = 0
 user = ""
 Header = "Welcome to darkchat "..Version.."!"
-
+function cWrite(Text, bgcolor, tecolor, solid)
+  if term.isColor() == true then
+    term.setBackgroundColor(colors[bgcolor])
+    term.setTextColor(colors[tecolor])
+    if solid then
+      term.write(string.rep(" ", #Text))
+    else
+      term.write(Text)
+    end
+  else
+    term.write(Text)
+  end
+end
+function bgReset()
+  if term.isColor() == true then
+    term.setTextColor(colors.white)
+    term.setBackgroundColor(colors.black)
+  end
+end
 function rSend(message, special, hidden)
   local messaget = {}
   messaget.user = user
@@ -61,7 +95,11 @@ function rSend(message, special, hidden)
   messaget = textutils.serialize(messaget)
   rednet.broadcast(messaget)
   if not hidden then
-    table.insert(chat, user..": "..message)
+    if special then
+      table.insert(chat, "yellow#* "..user.." "..message)
+    else
+      table.insert(chat, "white#"..user..": "..message)
+    end
   end
 end
 function rReceive()
@@ -87,26 +125,29 @@ function getChat()
     s, m = rReceive()
     if s ~= os.getComputerID() and m.user ~= user and m.message then
       if m.special then
-        table.insert(chat, "* ".. m.user .. " " .. m.message)
+        table.insert(chat, "yellow#* ".. m.user .. " " .. m.message)
       else
-        table.insert(chat, m.user ..": ".. m.message)
+        table.insert(chat, "white#" .. m.user ..": ".. m.message)
       end
     end
     draw()
   end
 end
 function draw()
-  clears()
-  --term.setCursorPos(1,2)
-  if #chat == Y - 1 then
-    table.remove(chat, 1)
-  end
+  bgReset() clears()
+  if #chat == Y - 1 then table.remove(chat, 1) end  
   for i = 1, #chat do
+    chatN = split(chat[i], "#")
     term.setCursorPos(1,i)
-    term.write(chat[i])
+    cWrite(chatN[2],"black",chatN[1])
   end
   term.setCursorPos(1, Y - 1)
-  term.write(string.rep("-", X))
+  cWrite(string.rep("-", X), "blue","blue", true)
+  term.setTextColor(colors.white)
+  local Text = "User: "..user
+  term.setCursorPos(X/2 - #Text/2, Y - 1)
+  write(Text)
+  bgReset()
   term.setCursorPos(#BottomText + KeyCount + 1, Y)
   return true
 end
@@ -115,9 +156,17 @@ function sendChat()
     term.setCursorPos(1, Y)
     term.write(BottomText)
     message = read()
-    if message == "/exit" then
-      rSend("has quit.", true)
-      os.reboot()
+    if string.sub(message,1,1) == "/" then
+      commandS = string.sub(message,2,#message)
+      commandS = split(commandS, " ")
+      if comD[commandS[1]] then
+        comD[commandS[1]](commandS)
+      else
+        table.insert(chat, "red#Unknown Command")
+        draw()
+      end
+    elseif message == "" then
+      draw()
     elseif message then
       rSend(message)
       draw()
@@ -140,17 +189,29 @@ function keyListen()
     end
   end
 end
-
+comD = {
+  ["exit"] = function()
+    rSend("has quit.", true)
+    os.reboot()  
+  end,
+  ["me"] = function(Words)
+    local StringRe = ""
+    for i = 2, #Words do
+      StringRe = StringRe..Words[i].." "
+    end
+    rSend(StringRe, true)
+  end,
+}
 --[[
 28: enter
 14: backspace
 ]]--
-
 while user == "" do
   term.clear()
-  term.setCursorPos(X/2 - string.len(Header)/2,1)
+  cWrite(string.rep("-", X), "blue","blue", true) bgReset()
+  term.setCursorPos(X/2 - string.len(Header)/2,2)
   print(Header)
-  print(string.rep("-", X))
+  cWrite(string.rep("-", X), "blue","blue", true) bgReset()
   write("Nickname: ")
   user = read()
   if user == "" then
@@ -158,7 +219,6 @@ while user == "" do
     sleep(1)
   end
 end
-
 term.clear()
 term.setCursorPos(1,1)
 rSend("has joined chat!", true, true)
