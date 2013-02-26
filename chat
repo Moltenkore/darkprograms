@@ -1,6 +1,6 @@
 chat = {}
 X, Y = term.getSize()
-Version = 1.32
+Version = 1.33
 autoupdate = true
 BottomText = "Message: "
 KeyCount = 0
@@ -92,6 +92,14 @@ function rReceive()
     M = textutils.unserialize(M)
     if type(M) == "table" and M.darkchat then
       darkchat = true
+    elseif type(M) == "table" and M.list then
+      local list = {}
+      list.user = user
+      list.reply = true
+      list = textutils.serialize(list)
+      modem.transmit(channelN,channelN,list)
+    elseif type(M) == "table" and M.reply then
+      os.queueEvent("user",M.user)
     end
   until darkchat == true
   return M
@@ -116,7 +124,7 @@ function getChat()
     draw()
   end
 end
-function draw()
+function draw() 
   bgReset() clears()
   if #chat == Y - 1 then table.remove(chat, 1) end  
   for i = 1, #chat do
@@ -216,6 +224,27 @@ function publicMode()
     channelN = "10"
   end
 end
+function getOnlineList()
+  while true do
+    os.pullEvent("grabList")
+    local com = {}
+    local Users = ""
+    com.list = true
+    com = textutils.serialize(com)
+    modem.transmit(channelN,channelN,com)
+    os.startTimer(2)
+    repeat
+      local e, u = os.pullEvent()
+      if e == "user" then
+        Users = Users..u..", "
+      end
+    until e == "timer"
+    Users = string.sub(Users, 1, #Users - 2) -- remove extra comma
+    table.insert(chat, "yellow#Users in channel: "..Users)
+    draw()
+  end
+end
+
 comD = {
   ["exit"] = function()
     rSend("has quit.", true)
@@ -241,6 +270,11 @@ comD = {
       rSend("has entered the channel!", true, true)
     end
   end,
+  ["list"] = function()
+    os.queueEvent("grabList")
+    table.insert(chat, "lime#Gathering list...")
+    draw()
+  end
 }
 --[[
 28: enter
@@ -290,4 +324,4 @@ modem.open(channelN)
 term.clear()
 term.setCursorPos(1,1)
 rSend("has joined the chat!", true, true)
-parallel.waitForAll(getChat, draw, sendChat, keyListen)
+parallel.waitForAll(getChat, draw, sendChat, keyListen, getOnlineList)
