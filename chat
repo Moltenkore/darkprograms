@@ -274,7 +274,11 @@ comD = {
     os.queueEvent("grabList")
     table.insert(chat, "lime#Gathering list...")
     draw()
-  end
+  end,
+  ["clear"] = function()
+    chat = {}
+    draw()
+  end,
 }
 --[[
 28: enter
