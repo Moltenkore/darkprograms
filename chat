@@ -1,7 +1,7 @@
 chat = {}
 X, Y = term.getSize()
 Version = 1.32
-autoupdate = false
+autoupdate = true
 BottomText = "Message: "
 KeyCount = 0
 user = ""
