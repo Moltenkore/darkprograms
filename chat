@@ -1,5 +1,11 @@
-Version = 1.31
-autoupdate = true
+chat = {}
+X, Y = term.getSize()
+Version = 1.32
+autoupdate = false
+BottomText = "Message: "
+KeyCount = 0
+user = ""
+Header = "Welcome to darkchat "..Version.."!"
 function findPeripheral(Perihp) 
   for _,s in ipairs(rs.getSides()) do
     if peripheral.isPresent(s) and peripheral.getType(s) == Perihp then
@@ -43,30 +49,6 @@ function split(str, pattern) -- Splits string by pattern, returns table
   end
   return t
 end
-term.clear() term.setCursorPos(1,1)
-if autoupdate == true then
-print("Checking for updates...")
-  if gitUpdate("chat", shell.getRunningProgram(), Version) == true then
-    print("Download new version, restarting...")
-    sleep(1.5)
-    os.reboot()
-  else
-    print("You're running the latest version")
-    sleep(1)
-  end
-end
-Side = findPeripheral("modem")
-if not Side then
-  print("no modem.")
-  return exit
-end
-modem = peripheral.wrap(Side)
-X, Y = term.getSize()
-chat = {}
-BottomText = "Message: "
-KeyCount = 0
-user = ""
-Header = "Welcome to darkchat "..Version.."!"
 function cWrite(Text, bgcolor, tecolor, solid)
   if term.isColor() == true then
     term.setBackgroundColor(colors[bgcolor])
@@ -190,6 +172,50 @@ function keyListen()
     end
   end
 end
+function startUp()
+  term.clear() term.setCursorPos(1,1)
+  if autoupdate == true then
+  print("Checking for updates...")
+    if gitUpdate("chat", shell.getRunningProgram(), Version) == true then
+      print("Download new version, restarting...")
+      sleep(1.5)
+      os.reboot()
+    else
+      print("You're running the latest version")
+      sleep(1)
+    end
+  end
+  Side = findPeripheral("modem")
+  if not Side then
+    print("no modem.")
+    return exit
+  end
+  modem = peripheral.wrap(Side)
+  term.clear() term.setCursorPos(1,1)
+  cWrite(string.rep("-", X), "blue","blue", true) bgReset()
+  term.setCursorPos(X/2 - string.len(Header)/2,2)
+  print(Header)
+  cWrite(string.rep("-", X), "blue","blue", true) bgReset()
+end
+function privateMode()
+  user = config.user
+  channelN = config.channel
+end
+function publicMode()
+  repeat
+    write("Nickname: ")
+    user = read()
+    if user == "" then
+      print("\nInvalid Name")
+    end
+  until user ~= ""
+  print("\nDefault channel is 10")
+  write("Channel: ")
+  channelN = read()
+  if not tonumber(channelN) then
+    channelN = "10"
+  end
+end
 comD = {
   ["exit"] = function()
     rSend("has quit.", true)
@@ -220,31 +246,47 @@ comD = {
 28: enter
 14: backspace
 ]]--
-term.clear()
-cWrite(string.rep("-", X), "blue","blue", true) bgReset()
-term.setCursorPos(X/2 - string.len(Header)/2,2)
-print(Header)
-cWrite(string.rep("-", X), "blue","blue", true) bgReset()
-
-repeat
-  write("Nickname: ")
-  user = read()
-  if user == "" then
-    print("\nInvalid Name")
+term.clear() term.setCursorPos(1,1)
+if fs.exists(".darkChatConf") == true then
+  F = fs.open(".darkChatConf", "r")
+  Data = F.readAll()
+  F.close()
+  config = textutils.unserialize(Data)
+else
+  config = {}
+  repeat
+    print("Do you want DarkChat private mode?")
+    write("y / n : ")
+    Qprivate = read()
+  until Qprivate == "y" or Qprivate == "n"
+  if Qprivate == "y" then
+    config.private = true
+    write("\nUsername: ")
+    config.user = read()
+    repeat
+      write("Default channel number: ")
+      Qchannel = read()
+    until tonumber(Qchannel)
+    config.channel = tonumber(Qchannel)
+  else
+    config.private = false
   end
-until user ~= ""
-
-print("\nDefault channel is 10")
-write("Channel: ")
-channelN = read()
-if not tonumber(channelN) then
-  channelN = "10"
+  configString = textutils.serialize(config)
+  F = fs.open(".darkChatConf", "w")
+  F.write(configString)
+  F.close()
+  print("Setup Complete!")
+  sleep(1)
+end
+startUp()
+if config.private == true then
+  privateMode()
+else
+  publicMode()
 end
 channelN = tonumber(channelN)
-
 modem.closeAll()
 modem.open(channelN)
-
 term.clear()
 term.setCursorPos(1,1)
 rSend("has joined the chat!", true, true)
