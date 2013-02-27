@@ -1,7 +1,12 @@
+--changeable
+HistoryNum = 200 --how many lines of history to keep
+autoupdate = false -- turn on or off auto update
+--Non changeable!
 chat = {}
+lineCount = 1
+modifier = 0
 X, Y = term.getSize()
-Version = 1.33
-autoupdate = true
+Version = 1.4
 BottomText = "Message: "
 KeyCount = 0
 user = ""
@@ -79,9 +84,9 @@ function rSend(message, special, hidden)
   modem.transmit(channelN,channelN,messaget)
   if not hidden then
     if special then
-      table.insert(chat, "yellow#* "..user.." "..message)
+      os.queueEvent("tableInsert", "yellow#* "..user.." "..message)
     else
-      table.insert(chat, "white#"..user..": "..message)
+      os.queueEvent("tableInsert", "white#"..user..": "..message)
     end
   end
 end
@@ -104,40 +109,56 @@ function rReceive()
   until darkchat == true
   return M
 end
+function modiferMod(operation, amount) -- if operation is true, number will be added else subtacted
+  if operation == true then
+    if lineCount - modifier > 1 then
+      modifier = modifier + 1
+    end
+  else
+    if modifier > 0 then
+      modifier = modifier - 1
+    end
+  end
+end
 function clears()
   for i = 1, Y - 2 do
     term.setCursorPos(1,i)
     term.write(string.rep(" ", X))
   end
-  return true
 end
 function getChat()
   while true do
     m = rReceive()
     if m.id ~= os.getComputerID() and m.user ~= user and m.message then
       if m.special then
-        table.insert(chat, "yellow#* ".. m.user .. " " .. m.message)
+        os.queueEvent("tableInsert", "yellow#* ".. m.user .. " " .. m.message)
       else
-        table.insert(chat, "white#" .. m.user ..": ".. m.message)
+        os.queueEvent("tableInsert", "white#" .. m.user ..": ".. m.message)
       end
     end
-    draw()
   end
 end
 function draw() 
   bgReset() clears()
-  if #chat == Y - 1 then table.remove(chat, 1) end  
-  for i = 1, #chat do
+  if #chat > HistoryNum then table.remove(chat, 1) end
+  if #chat > Y - 2 then 
+    lineCount = ((#chat) - (Y - 3))
+  end
+  for i = lineCount - modifier, #chat - modifier do
     chatN = split(chat[i], "#")
-    term.setCursorPos(1,i)
+    term.setCursorPos(1,i - lineCount+1+modifier)
     cWrite(chatN[2],"black",chatN[1])
   end
   term.setCursorPos(1, Y - 1)
-  cWrite(string.rep("-", X), "blue","blue", true)
+  cWrite(string.rep("-", X), "blue","blue", true) 
   term.setTextColor(colors.white)
   local Text = "<User: "..user.."> <Channel: "..channelN..">"
   term.setCursorPos(X/2 - #Text/2, Y - 1)
   write(Text)
+  if modifier > 0 and term.isColor() == true then
+    paintutils.drawPixel(1, Y - 1, colors.yellow)
+    paintutils.drawPixel(X, Y - 1, colors.yellow)
+  end
   bgReset()
   term.setCursorPos(#BottomText + KeyCount + 1, Y)
   return true
@@ -151,10 +172,9 @@ function sendChat()
       commandS = string.sub(message,2,#message)
       commandS = split(commandS, " ")
       if comD[commandS[1]] then
-        comD[commandS[1]](commandS)
+        comD[commandS[1]].run(commandS)
       else
-        table.insert(chat, "red#Unknown Command")
-        draw()
+        os.queueEvent("tableInsert", "red#Unknown Command")
       end
     elseif message == "" then
       draw()
@@ -240,45 +260,92 @@ function getOnlineList()
       end
     until e == "timer"
     Users = string.sub(Users, 1, #Users - 2) -- remove extra comma
-    table.insert(chat, "yellow#Users in channel: "..Users)
+    os.queueEvent("tableInsert", "yellow#Users in channel: "..Users)
+  end
+end
+function scrollingEventListen()
+  while true do
+    local _,direction = os.pullEvent("mouse_scroll")
+    if direction == -1 then
+      modiferMod(true, 1) 
+      draw()
+    else
+      modiferMod(false, 1) 
+      draw()  
+    end
+  end
+end
+function tableEventListen()
+  while true do
+    local e, mess = os.pullEvent("tableInsert")
+    if modifier > 0 and HistoryNum ~= #chat then
+      modifier = modifier + 1
+    end
+    table.insert(chat, mess)
     draw()
   end
 end
-
+function helpGen()
+  os.queueEvent("tableInsert", "lime#".. string.rep("-", X / 2 - 4) .. "  help  " .. string.rep("-", X / 2 - 3))
+  for i, v in pairs(comD) do
+    if v.help then
+      os.queueEvent("tableInsert", "lime#/"..i.." ".. v.help)
+    end
+  end
+  os.queueEvent("tableInsert", "lime#".. string.rep("-", X))
+end
 comD = {
-  ["exit"] = function()
-    rSend("has quit.", true)
-    os.reboot()  
-  end,
-  ["me"] = function(Words)
-    local StringRe = ""
-    for i = 2, #Words do
-      StringRe = StringRe..Words[i].." "
-    end
-    rSend(StringRe, true)
-  end,
-  ["channel"] = function(Channels)
-    local SetChan = Channels[2]
-    if not tonumber(SetChan) then
-      table.insert(chat, "red#Error: Must be a number.")
+  ["exit"] = {
+    run = function()
+      rSend("has quit.", true)
+      os.reboot()  
+    end,
+    help = ""
+  },
+  ["me"] = {
+    run = function(Words)
+      local StringRe = ""
+      for i = 2, #Words do
+        StringRe = StringRe..Words[i].." "
+      end
+      rSend(StringRe, true)
+    end,
+    help = "<text>"
+  },
+  ["channel"] = {
+    run = function(Channels)
+      local SetChan = Channels[2]
+      if not tonumber(SetChan) then
+        os.queueEvent("tableInsert", "red#Error: Must be a number.")
+      else
+        rSend("has changed channel.", true)
+        channelN = tonumber(SetChan)
+        modem.closeAll()
+        modem.open(channelN)
+        rSend("has entered the channel!", true, true)
+      end
+    end,
+  },
+  ["list"] = {
+    run = function()
+      os.queueEvent("grabList")
+      os.queueEvent("tableInsert", "lime#Gathering list...")
+    end,
+    help = ""
+  },
+  ["clear"] = {
+    run = function()
+      chat = {}
+      lineCount = 1
+      modifier = 0
       draw()
-    else
-      rSend("has changed channel.", true)
-      channelN = tonumber(SetChan)
-      modem.closeAll()
-      modem.open(channelN)
-      rSend("has entered the channel!", true, true)
-    end
-  end,
-  ["list"] = function()
-    os.queueEvent("grabList")
-    table.insert(chat, "lime#Gathering list...")
-    draw()
-  end,
-  ["clear"] = function()
-    chat = {}
-    draw()
-  end,
+    end,
+    help = ""
+  },
+  ["help"] = {
+    run = helpGen,
+    help = ""
+  },
 }
 --[[
 28: enter
@@ -328,4 +395,4 @@ modem.open(channelN)
 term.clear()
 term.setCursorPos(1,1)
 rSend("has joined the chat!", true, true)
-parallel.waitForAll(getChat, draw, sendChat, keyListen, getOnlineList)
+parallel.waitForAll(getChat, draw, sendChat, keyListen, getOnlineList, scrollingEventListen, tableEventListen)
