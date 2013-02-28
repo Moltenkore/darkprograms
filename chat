@@ -6,7 +6,7 @@ chat = {}
 lineCount = 1
 modifier = 0
 X, Y = term.getSize()
-Version = 1.41
+Version = 1.42
 BottomText = "Message: "
 KeyCount = 0
 user = ""
@@ -127,6 +127,7 @@ function clears()
   end
 end
 function getChat()
+  draw()
   while true do
     m = rReceive()
     if m.id ~= os.getComputerID() and m.user ~= user and m.message then
@@ -285,6 +286,15 @@ function tableEventListen()
     draw()
   end
 end
+function exitEventListen()
+  while true do
+    os.pullEvent("exit")
+    term.clear()
+    term.setCursorPos(1,1)
+    modem.closeAll()
+    return exit
+  end
+end
 function helpGen()
   os.queueEvent("tableInsert", "lime#".. string.rep("-", X / 2 - 4) .. "  help  " .. string.rep("-", X / 2 - 3))
   for i, v in pairs(comD) do
@@ -298,7 +308,7 @@ comD = {
   ["exit"] = {
     run = function()
       rSend("has quit.", true)
-      os.reboot()  
+      os.queueEvent("exit")
     end,
     help = ""
   },
@@ -395,4 +405,4 @@ modem.open(channelN)
 term.clear()
 term.setCursorPos(1,1)
 rSend("has joined the chat!", true, true)
-parallel.waitForAll(getChat, draw, sendChat, keyListen, getOnlineList, scrollingEventListen, tableEventListen)
+parallel.waitForAny(getChat, sendChat, keyListen, getOnlineList, scrollingEventListen, tableEventListen, exitEventListen)
