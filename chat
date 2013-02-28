@@ -1,6 +1,6 @@
 --changeable
 HistoryNum = 200 --how many lines of history to keep
-autoupdate = false -- turn on or off auto update
+autoupdate = true -- turn on or off auto update
 --Non changeable!
 chat = {}
 lineCount = 1
