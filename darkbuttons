@@ -1,5 +1,5 @@
 --Title: Dark buttons
-Version = 1.0
+Version = 1.1
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 if not term.isColour() then
@@ -93,6 +93,7 @@ function textBox(text,xmin,xmax,ymin,ymax,tCol,bgCol)
   boxText(text,xmin,xmax,ymin,ymax,tCol,bgCol)
 end
 function draw()
+  getMonitors()
   for i,v in pairs(monSids) do
     mon = peripheral.wrap(v)
     mon.clear()
@@ -283,13 +284,36 @@ function wizard(mode)
     happy = false
     write("Text on the button: ")
     bText = read()
-    write("Wire color for this button: ")
-    wireCol = read()
+    repeat
+      dark.cs()
+      bOrder = rainbow(1)
+      term.setCursorPos(1,2)
+      write("Wire color for this button: ")
+      wireCol = waitForClick(bOrder)
+      
+      term.setCursorPos(28,2)
+      term.setTextColor(colors[wireCol])
+      write(wireCol)
+      term.setTextColor(colors.white)
+      
+      term.setCursorPos(1,y-1)
+      write("Click ")
+      term.setTextColor(colors.yellow)
+      write("here ")
+      term.setTextColor(colors.white)
+      write("to confirm colours")
+      term.setCursorPos(1,y)
+      write("Else click here to choose again")  
+      happy = waitForExitClick()
+    until happy == true
+    happy = false    
     return color2,color,color3,bText,wireCol
   end
   function addButton()
     repeat --Button wizard
       clearMonitors()
+      draw()
+      mon = peripheral.wrap(selectedMon)
       monWrite("Click position 1 for your button",1,y)
       _,side,txd,tyd = os.pullEvent("monitor_touch")
       drawX(txd,tyd)
