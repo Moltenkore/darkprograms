@@ -1,5 +1,5 @@
 --Title: Dark buttons
-Version = 1.1
+Version = 1.11
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 if not term.isColour() then
@@ -8,7 +8,6 @@ if not term.isColour() then
 end
 if fs.exists("dark") == false then -- load darkAPI
   print("Missing DarkAPI")
-  sleep(2)
   print("Attempting to download...")
   getGit = http.get("https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/dark")
   getGit = getGit.readAll()
@@ -26,6 +25,13 @@ c = colors.combine() -- Default var for wires
 AutoUpdate = true
 
 --General Functions
+function Header(text, lText, rText) -- builds a header using functions above from <text>
+  local x,y = term.getSize()
+  dark.printL("-", 1, nil, "blue", "blue")
+  dark.printC(string.rep(" ", x+1), 2, nil, "white", "blue")
+  dark.printC(text, 2, nil, "white", "blue")
+  dark.printL("-", 3, 5, "blue", "blue")
+end
 function saveState()
   dark.db.save("state", buttons)
 end
@@ -132,6 +138,7 @@ function terminalMenu()
   while true do
     term.clear()
     term.setCursorPos(1,1)
+    Header("Running DarkButtons V"..Version)
     print("Please press a key to select an option.")
     print("\n[1] Add a button")
     print("[2] Remove a button")
@@ -155,7 +162,7 @@ function stealthUpdate()
   end
   return
 end
---Event driven functions
+--Event driven looping functions
 function hitListen()
   while true do
     draw()
@@ -221,7 +228,7 @@ function wizard(mode)
     end
     return order
   end
-  function addButton_monitorPart()
+  function addButton_terminalPart()
     function waitForClick(bOrder)
       repeat
         _,_,lx,ly = os.pullEvent("mouse_click")
@@ -240,14 +247,14 @@ function wizard(mode)
       dark.cs()
       color2 = "white"
       bOrder = rainbow(1)
-      print("<- Click to select!")
+      print(" <- Click one to select!")
         
       term.setCursorPos(1,3)
-      print("Background Colour.      ")
+      print("Inactive button background colour.     ")
       color = waitForClick(bOrder)
   
       term.setCursorPos(1,3)
-      print("Text colour.              ")
+      print("Text colour.                              ")
       color2 = waitForClick(bOrder)
         
       term.setCursorPos(1,5)
@@ -255,7 +262,7 @@ function wizard(mode)
       textBox("Test Box",1,x,6,8,colors[color2],colors[color])
       
       term.setCursorPos(1,3)
-      print("Button activate colour.")
+      print("Button activate background colour.      ")
       color3 = waitForClick(bOrder)
       
       term.setCursorPos(1,10)
@@ -263,7 +270,7 @@ function wizard(mode)
       textBox("Test Box",1,x,11,13,colors[color2],colors[color3])
       
       term.setCursorPos(1,3)
-      print("                          ")
+      print("                                            ")
       
       term.setCursorPos(1,y-1)
       write("Click ")
@@ -282,7 +289,9 @@ function wizard(mode)
     until happy == true
     dark.cs()
     happy = false
-    write("Text on the button: ")
+    print("Text on the button: ")
+    print("\nNote: This is the text that appears on the button, type it in and then press enter.")
+    term.setCursorPos(20,1)
     bText = read()
     repeat
       dark.cs()
@@ -314,14 +323,14 @@ function wizard(mode)
       clearMonitors()
       draw()
       mon = peripheral.wrap(selectedMon)
-      monWrite("Click position 1 for your button",1,y)
+      monWrite("Tap position 1 for your button",1,y)
       _,side,txd,tyd = os.pullEvent("monitor_touch")
       drawX(txd,tyd)
-      monWrite("Click position 2 for your button",1,y)
+      monWrite("Tap position 2 for your button",1,y)
       _,_,txu,tyu = os.pullEvent("monitor_touch")
       rButton(side,txd,tyd,txu,tyu)
-      monWrite("If you are happy click the button",1,y-1)
-      monWrite("Else, click any black space        ",1,y)
+      monWrite("If you are happy Tap the button",1,y-1)
+      monWrite("Else, Tap any black space        ",1,y)
       _,Side,hx,hy = os.pullEvent("monitor_touch")
       do --Reverse if hit from bottom first
       if txd > txu then
@@ -355,8 +364,12 @@ function wizard(mode)
       clearMonitors()
       draw()
       mon = peripheral.wrap(selectedMon)
-      monWrite("Click a button to remove it.",1,y-1)
-      monWrite("Click here to exit.",1,y)
+      monWrite("Tap a button to remove it.",1,y-1)
+      monWrite("Tap ",1,y)
+      mon.setTextColor(colors.yellow)
+      mon.write("here")
+      mon.setTextColor(colors.white)
+      mon.write(" when you're finished.")
       _,Side,hx,hy = os.pullEvent("monitor_touch")
       if hy == y then 
         break 
@@ -364,6 +377,8 @@ function wizard(mode)
       for name, data in pairs(buttons) do
         if Side == data.side then
           if checkTemp(hx,hy,data.xmin,data.xmax,data.ymin,data.ymax) == true then
+            c = colors.subtract(c, buttons[name].wireCol) -- if the button is on, we turn it off
+            rs.setBundledOutput(options.wireSide, c)
             buttons[name] = nil
             break
           end
@@ -396,11 +411,10 @@ function wizard(mode)
   
   if mode == "add" then
     xmin,xmax,ymin,ymax = addButton()
-    tCol,bgCol,actCol,name,wireCol = addButton_monitorPart()   
+    tCol,bgCol,actCol,name,wireCol = addButton_terminalPart()   
     dark.cs()
     createStaticbuttons(name,xmin,xmax,ymin,ymax,tCol,bgCol,actCol,selectedMon,wireCol)
-  end
-  if mode == "remove" then
+  elseif mode == "remove" then
     dark.cs()
     removeButton()
   end
