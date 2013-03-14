@@ -1,5 +1,5 @@
 --Written by darkrising
-DARKversion = 3.2
+DARKversion = 3.21
 
 db = {}
 db.__index = db
@@ -113,19 +113,6 @@ function getPBFile(PBCode, uPath) -- pastebin code of the file, and path to save
     return false
   end
 end
-function betterUpdate(ProgramName, PbinCode, Filename, ProgramVersion)
-  if http then
-    getPBFile(PbinCode, "Version")
-    NVersion = db.load("Version")
-    fs.delete("Version")
-    if NVersion[ProgramName].Version > ProgramVersion then
-      getPBFile(NVersion[ProgramName].PBCode, Filename)
-      return true
-    end
-  else
-    return false
-  end
-end
 function gitUpdate(ProgramName, Filename, ProgramVersion)
   if http then
     local getGit = http.get("https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/programVersions")
@@ -138,29 +125,6 @@ function gitUpdate(ProgramName, Filename, ProgramVersion)
       file.write(getGit)
       file.close()
       return true
-    end
-  else
-    return false
-  end
-end
-function update(ProgramName, PbinCode) -- name of the program AND the pastebin code of the Versions File
-  ProgramNameV = string.lower(ProgramName)
-  if http then
-    if fs.exists("Version") == true then
-      Version = db.load("Version")
-      Version = Version[ProgramNameV].Version
-    else
-      getPBFile(PbinCode, "Version")
-      return true
-    end
-    getPBFile(PbinCode, "Versiontemp")
-    NewVersion = db.load("Versiontemp")
-    fs.delete("Versiontemp")
-    if NewVersion[ProgramNameV].Version > Version then
-      db.save("Version", NewVersion)
-      fs.delete(ProgramName)
-      getPBFile(NewVersion[ProgramNameV].PBCode, ProgramName)
-      os.reboot()
     end
   else
     return false
