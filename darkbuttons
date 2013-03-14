@@ -1,5 +1,5 @@
 --Title: Dark buttons
-Version = 1.11
+Version = 1.2
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 if not term.isColour() then
@@ -49,6 +49,13 @@ function LoadState()
 end
 function getMonitors()
   monSids = {}
+  if peripheral.getNames then
+    for i,v in pairs(peripheral.getNames()) do
+      if string.sub(v,1,7) == "monitor" then
+        table.insert(monSids, v)
+      end
+    end
+  end
   for i,v in pairs(rs.getSides()) do
     if peripheral.isPresent(v) and peripheral.getType(v) == "monitor" then
       table.insert(monSids, v)
