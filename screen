@@ -202,8 +202,7 @@ if arg[1] == "wizard" then
   
   repeat
     write("Monitor Text Scale: ")
-    TextSca = read()
-    TextSca = tonumber(TextSca)
+    TextSca = tonumber(read())
     if not ((TextSca >= 0.5) and (TextSca <= 5)) then
       print("Must be a number between 0.5 and 5")
     end
@@ -237,7 +236,7 @@ if arg[1] == "wizard" then
 end
 if arg[1] == "update" then
   print("Checking for updates...")
-  if ((dark.gitUpdate("screen", shell.getRunningProgram(), Version) == true) or (dark.gitUpdate("dark", "dark", dark.DARKversion) == true)) then 
+  if ((dark.gitUpdate("screen", ProgramName, Version) == true) or (dark.gitUpdate("dark", "dark", dark.DARKversion) == true)) then 
     print("Update Complete")
     sleep(1)
     os.reboot()
