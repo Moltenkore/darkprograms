@@ -4,8 +4,11 @@ Version = 3.36
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 AutoUpdate = true
-if fs.exists("dark") == false then -- load darkAPI
+if not fs.exists("dark") then -- load darkAPI
   print("Missing DarkAPI")
+  if not http then
+	error("Enable the HTTP API to download DarkAPI")
+  end
   sleep(2)
   print("Attempting to download...")
   getGit = http.get("https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/dark")
