@@ -4,8 +4,11 @@ Version = 3.36
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 AutoUpdate = true
-if fs.exists("dark") == false then -- load darkAPI
+if not fs.exists("dark") then -- load darkAPI
   print("Missing DarkAPI")
+  if not http then
+	error("Enable the HTTP API to download DarkAPI")
+  end
   sleep(2)
   print("Attempting to download...")
   getGit = http.get("https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/dark")
@@ -199,8 +202,7 @@ if arg[1] == "wizard" then
   
   repeat
     write("Monitor Text Scale: ")
-    TextSca = read()
-    TextSca = tonumber(TextSca)
+    TextSca = tonumber(read())
     if not ((TextSca >= 0.5) and (TextSca <= 5)) then
       print("Must be a number between 0.5 and 5")
     end
@@ -234,7 +236,7 @@ if arg[1] == "wizard" then
 end
 if arg[1] == "update" then
   print("Checking for updates...")
-  if ((dark.gitUpdate("screen", shell.getRunningProgram(), Version) == true) or (dark.gitUpdate("dark", "dark", dark.DARKversion) == true)) then 
+  if ((dark.gitUpdate("screen", ProgramName, Version) == true) or (dark.gitUpdate("dark", "dark", dark.DARKversion) == true)) then 
     print("Update Complete")
     sleep(1)
     os.reboot()
