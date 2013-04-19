@@ -9,6 +9,9 @@ end
 if fs.exists("dark") == false then -- load darkAPI
   print("Missing DarkAPI")
   print("Attempting to download...")
+  if not http then
+	error("Enable the HTTP API to download DarkAPI")
+  end
   getGit = http.get("https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/dark")
   getGit = getGit.readAll()
   file = fs.open("dark", "w")
