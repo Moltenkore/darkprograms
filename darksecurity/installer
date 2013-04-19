@@ -20,14 +20,14 @@ repeat
 	installAnswer = read()
 until ((installAnswer == "Server") or (installAnswer == "Client") or (installAnswer == "server") or (installAnswer == "client"))
 	
-	if installAnswer == "Server"then
-		table.insert(programs, "Server")
+	if installAnswer == "Server" then
+		table.insert(programs, "server")
 	elseif installAnswer == "Client" then
-		table.insert(programs, "Client")
+		table.insert(programs, "client")
 	elseif installAnswer == "server" then
-		table.insert(programs, "Server")
+		table.insert(programs, "server")
 	elseif installAnswer == "client" then
-		table.insert(programs, "Client")
+		table.insert(programs, "client")
 	end
 
 	print("Where would you like to download them to?")
