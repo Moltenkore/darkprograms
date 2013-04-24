@@ -113,7 +113,7 @@ function Next()
  end
 end
 function RunServerMenu()
-  --dark.splash(1.5, "Powered by DarkGui")  
+  dark.splash(1.5, "Powered by DarkGui")  
   state = "main"
   Page = 0  
   while true do
