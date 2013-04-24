@@ -1,10 +1,9 @@
 --Title: Dark Server
-Version = 5.2
+Version = 5.3
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 if fs.exists("dark") == false then -- load darkAPI
   print("Missing DarkAPI")
-  sleep(2)
   print("Attempting to download...")
   getGit = http.get("https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/dark")
   getGit = getGit.readAll()
@@ -63,12 +62,19 @@ function databaseLoad()
   masterdb = dark.db.load(".DarkDB")
   Config = dark.db.load(".DarkS_conf")  
 end
-function Header(text) -- builds a header using functions above from <text>
-  dark.printL("-", 1)
-  dark.printA("|", x, 2)
-  dark.printA("|", 1, 2)
-  dark.printC(text, 2)
-  dark.printL("-", 3, 4)
+function Header(text, lText, rText) -- builds a header using functions above from <text>
+  dark.printL("-", 1, nil, "blue", "blue")
+  dark.printA("|", x, 2, nil, "blue", "blue")
+  dark.printA("|", 1, 2, nil, "blue", "blue")
+  dark.printC(string.rep(" ", x), 2, nil, "white", "blue")
+  if lText then dark.printA(lText, 1, 2, nil, "white", "blue") end
+  if rText then dark.printA(rText, x - #rText, 2, nil, "white", "blue") end
+  dark.printC(text, 2, nil, "yellow", "blue")
+  dark.printL("-", 3, 5, "blue", "blue")
+end
+function Footer()
+  dark.printL("-", y, nil, "blue", "blue")
+  dark.printA("by darkrising", x-13, y, nil, "yellow", "blue")
 end
 function displayTNameColumn(TName, Page, Extrater, Admin) -- displays passed table (TName) in special formating, if Table inside Table last argument reads table names if true
   if Extrater then
@@ -107,21 +113,26 @@ function Next()
  end
 end
 function RunServerMenu()
-  dark.splash(1.5, "Powered by DarkGui")  
+  --dark.splash(1.5, "Powered by DarkGui")  
   state = "main"
   Page = 0  
   while true do
     term.clear()
     term.setCursorPos(1,1)
+    resetCli()
     if Co[state].draw then    
       Co[state].draw()
-      _, key = os.pullEvent("char") 
-      key = tonumber(key)
-      if Co[Co[state].options[key]] then
-        state = Co[state].options[key]
-      else
-        print("\nOption doesn't exist!")
-        sleep(2)
+      Event, key, mx, my = os.pullEvent()
+      if Event == "char" then
+        key = tonumber(key)
+        if Co[Co[state].options[key]] then
+          state = Co[state].options[key]
+        else
+          print("\nOption doesn't exist!")
+          sleep(2)
+        end
+      elseif Event == "mouse_click" then
+        checkArea(mx,my)
       end
     else
       Co[state].Run()
@@ -132,13 +143,7 @@ end
 function RunServer()
   while true do
 	  serverstatus = "Running"
-    T, S, M = os.pullEvent()   
-    if ((T == "darkServ") and (S == "off")) then
-      serverstatus = "Stopped"
-      while S ~= "on" do
-        T, S = os.pullEvent("darkServ")
-      end	  
-    end
+    T, S, M = os.pullEvent()
     if T == "rednet_message" then
       if Config.encryption == true then
         M = dark.decrypt(M,1,true)
@@ -182,6 +187,63 @@ function stealthUpdate()
   end
   return
 end
+cliVent = {}
+function resetCli()
+  cliVent = {}
+end
+function printR(text, option, bx, line, bgCol)
+  if not bx then
+    bx, line = term.getCursorPos()
+  end
+  local clindex = #cliVent + 1
+  cliVent[clindex] = {}
+  cliVent[clindex].startx = bx
+  cliVent[clindex].endx = bx + #text
+  cliVent[clindex].starty = line
+  cliVent[clindex].endy = line
+  cliVent[clindex].option = option
+  cliVent[clindex].draw = function()
+    term.setCursorPos(bx, line)
+    if term.isColor() == true then
+      if bgCol then term.setBackgroundColor(colors[bgCol]) end
+      term.setTextColor(colors.yellow)
+      term.write(text)
+      dark.resetCol("white", "black")
+    end
+  end
+  write(text)
+  term.setCursorPos(1, line + 1)
+end
+function regBut(text, startx, line, option, bgCol)
+  local clindex = #cliVent + 1
+  cliVent[clindex] = {}
+  cliVent[clindex].startx = startx
+  cliVent[clindex].endx = startx + #text
+  cliVent[clindex].starty = line
+  cliVent[clindex].endy = line
+  cliVent[clindex].option = option
+  cliVent[clindex].draw = function()
+    term.setCursorPos(startx, line)
+    if term.isColor() == true then
+      if bgCol then term.setBackgroundColor(colors[bgCol]) end
+      term.setTextColor(colors.yellow)
+      term.write(text)
+      dark.resetCol("white", "black")
+    end
+  end  
+end
+function checkArea(tx,ty)
+  for _, data in pairs(cliVent) do
+    if ty >= data.starty and ty <= data.endy then
+      if tx >= data.startx and tx <= data.endx then
+        state = Co[state].options[data.option]
+        data.draw()
+        sleep(0.1)
+      end
+    end
+  end
+end
+
 Co = {
   ["help"] = {
     draw = function()
@@ -197,40 +259,34 @@ Co = {
   ["main"] = {
     draw = function()
       Page = 0
-      Header("Welcome to the Server Control Panel", 2)
-      print("[1] Disk ID managment")
-      print("[2] User managment")
-      print("[3] Pc managment")
-      print("[4] Security Level Manager")
-	    print("[5] Help")
-	    print("\n[6] Toggle Server On / Off")
-      print("\nCurrent Security Level Selected: "..SLevel)
-      dark.printA("by darkrising aka djhannz", x-25, y)
-	    dark.printA("                 ", 1, y)
-	    sleep(0.2)
-      dark.printA("Server: "..serverstatus, 1, y)
+      Header("Welcome to the Server Control Panel", "V"..Version)
+      printR("[1] Disk ID managment", 1)
+      printR("[2] User managment", 2)
+      printR("[3] Pc managment", 3)
+      printR("[4] Security Level Manager", 4)
+	    printR("[5] Help", 5)
+      dark.printL("-", y, nil, "blue", "blue")
+      dark.printA("by darkrising", x-13, y, nil, "yellow", "blue")
+	    dark.printA("                 ", 1, y, nil, "blue", "blue")
+      dark.printA("Current Security Level: "..SLevel, 1, y, nil, "white", "blue")
     end,
-    options = {"ids", "user_main", "pc_main", "secLev", "help", "serverSt"}
-  },
-  ["serverSt"] = {
-    Run = function()
-      if serverstatus == "Running" then
-        os.queueEvent("darkServ", "off")
-      else
-        os.queueEvent("darkServ", "on")
-      end
-    end,
-    Parent = "main"
+    options = {"ids", "user_main", "pc_main", "secLev", "help"}
   },
   
   -- disk ids menu
   ["ids"] = {
     draw = function()
       databaseLoad()
-      Header("[4]Previous - ID managment - [5]Next")
-      dark.printL("-", y-1)
+      Header("ID managment","[4]Previous","[5]Next")
+      regBut("[4]Previous",1,2,4, "blue")
+      regBut("[5]Next",x - 7,2,5, "blue")
+      dark.printL("-", y-1, nil, "blue", "blue")
       displayTNameColumn(masterdb[SLevel].ids, Page)
-      dark.printA("[1]ADD, [2]Delete, [3]Back, IDs:".. #masterdb[SLevel].ids .." P:"..Page + 1 .."/"..gPage + 1, 1, y)
+      dark.printL("-", y, nil, "blue", "blue")
+      dark.printA("[1]ADD, [2]Delete, [3]Back, IDs:".. #masterdb[SLevel].ids .." P:"..Page + 1 .."/"..gPage + 1, 1, y, nil, "white", "blue")
+      regBut("[1]ADD,",1,y,1,"blue")
+      regBut("[2]Delete,",9,y,2,"blue")
+      regBut("[3]Back,",20,y,3,"blue")
     end,
     options = {"ids_add", "ids_delete", "main", "ids_prev", "ids_next"}
   },
@@ -310,9 +366,11 @@ Co = {
     draw = function()
       Page = 0
       Header("User Management")
-      print("[1] Main Menu")
-      print("\n[2] User Manager")
-      print("[3] Admin Manager")
+      printR("[1] Main Menu", 1)
+      print("")
+      printR("[2] User Manager", 2)
+      printR("[3] Admin Manager", 3)
+      Footer()
     end,
     options = {"main", "user_general", "user_admin"}
   },
@@ -321,10 +379,16 @@ Co = {
     draw = function()
       Page = 0
       databaseLoad()
-      Header("[4]Previous - General User Managment - [5]Next")
-      dark.printL("-", y-1)
+      Header("General User Managment","[4]Previous","[5]Next")
+      regBut("[4]Previous",1,2,4, "blue")
+      regBut("[5]Next",x - 7,2,5, "blue")
+      dark.printL("-", y-1, nil, "blue", "blue")
       displayTNameColumn(masterdb[SLevel].user, Page, true)
-      dark.printA("[1]ADD, [2]Delete, [3]Back, IDs:".. #masterdb[SLevel].user .." P:"..Page + 1 .."/"..gPage + 1, 1, y)
+      dark.printL("-", y, nil, "blue", "blue")
+      dark.printA("[1]ADD, [2]Delete, [3]Back, IDs:".. #masterdb[SLevel].user .." P:"..Page + 1 .."/"..gPage + 1, 1, y, nil, "white", "blue")
+      regBut("[1]ADD,",1,y,1,"blue")
+      regBut("[2]Delete,",9,y,2,"blue")
+      regBut("[3]Back,",20,y,3,"blue")
     end,
     options = {"user_general_add","user_general_remove","user_main","user_general_prev","user_general_next"}
   },
@@ -377,10 +441,16 @@ Co = {
     draw = function()
       Page = 0
       databaseLoad()
-      Header("[4]Previous - Admin Managment - [5]Next")
-      dark.printL("-", y-1)
+      Header("Admin Managment","[4]Previous","[5]Next")
+      regBut("[4]Previous",1,2,4, "blue")
+      regBut("[5]Next",x - 7,2,5, "blue")
+      dark.printL("-", y-1, nil, "blue", "blue")
       displayTNameColumn(masterdb[SLevel].user, Page, true, true)
-      dark.printA("[1]Promote, [2]Demote, [3]Back, IDs:".. #masterdb[SLevel].user .." P:"..Page + 1 .."/"..gPage + 1, 1, y)
+      dark.printL("-", y, nil, "blue", "blue")
+      dark.printA("[1]Promote, [2]Demote, [3]Back, IDs:".. #masterdb[SLevel].user .." P:"..Page + 1 .."/"..gPage + 1, 1, y, nil, "white", "blue")
+      regBut("[1]Promote,",1,y,1,"blue")
+      regBut("[2]Demote,",13,y,2,"blue")
+      regBut("[3]Back,",24,y,3,"blue")
     end,
     options = {"user_admin_promote","user_admin_demote","user_main","user_admin_prev","user_admin_next"}  
   },
@@ -431,9 +501,11 @@ Co = {
   ["pc_main"] = {
     draw = function()
       Header("Pc Management")
-      print("[1] Main Menu")
-      print("\n[2] Pc Whitelist")
-      print("[3] Super Pc List")
+      printR("[1] Main Menu", 1)
+      print("")
+      printR("[2] Pc Whitelist", 2)
+      printR("[3] Super Pc List", 3)
+      Footer()
     end,
     options = {"main", "pc_general", "pc_super"}
   },
@@ -442,10 +514,16 @@ Co = {
     draw = function()
       Page = 0
       databaseLoad()
-      Header("[4]Previous - Pc Whitelist - [5]Next")
-      dark.printL("-", y-1)
+      Header("Pc Whitelist","[4]Previous","[5]Next")
+      regBut("[4]Previous",1,2,4, "blue")
+      regBut("[5]Next",x - 7,2,5, "blue")
+      dark.printL("-", y-1, nil, "blue", "blue")
       displayTNameColumn(masterdb[SLevel].pc.general, Page)
-      dark.printA("[1]ADD, [2]Delete, [3]Back, IDs:".. #masterdb[SLevel].pc.general .." P:"..Page + 1 .."/"..gPage + 1, 1, y)      
+      dark.printL("-", y, nil, "blue", "blue")
+      dark.printA("[1]ADD, [2]Delete, [3]Back, IDs:".. #masterdb[SLevel].pc.general .." P:"..Page + 1 .."/"..gPage + 1, 1, y, nil, "white", "blue")
+      regBut("[1]ADD,",1,y,1,"blue")
+      regBut("[2]Delete,",9,y,2,"blue")
+      regBut("[3]Back,",20,y,3,"blue")
     end,
     options = {"pc_general_add","pc_general_remove","pc_main","pc_general_prev","pc_general_next"}
   },
@@ -502,10 +580,16 @@ Co = {
     draw = function()
       Page = 0
       databaseLoad()
-      Header("[4]Previous - Super Pc List - [5]Next")
-      dark.printL("-", y-1)
+      Header("Super Pc List","[4]Previous","[5]Next")
+      regBut("[4]Previous",1,2,4, "blue")
+      regBut("[5]Next",x - 7,2,5, "blue")
+      dark.printL("-", y-1, nil, "blue", "blue")
       displayTNameColumn(masterdb[SLevel].pc.super, Page)
-      dark.printA("[1]ADD, [2]Delete, [3]Back, IDs:".. #masterdb[SLevel].pc.super .." P:"..Page + 1 .."/"..gPage + 1, 1, y)      
+      dark.printL("-", y, nil, "blue", "blue")
+      dark.printA("[1]ADD, [2]Delete, [3]Back, IDs:".. #masterdb[SLevel].pc.super .." P:"..Page + 1 .."/"..gPage + 1, 1, y, nil, "white", "blue")
+      regBut("[1]ADD,",1,y,1,"blue")
+      regBut("[2]Delete,",9,y,2,"blue")
+      regBut("[3]Back,",20,y,3,"blue")      
     end,
     options = {"pc_super_add","pc_super_remove","pc_main","pc_super_prev","pc_super_next"}
   },
@@ -575,13 +659,15 @@ Co = {
     draw = function()
       databaseLoad()
       Header("Security Level Manager")
-      print("[1] Main Menu")
-      print("\nCurrently Selected Security Level: "..SLevel)
-      print("Security Levels: ".. #masterdb)
-      print("\n[2] Select Level")
-      print("[3] Add Levels")
-      print("[4] Remove a Level")
+      printR("[1] Main Menu", 1)
+      print("\nSecurity Levels: ".. #masterdb)
+      print("")
+      printR("[2] Select Level", 2)
+      printR("[3] Add Levels", 3)
+      printR("[4] Remove a Level", 4)
       print("\nNote: Removing a level will remove everything inside that level from the database.")
+      Footer()
+      dark.printA("Current Security Level: "..SLevel, 1, y, nil, "white", "blue")
     end,
     options = {"main","secLev_select","secLev_add","secLev_remove"}
   },
@@ -674,20 +760,7 @@ if fs.exists(".DarkS_conf") == false then
   for i = 1, securityLevelNumber do
     table.insert(masterdb, makenew())
   end
-  
-  print("Do you wish to use encryption on rednet communication?")
-  print("Useful for bundle cable information protection!")
-  print("Please note: every client must have encryption enabled too.")
-  repeat
-  write("\ny / n : ")
-  encryptq = read()
-  until ((encryptq == "y") or (encryptq == "n"))
-  if encryptq == "y" then
-    Config.encryption = true
-  else
-    Config.encryption = false
-  end
-  
+  Config.encryption = true
   if fs.isDir(".DarkDB") == true then fs.delete(".DarkDB") end
   dark.db.save(".DarkDB", masterdb)
   dark.db.save(".DarkS_conf", Config)
