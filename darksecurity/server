@@ -1,5 +1,5 @@
 --Title: Dark Server
-Version = 5.3
+Version = 5.31
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 if fs.exists("dark") == false then -- load darkAPI
@@ -27,15 +27,33 @@ AutoUpdate = true
 GlobalMenuWaitTime = 1
 SLevel = 1
 term.clear() term.setCursorPos(1,1)
+
+function debugLog(Text)
+  local on = true
+  if on == true then
+    local file = fs.open("debug_log.txt", "a")
+    file.writeLine(Text)
+    file.close()
+  end
+end
+
 function rednetSendE(ID, Message)
   if Config.encryption == true then
     Message = dark.encrypt(Message, 1)
   end
   rednet.send(ID, Message)
 end
+function decUser(qarea, quser, thoughtPass)
+  local encText = masterdb[qarea].user[quser].password
+  local pash = masterdb[qarea].user[quser].pash
+  local out = dark.decrypt(encText, pash)
+  return out
+end
 function newUser(sLevel, Username, Password, isadmin)
   masterdb[sLevel].user[Username] = {}
-  masterdb[sLevel].user[Username].password = Password
+  local encText, Hash = dark.encrypt(Password)
+  masterdb[sLevel].user[Username].password = encText
+  masterdb[sLevel].user[Username].pash = Hash
   masterdb[sLevel].user[Username].admin = isadmin
   databaseSave()
 end
@@ -147,30 +165,34 @@ function RunServer()
     if T == "rednet_message" then
       if Config.encryption == true then
         M = dark.decrypt(M,1,true)
-      end
+      end      
       ComRay = textutils.unserialize(M)
       if type(ComRay) == "table" then
         -- Access Query
         if ComRay.area then
-          ComRay.area = tonumber(ComRay.area)
+          ComRay.area = tonumber(ComRay.area) -- Get our client's area (security level)
         end
-        if ComRay.computerid and ComRay.area and masterdb[ComRay.area] and not ComRay.super then
-          if dark.db.search(ComRay.computerid, masterdb[ComRay.area].pc.general) > 0 then
-            if ComRay.diskQuery then
+        if ComRay.computerid and ComRay.area and masterdb[ComRay.area] and not ComRay.super then          
+          if dark.db.search(ComRay.computerid, masterdb[ComRay.area].pc.general) > 0 then -- if computer is in the database
+            if ComRay.diskQuery then --Disk ID Database Check
               if dark.db.search(ComRay.diskQuery, masterdb[ComRay.area].ids) > 0 then
                 rednetSendE(S, "#GRANTED#")
               else
                 rednetSendE(S, "#DENIED#")
               end
             end
-            if ComRay.userQuery and ComRay.passQuery then
-              if ((masterdb[ComRay.area].user[ComRay.userQuery]) and (masterdb[ComRay.area].user[ComRay.userQuery].password == ComRay.passQuery)) then
+            if ComRay.userQuery and ComRay.passQuery then --User and Password Check
+              if ((masterdb[ComRay.area].user[ComRay.userQuery]) and (decUser(ComRay.area, ComRay.userQuery, ComRay.passQuery) == ComRay.passQuery)) then
                 rednetSendE(S, "#GRANTED#")
               else
                 rednetSendE(S, "#DENIED#")
               end
             end
-          else
+          
+          elseif ComRay.area == 0 then
+          
+          
+          elseif not ComRay.super then
             rednetSendE(S, "#DENIED#")
           end
         end  
