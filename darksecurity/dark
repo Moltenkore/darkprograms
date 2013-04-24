@@ -1,5 +1,5 @@
 --Written by darkrising
-DARKversion = 3.21
+DARKversion = 3.23
 
 db = {}
 db.__index = db
@@ -180,7 +180,7 @@ function printL(Text, Line, NextLine, Color, BkgColor) -- print line
   if Color then resetCol(Color, BkgColor) end
   return true  
 end
-function printA(Text, xx, yy, NextLine) -- print anywhere
+function printA(Text, xx, yy, NextLine, Color, BkgColor) -- print anywhere
   term.setCursorPos(xx,yy)
   if Color then setCol(Color, BkgColor) end
   term.write(Text)
@@ -307,4 +307,15 @@ function decrypt(Input, Hash, keyY) -- takes encrypted string with either hash (
     i = i + 1
   until Input:byte(i) == nil
   return dec
+end
+function serialGen(digits)
+  local serial
+  for i = 1, digits do
+    if i == 1 then
+      serial = math.random(9)
+    else
+      serial = serial.. math.random(9)
+    end
+  end
+  return serial
 end
