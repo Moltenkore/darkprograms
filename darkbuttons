@@ -1,5 +1,5 @@
 --Title: Dark buttons
-Version = 1.21
+Version = 1.22
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 if not term.isColour() then
@@ -113,6 +113,28 @@ function draw()
   for i,v in pairs(monSids) do
     mon = peripheral.wrap(v)
     mon.clear()
+  end
+  for name, data in pairs(buttons) do
+    mon = peripheral.wrap(data.side)
+    x,y = mon.getSize()
+    if data.active == true then
+      textBox(name,data.xmin,data.xmax,data.ymin,data.ymax,data.tCol,data.actCol)
+    else
+      textBox(name,data.xmin,data.xmax,data.ymin,data.ymax,data.tCol,data.bgCol)
+    end
+  end
+end
+function checkerboard()
+  getMonitors()
+  for i,v in pairs(monSids) do
+    mon = peripheral.wrap(v)
+    local mx, my = mon.getSize()
+    if mon.isColor() then mon.setTextColor(colors.gray) end
+    for i = 1, my do
+      mon.setCursorPos(1,i)
+      mon.write(string.rep("X", mx))
+    end
+    if mon.isColor() then mon.setTextColor(colors.white) end
   end
   for name, data in pairs(buttons) do
     mon = peripheral.wrap(data.side)
@@ -331,7 +353,7 @@ function wizard(mode)
   function addButton()
     repeat --Button wizard
       clearMonitors()
-      draw()
+      checkerboard()
       mon = peripheral.wrap(selectedMon)
       monWrite("Tap position 1 for your button",1,y)
       _,side,txd,tyd = os.pullEvent("monitor_touch")
