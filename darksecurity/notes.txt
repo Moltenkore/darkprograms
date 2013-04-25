@@ -29,7 +29,7 @@ masterDB                Table           Master database
 ---super                Table           Holds super pc ids
 
 !!New User!!
-masterDB
+masterDB                Table           Master database
 -sLevel                 Table           User sLevel
 --user                  Table           Stores user tables
 ---Username             String          User's Username
