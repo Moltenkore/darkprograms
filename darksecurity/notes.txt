@@ -1,0 +1,38 @@
+--Communications
+-----------------------------------------------------------
+Commands                Data Type       Description
+-----------------------------------------------------------
+--Needed information
+ComRay.area             number          computer's area
+ComRay.computerid       number          computer's id
+ComRay.super            boolean         Super status?
+
+--disk module  
+ComRay.diskQuery        number          Disk ID
+ 
+--user and pass module
+ComRay.passQuery        string          password
+ComRay.userQuery        string          user
+
+
+--Database Structure
+-----------------------------------------------------------
+Database Tree           Data Type       Description
+-----------------------------------------------------------
+!!Master DB structure!!
+masterDB                Table           Master database
+-sLevel                 Table           Each security level is a number matching this table
+--ids                   Table           Stores disk ids
+--user                  Table           Stores user tables
+--pc                    Table           Holds pc id tables only
+---general              Table           Holds general pc ids
+---super                Table           Holds super pc ids
+
+!!New User!!
+masterDB
+-sLevel                 Table           User sLevel
+--user                  Table           Stores user tables
+---Username             String          User's Username
+---password             String          Encrypted Password
+---pash                 String          Encryption Hash
+---admin                Boolean         an Admin, true/false
