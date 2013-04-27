@@ -20,7 +20,7 @@ ComRay.userQuery        string          user
 Database Tree           Data Type       Description
 -----------------------------------------------------------
 !!Master DB structure!!
-masterDB                Table           Master database
+masterdb                Table           Master database
 -sLevel                 Table           Each security level is a number matching this table
 --ids                   Table           Stores disk ids
 --user                  Table           Stores user tables
@@ -29,7 +29,7 @@ masterDB                Table           Master database
 ---super                Table           Holds super pc ids
 
 !!New User!!
-masterDB                Table           Master database
+masterdb                Table           Master database
 -sLevel                 Table           User sLevel
 --user                  Table           Stores user tables
 ---Username             String          User's Username
