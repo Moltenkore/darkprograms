@@ -1,38 +1,45 @@
---Communications
+>Communications<
 -----------------------------------------------------------
 Commands                Data Type       Description
 -----------------------------------------------------------
---Needed information
-ComRay.area             number          computer's area
-ComRay.computerid       number          computer's id
-ComRay.super            boolean         Super status?
+>Base Info<
+-area                   number          computer's area
+-computerid             number          computer's id
 
---disk module  
-ComRay.diskQuery        number          Disk ID
+>disk module<
+-diskQuery              number          Disk ID
  
---user and pass module
-ComRay.passQuery        string          password
-ComRay.userQuery        string          user
+>user and pass module<
+-passQuery              string          password
+-userQuery              string          user
+
+>Admin user and pass module (note, admin of any level)<
+-super                  boolean         is super? true/false
+-adminUser              string          admin's username
+-adminPassword          string          admin's password
 
 
---Database Structure
------------------------------------------------------------
-Database Tree           Data Type       Description
------------------------------------------------------------
-!!Master DB structure!!
-masterdb                Table           Master database
--sLevel                 Table           Each security level is a number matching this table
---ids                   Table           Stores disk ids
---user                  Table           Stores user tables
---pc                    Table           Holds pc id tables only
----general              Table           Holds general pc ids
----super                Table           Holds super pc ids
+>Database Structure<
+---------------------------------------------------------------------------------------------
+Database Tree           Data Type       Description                             Index
+---------------------------------------------------------------------------------------------
+>Storage Database<
+masterdb                Table           Master database                         N/A
 
-!!New User!!
-masterdb                Table           Master database
--sLevel                 Table           User sLevel
---user                  Table           Stores user tables
----Username             String          User's Username
----password             String          Encrypted Password
----pash                 String          Encryption Hash
----admin                Boolean         an Admin, true/false
+-ids                    Table           Stores disk ids                         Disk ID
+--area                  Number          Disk Area
+
+-user                   Table           Stores Users                            Username
+--password              String          Encrypted Password
+--pash                  String          Encryption Hash
+--admin                 Boolean         an Admin, true/false
+--area                  Number          user area (0 for admin)
+
+-pc                     Table           Holds pc id tables                      PC IDS
+--enCode                Number          PC hash number
+--area                  Number          PC area (0 for super)
+--super                 Table           Holds super pc ids
+
+>config options database<
+config                  Table           Master config options
+-securityLevelNumber    Number          holds security level amount
