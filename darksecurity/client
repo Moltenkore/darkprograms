@@ -2,7 +2,7 @@
 Version = 4.0
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
-AutoUpdate = true
+AutoUpdate = false
 x,y = term.getSize()
 if fs.exists("dark") == false then -- load darkAPI
   print("Missing DarkAPI")
@@ -18,44 +18,57 @@ else
   os.loadAPI("dark")
 end
 function rednetSendE(ID, Message)
-  if Config.encryption == true then
+  if not config.enCode then
     Message = dark.encrypt(Message, 1)
+  else
+    Message = dark.repCrypt(Message, config.enCode)
   end
   rednet.send(ID, Message)
 end
 function rednetReceiveE(TimeA)
   local Se,Me,Di = rednet.receive(TimeA)
-  if Config.encryption == true then
-    Me = dark.decrypt(Me, 1, true)
+  if Me then
+    if not config.enCode then
+      Me = dark.decrypt(Me, 1, true)
+    else
+      Me = dark.repdeCrypt(Me, config.enCode)
+    end
+    return Se,Me,Di
   end
-  return Se,Me,Di
 end
-function Header(text)
-  dark.printL("-", 1)
-  dark.printA("|", x, 2)
-  dark.printA("|", 1, 2)
-  dark.printC(text, 2)
-  dark.printL("-", 3, 4)
+function header(text, lText, rText)
+  dark.printL("-", 1, nil, "blue", "blue")
+  dark.printA("|", x, 2, nil, "blue", "blue")
+  dark.printA("|", 1, 2, nil, "blue", "blue")
+  dark.printC(string.rep(" ", x), 2, nil, "white", "blue")
+  if lText then dark.printA(lText, 1, 2, nil, "white", "blue") end
+  if rText then dark.printA(rText, x - #rText, 2, nil, "white", "blue") end
+  dark.printC(text, 2, nil, "yellow", "blue")
+  dark.printL("-", 3, 5, "blue", "blue")
+end
+function footer()
+  dark.printL("-", y, nil, "blue", "blue")
+  dark.printA("by darkrising", x-13, y, nil, "yellow", "blue")
 end
 function keycard_mainProgram()
   while true do
     event, eventinfo, extrainfo = os.pullEvent("disk")
-    ComRay2 = {}
-    ComRay2.computerid = os.getComputerID()
-    ComRay2.area = Config.securityLevel
+    com2 = {}
+    com2.computerid = os.getComputerID()
+    com2.area = tonumber(config.securityLevel)
     
     if disk.hasData(eventinfo) == true then
-      ComRay2.diskQuery = disk.getDiskID(eventinfo) 
-      SendString = textutils.serialize(ComRay2)
-      rednetSendE(Config.serverID, SendString)
+      com2.diskQuery = disk.getID(eventinfo) 
+      SendString = textutils.serialize(com2)
+      rednetSendE(config.serverID, SendString)
       
       S, M = rednetReceiveE(2)
       
-      if M == "#GRANTED#" then
+      if M == "#granted" then
         disk.eject(eventinfo)
-        rs.setOutput(Config.doorside, true)
-        sleep(Config.pulseTime)
-        rs.setOutput(Config.doorside, false)
+        rs.setOutput(config.doorside, true)
+        sleep(config.pulseTime)
+        rs.setOutput(config.doorside, false)
       end
       disk.eject(eventinfo)
     else
@@ -65,40 +78,37 @@ function keycard_mainProgram()
 end
 function userandpassword_mainProgram()
   while true do
-    ComRay = {}
-    ComRay.computerid = os.getComputerID()
-    ComRay.area = Config.securityLevel
+    com = {}
+    com.computerid = os.getComputerID()
+    com.area = tonumber(config.securityLevel)
     
     term.clear() term.setCursorPos(1,1)
-    Header(Config.tLabel)
+    footer()
+    header(config.tLabel)
     print("") print("")
     
-    write("User: ") 
+    write(">  Username: ") 
     status, User = pcall(read)
-    ComRay.userQuery = User
+    com.userQuery = User
     
-    write("Password: ") 
+    write(">  Password: ") 
     status, password = pcall(read, "*")
-    ComRay.passQuery = password
+    com.passQuery = password
     
-    SendString = textutils.serialize(ComRay)
+    SendString = textutils.serialize(com)
     
     if ((User ~= nil) and (password ~= nil)) then
-      rednetSendE(Config.serverID , SendString)
+      rednetSendE(config.serverID, SendString)
       ID, MES = rednetReceiveE(2)
       if MES == nil then
-      print("\nNo response from server!")
+      print("\nWrong or no response from server.")
       sleep(2)
       else
-        if MES == "#GRANTED#" then
-          dark.printC("Correct", 4, 4)
-          rs.setOutput(Config.doorside, true)
-          sleep(Config.pulseTime)
-          rs.setOutput(Config.doorside, false)
-        else
-          print("")
-          dark.printC("Incorrect", 4, 4)
-          sleep(1)
+        if MES == "#granted" then
+          dark.printC("Correct", 5, 5)
+          rs.setOutput(config.doorside, true)
+          sleep(config.pulseTime)
+          rs.setOutput(config.doorside, false)
         end
       end
     end
@@ -120,67 +130,96 @@ function stealthUpdate()
   end
 end
 if fs.exists(".DarkC_conf") == false then
-  Config = {}
+  config = {}
   SideList = rs.getSides()
   
   term.clear()
   term.setCursorPos(1,1)
-  Header("Dark Client Setup")
+  header("Dark Client Setup")
   
   print("Computer's id is ".. os.getComputerID())
   
-  write("Please type the server / relay id: ")
-  Config.serverID = tonumber(io.read())
-  
-  write("Terminal Security Level: ")
-  Config.securityLevel = io.read()
+  write("\nPlease type the server / relay id: ")
+  config.serverID = tonumber(io.read())
   
   repeat
-    write("redstone output side: ")
+    write("\nTerminal Security Level: ")
+    config.securityLevel = io.read()
+  until tonumber(config.securityLevel)
+  config.securityLevel = tonumber(config.securityLevel)
+  
+  repeat
+    write("\nRedstone output side: ")
     doorside = io.read()
   until dark.db.search(doorside, SideList) > 0
-  Config.doorside = doorside
+  config.doorside = doorside
   
-  write("redstone pulse time (in seconds): ")
+  write("\nRedstone pulse time (in seconds): ")
   pulseTime = tonumber(io.read())
-  Config.pulseTime = pulseTime
+  config.pulseTime = pulseTime
   
-  print("terminal label: ")
-  Config.tLabel = io.read()
-
-  print("Do you wish to use encryption on rednet communication?")
-  print("Useful for bundle cable information protection!")
-  repeat
-  write("\ny / n : ")
-  encryptq = read()
-  until ((encryptq == "y") or (encryptq == "n"))
-  if encryptq == "y" then
-    Config.encryption = true
-  else
-    Config.encryption = false
-  end
+  write("\nTerminal label: ")
+  config.tLabel = io.read()
   
   print("\nWhat type of terminal is this?")
   print("options: 'keycard', 'password' or 'both'")
   repeat
-  write(": ")
-  tType = read()
+    write(": ")
+    tType = read()
   until ((tType == "keycard") or (tType == "password") or (tType == "both"))
-  Config.tType = tType
+  config.tType = tType
   
-  dark.db.save(".DarkC_conf", Config)
+  print("\nDo you have an encryption key? (if you added the client's id manually to the server)")
+  print("options: y / n")
+  repeat
+    write(": ")
+    encKey = read()
+  until (encKey == "y") or (encKey == "n")
+  if encKey == "y" then
+    repeat
+      write("Encryption key: ")
+      encKey = read()
+    until tonumber(encKey)
+  else
+    print("\nPlease make sure your server is up and running.")
+    print("Please type your server Admin username and password.")
+    com = {}
+    write("\nUsername: ")
+    com.userQuery = read()
+    write("Password: ")
+    com.passQuery = read("*")    
+    com.area = config.securityLevel
+    com.computerid = os.getComputerID()
+    com.super = true
+    com.addMe = true
+    message = textutils.serialize(com)
+    rednetSendE(3, message)
+    s,m,d = rednetReceiveE(2)
+    if s then
+      print("Success!")
+      config.enCode = tonumber(m)
+    else
+      print("failed, please add manually.")
+      repeat
+        write("Encryption key: ")
+        encKey = read()
+      until tonumber(encKey)
+    end    
+  end
+  
+  dark.db.save(".DarkC_conf", config)
   
   print("\nsetup complete!")
   sleep(1)
 end
 
-Config = dark.db.load(".DarkC_conf")
+config = dark.db.load(".DarkC_conf")
 
-if Config.tType == "keycard" then
+if config.tType == "keycard" then
   parallel.waitForAll(keycard_mainProgram, stealthUpdate)
-elseif Config.tType == "password" then
+elseif config.tType == "password" then
   parallel.waitForAll(userandpassword_mainProgram, stealthUpdate)
-elseif Config.tType == "both" then
+elseif config.tType == "both" then
   print("hi")
   parallel.waitForAll(keycard_mainProgram, userandpassword_mainProgram, stealthUpdate)
 end

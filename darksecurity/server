@@ -1,8 +1,8 @@
 --Title: Dark Server
-Version = 5.31
+Version = 6.0
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
-if fs.exists("dark") == false then -- load darkAPI
+if fs.exists("dark") == false then
   print("Missing DarkAPI")
   print("Attempting to download...")
   getGit = http.get("https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/dark")
@@ -10,10 +10,12 @@ if fs.exists("dark") == false then -- load darkAPI
   file = fs.open("dark", "w")
   file.write(getGit)
   file.close()
-  os.reboot()
-else
+  print("Done!")
+  sleep(1)
   os.loadAPI("dark")
 end
+os.loadAPI("dark")
+--Search for a modem
 S = dark.findPeripheral("modem")
 if S == false then
   print("Please attach Modem") 
@@ -21,66 +23,68 @@ if S == false then
 else
   rednet.open(S)  
 end
-
+--Some Vars
 x, y = term.getSize()
-AutoUpdate = true
-GlobalMenuWaitTime = 1
-SLevel = 1
-term.clear() term.setCursorPos(1,1)
-
-function debugLog(Text)
-  local on = true
-  if on == true then
-    local file = fs.open("debug_log.txt", "a")
-    file.writeLine(Text)
-    file.close()
-  end
-end
-
-function rednetSendE(ID, Message)
-  if Config.encryption == true then
+AutoUpdate = false
+globalWait = 1
+slevel = 1
+cliVent = {}
+--Communication
+function sendE(ID, Message)
+  if masterdb.pc[tostring(S)] and masterdb.pc[tostring(S)].enCode then
+    Message = dark.repCrypt(Message, masterdb.pc[tostring(ID)].enCode)
+  else
     Message = dark.encrypt(Message, 1)
   end
   rednet.send(ID, Message)
 end
-function decUser(qarea, quser, thoughtPass)
-  local encText = masterdb[qarea].user[quser].password
-  local pash = masterdb[qarea].user[quser].pash
-  local out = dark.decrypt(encText, pash)
+function recDec(S,M,D)
+  if masterdb.pc[tostring(S)] and masterdb.pc[tostring(S)].enCode then
+    M = dark.repdeCrypt(M, masterdb.pc[tostring(S)].enCode)
+  else
+    M = dark.decrypt(M, 1, true)
+  end
+  return S,M,D
+end
+--User Management
+function decUser(user)
+  local encText, pash, out
+  encText = masterdb.user[user].password
+  pash = masterdb.user[user].pash
+  out = dark.decrypt(encText, pash)
   return out
 end
-function newUser(sLevel, Username, Password, isadmin)
-  masterdb[sLevel].user[Username] = {}
+function newUser(slevel, Username, Password, isadmin)
   local encText, Hash = dark.encrypt(Password)
-  masterdb[sLevel].user[Username].password = encText
-  masterdb[sLevel].user[Username].pash = Hash
-  masterdb[sLevel].user[Username].admin = isadmin
+  masterdb.user[Username] = {}
+  masterdb.user[Username].password = encText
+  masterdb.user[Username].pash = Hash
+  masterdb.user[Username].admin = isadmin
+  masterdb.user[Username].area = slevel
   databaseSave()
 end
-function delUser(sLevel, Username)
-  masterdb[sLevel].user[Username] = nil
+function delUser(Username)
+  masterdb.user[Username] = nil
   databaseSave()
 end
-function makenew()
-  local LevelTemplate = {
-    ids = {},
-    user = {},
-    pc = {
-      general = {},
-      super = {}
-    }
-  }
-  return LevelTemplate
+--Database Control
+function databaseNew()
+  local db = {}
+  db.ids = {}
+  db.user = {}
+  db.pc = {}
+  return db
 end
 function databaseSave()
   dark.db.save(".DarkDB", masterdb)
-  dark.db.save(".DarkS_conf", Config)
+  dark.db.save(".DarkS_conf", config)
 end
 function databaseLoad()
   masterdb = dark.db.load(".DarkDB")
-  Config = dark.db.load(".DarkS_conf")  
+  config = dark.db.load(".DarkS_conf")  
 end
-function Header(text, lText, rText) -- builds a header using functions above from <text>
+--Gui Elements
+function header(text, lText, rText)
   dark.printL("-", 1, nil, "blue", "blue")
   dark.printA("|", x, 2, nil, "blue", "blue")
   dark.printA("|", 1, 2, nil, "blue", "blue")
@@ -90,11 +94,11 @@ function Header(text, lText, rText) -- builds a header using functions above fro
   dark.printC(text, 2, nil, "yellow", "blue")
   dark.printL("-", 3, 5, "blue", "blue")
 end
-function Footer()
+function footer()
   dark.printL("-", y, nil, "blue", "blue")
   dark.printA("by darkrising", x-13, y, nil, "yellow", "blue")
 end
-function displayTNameColumn(TName, Page, Extrater, Admin) -- displays passed table (TName) in special formating, if Table inside Table last argument reads table names if true
+function displayTNameColumn(TName, Page, Extrater, Admin)
   if Extrater then
     local TName2 = {}
     for i,v in pairs(TName) do
@@ -120,96 +124,16 @@ function displayTNameColumn(TName, Page, Extrater, Admin) -- displays passed tab
     dark.printA(TName[(i+28)+Mod], 34, i + 3)
   end
 end
-function prev()
+function prevPage()
   if Page ~= 0 then
     Page = Page - 1
   end
 end
-function Next()
+function nextPage()
  if Page < gPage then
    Page = Page + 1
  end
 end
-function RunServerMenu()
-  dark.splash(1.5, "Powered by DarkGui")  
-  state = "main"
-  Page = 0  
-  while true do
-    term.clear()
-    term.setCursorPos(1,1)
-    resetCli()
-    if Co[state].draw then    
-      Co[state].draw()
-      Event, key, mx, my = os.pullEvent()
-      if Event == "char" then
-        key = tonumber(key)
-        if Co[Co[state].options[key]] then
-          state = Co[state].options[key]
-        else
-          print("\nOption doesn't exist!")
-          sleep(2)
-        end
-      elseif Event == "mouse_click" then
-        checkArea(mx,my)
-      end
-    else
-      Co[state].Run()
-      state = Co[state].Parent
-    end
-  end
-end
-function RunServer()
-  while true do
-	  serverstatus = "Running"
-    T, S, M = os.pullEvent()
-    if T == "rednet_message" then
-      if Config.encryption == true then
-        M = dark.decrypt(M,1,true)
-      end      
-      ComRay = textutils.unserialize(M)
-      if type(ComRay) == "table" then
-        -- Access Query
-        if ComRay.area then
-          ComRay.area = tonumber(ComRay.area) -- Get our client's area (security level)
-        end
-        if ComRay.computerid and ComRay.area and masterdb[ComRay.area] and not ComRay.super then          
-          if dark.db.search(ComRay.computerid, masterdb[ComRay.area].pc.general) > 0 then -- if computer is in the database
-            if ComRay.diskQuery then --Disk ID Database Check
-              if dark.db.search(ComRay.diskQuery, masterdb[ComRay.area].ids) > 0 then
-                rednetSendE(S, "#GRANTED#")
-              else
-                rednetSendE(S, "#DENIED#")
-              end
-            end
-            if ComRay.userQuery and ComRay.passQuery then --User and Password Check
-              if ((masterdb[ComRay.area].user[ComRay.userQuery]) and (decUser(ComRay.area, ComRay.userQuery, ComRay.passQuery) == ComRay.passQuery)) then
-                rednetSendE(S, "#GRANTED#")
-              else
-                rednetSendE(S, "#DENIED#")
-              end
-            end
-          
-          elseif ComRay.area == 0 then
-          
-          
-          elseif not ComRay.super then
-            rednetSendE(S, "#DENIED#")
-          end
-        end  
-      end
-      --
-    end
-  end
-end
-function stealthUpdate()
-  if AutoUpdate == true then 
-    if ((dark.gitUpdate("server", shell.getRunningProgram(), Version) == true) or (dark.gitUpdate("dark", "dark", dark.DARKversion) == true)) then
-      os.reboot()
-    end
-  end
-  return
-end
-cliVent = {}
 function resetCli()
   cliVent = {}
 end
@@ -265,13 +189,84 @@ function checkArea(tx,ty)
     end
   end
 end
-
+--Server Loops
+function runServerGui()
+  term.clear() 
+  term.setCursorPos(1,1)
+  --dark.splash(1.5, "Powered by DarkGui")  
+  state = "main"
+  Page = 0  
+  while true do
+    term.clear()
+    term.setCursorPos(1,1)
+    resetCli()
+    if Co[state].draw then    
+      Co[state].draw()
+      Event, key, mx, my = os.pullEvent()
+      if Event == "char" then
+        key = tonumber(key)
+        if Co[Co[state].options[key]] then
+          state = Co[state].options[key]
+        else
+          print("\nOption doesn't exist!")
+          sleep(2)
+        end
+      elseif Event == "mouse_click" then
+        checkArea(mx,my)
+      end
+    else
+      Co[state].run()
+      state = Co[state].parent
+    end
+  end
+end
+function runServerBackend()
+  while true do
+	  serverstatus = "running"
+    T,S,M,D = os.pullEvent()
+    if T == "rednet_message" then
+      S,M,D = recDec(S,M,D)
+      com = textutils.unserialize(M)
+      if (type(com) == "table") and com.area and com.computerid and tonumber(com.area) and tonumber(com.computerid) then
+        if (not com.super) and masterdb.pc[tostring(com.computerid)] and (masterdb.pc[tostring(com.computerid)].area == com.area) then
+          if com.diskQuery and tonumber(com.diskQuery) and masterdb.ids[tostring(com.diskQuery)] and (masterdb.ids[tostring(com.diskQuery)].area == tonumber(com.area)) then
+            sendE(S, "#granted")
+          end
+          if com.userQuery and com.passQuery and masterdb.user[com.userQuery] and (masterdb.user[com.userQuery].area == tonumber(com.area)) and (decUser(com.userQuery) == com.passQuery) then
+            sendE(S, "#granted")
+          end
+        else
+          if com.super and com.userQuery and com.passQuery and masterdb.user[com.userQuery] and (decUser(com.userQuery) == com.passQuery) and (masterdb.user[com.userQuery].admin == true) then
+            if com.addMe then
+              local genCode = dark.serialGen(5)
+              sendE(S, genCode)
+              masterdb.pc[tostring(com.computerid)] = {}
+              masterdb.pc[tostring(com.computerid)].enCode = genCode
+              masterdb.pc[tostring(com.computerid)].area = tonumber(com.area)
+              masterdb.pc[tostring(com.computerid)].super = false
+              databaseSave()
+            end
+          end
+        end
+      end
+    end
+  end
+end
+function stealthUpdate()
+  if AutoUpdate == true then 
+    if ((dark.gitUpdate("server", shell.getrunningProgram(), Version) == true) or (dark.gitUpdate("dark", "dark", dark.DARKversion) == true)) then
+      os.reboot()
+    end
+  end
+  return
+end
+--Gui Table
 Co = {
   ["help"] = {
     draw = function()
       term.clear()
       term.setCursorPos(1,1)
-      Header("Help")
+      header("Help")
       dark.printA("Press [1] to return to the main menu", 1, y)
       print("\nHelp comming soon!")
       os.pullEvent("key")
@@ -281,7 +276,7 @@ Co = {
   ["main"] = {
     draw = function()
       Page = 0
-      Header("Welcome to the Server Control Panel", "V"..Version)
+      header("Welcome to the Server Control Panel", "V"..Version)
       printR("[1] Disk ID managment", 1)
       printR("[2] User managment", 2)
       printR("[3] Pc managment", 3)
@@ -290,32 +285,36 @@ Co = {
       dark.printL("-", y, nil, "blue", "blue")
       dark.printA("by darkrising", x-13, y, nil, "yellow", "blue")
 	    dark.printA("                 ", 1, y, nil, "blue", "blue")
-      dark.printA("Current Security Level: "..SLevel, 1, y, nil, "white", "blue")
+      dark.printA("Current Security Level: "..slevel, 1, y, nil, "white", "blue")
     end,
-    options = {"ids", "user_main", "pc_main", "secLev", "help"}
+    options = {"ids", "user_main", "pc_general", "secLev", "help"}
   },
   
   -- disk ids menu
   ["ids"] = {
     draw = function()
       databaseLoad()
-      Header("ID managment","[4]Previous","[5]Next")
-      regBut("[4]Previous",1,2,4, "blue")
-      regBut("[5]Next",x - 7,2,5, "blue")
+      header("ID managment","[4]prevPage","[5]nextPage")
+      regBut("[4]prevPage",1,2,4, "blue")
+      regBut("[5]nextPage",x - 7,2,5, "blue")
       dark.printL("-", y-1, nil, "blue", "blue")
-      displayTNameColumn(masterdb[SLevel].ids, Page)
+      local tempList = {}
+      for name in pairs(masterdb.ids) do
+        table.insert(tempList, name)
+      end
+      displayTNameColumn(tempList, Page)
       dark.printL("-", y, nil, "blue", "blue")
-      dark.printA("[1]ADD, [2]Delete, [3]Back, IDs:".. #masterdb[SLevel].ids .." P:"..Page + 1 .."/"..gPage + 1, 1, y, nil, "white", "blue")
+      dark.printA("[1]ADD, [2]Delete, [3]Back, P:"..Page + 1 .."/"..gPage + 1, 1, y, nil, "white", "blue")
       regBut("[1]ADD,",1,y,1,"blue")
       regBut("[2]Delete,",9,y,2,"blue")
       regBut("[3]Back,",20,y,3,"blue")
     end,
-    options = {"ids_add", "ids_delete", "main", "ids_prev", "ids_next"}
+    options = {"ids_add", "ids_delete", "main", "ids_prevPage", "ids_nextPage"}
   },
   ["ids_add"] = {
-    Run = function()
+    run = function()
       dark.cs()
-      Header("Disk IDs - add")
+      header("Disk IDs - add")
       
       print("Do you want to add the id manually?")
       repeat
@@ -333,7 +332,7 @@ Co = {
           print("\nPlease insert a disk into the drive.")
           _,DSide = os.pullEvent("disk")
           if disk.hasData(DSide) == true then
-            answer = disk.getDiskID(DSide)
+            answer = disk.getID(DSide)
           else
             print("\nNot a disk!")
           end
@@ -342,8 +341,9 @@ Co = {
         answer = tostring(answer)
       end
       
-      if dark.db.search(answer,masterdb[SLevel].ids) == 0 then
-        table.insert(masterdb[SLevel].ids, answer)
+      if not masterdb.ids[answer] then
+        masterdb.ids[answer] = {}
+        masterdb.ids[answer].area = slevel
         print("\nAdded!")
         databaseSave()
       else
@@ -352,47 +352,46 @@ Co = {
       write("\nPress enter to continue.")
       read()
     end,
-    Parent = "ids"
+    parent = "ids"
   },
   ["ids_delete"] = {
-    Run = function()
+    run = function()
       dark.cs()
-      Header("Disk IDs - remove")
+      header("Disk IDs - remove")
       write("Disk ID to remove: ")
       repeat
         answer = read()
       until tonumber(answer)
-      IndexNo = dark.db.search(answer, masterdb[SLevel].ids)
-      if IndexNo > 0 then
-        table.remove(masterdb[SLevel].ids, IndexNo)
+      if masterdb.ids[answer] then
+        masterdb.ids[answer] = nil
         databaseSave()
         print("\nRemoved!")
       else
         print("\nID not found!")
       end
-      sleep(GlobalMenuWaitTime)      
+      sleep(globalWait)      
     end,
-    Parent = "ids"    
+    parent = "ids"    
   },
-  ["ids_prev"] = {
-    Run = prev,
-    Parent = "ids"
+  ["ids_prevPage"] = {
+    run = prevPage,
+    parent = "ids"
   },
-  ["ids_next"] = {
-    Run = Next,
-    Parent = "ids"
+  ["ids_nextPage"] = {
+    run = nextPage,
+    parent = "ids"
   }, 
   
   -- user menus
   ["user_main"] = {
     draw = function()
       Page = 0
-      Header("User Management")
+      header("User Management")
       printR("[1] Main Menu", 1)
       print("")
       printR("[2] User Manager", 2)
       printR("[3] Admin Manager", 3)
-      Footer()
+      footer()
     end,
     options = {"main", "user_general", "user_admin"}
   },
@@ -401,23 +400,23 @@ Co = {
     draw = function()
       Page = 0
       databaseLoad()
-      Header("General User Managment","[4]Previous","[5]Next")
-      regBut("[4]Previous",1,2,4, "blue")
-      regBut("[5]Next",x - 7,2,5, "blue")
+      header("General User Managment","[4]prevPage","[5]nextPage")
+      regBut("[4]prevPage",1,2,4, "blue")
+      regBut("[5]nextPage",x - 7,2,5, "blue")
       dark.printL("-", y-1, nil, "blue", "blue")
-      displayTNameColumn(masterdb[SLevel].user, Page, true)
+      displayTNameColumn(masterdb.user, Page, true)
       dark.printL("-", y, nil, "blue", "blue")
-      dark.printA("[1]ADD, [2]Delete, [3]Back, IDs:".. #masterdb[SLevel].user .." P:"..Page + 1 .."/"..gPage + 1, 1, y, nil, "white", "blue")
+      dark.printA("[1]ADD, [2]Delete, [3]Back, P:"..Page + 1 .."/"..gPage + 1, 1, y, nil, "white", "blue")
       regBut("[1]ADD,",1,y,1,"blue")
       regBut("[2]Delete,",9,y,2,"blue")
       regBut("[3]Back,",20,y,3,"blue")
     end,
-    options = {"user_general_add","user_general_remove","user_main","user_general_prev","user_general_next"}
+    options = {"user_general_add","user_general_remove","user_main","user_general_prevPage","user_general_nextPage"}
   },
   ["user_general_add"] = {
-    Run = function()
+    run = function()
       dark.cs()
-      Header("Add User")
+      header("Add User")
       write("Username: ")
       local username = read()
       repeat
@@ -428,365 +427,240 @@ Co = {
       until pass1 == pass2
       pass1 = tostring(pass1)
       username = string.lower(username)
-      newUser(SLevel, username, pass1, false)
+      newUser(slevel, username, pass1, false)
       print("\nUser Added!")
-      sleep(GlobalMenuWaitTime)
+      sleep(globalWait)
     end,
-    Parent = "user_general"
+    parent = "user_general"
   },
   ["user_general_remove"] = {
-    Run = function()
+    run = function()
       dark.cs()
-      Header("Remove User")
+      header("Remove User")
       write("User to remove: ")
       local username = read()
-      if masterdb[SLevel].user[username] then
-        delUser(SLevel, username)
+      if masterdb.user[username] then
+        delUser(username)
         print("\nUser deleted!")
       else
         print("\nUser doesn't exist.")
       end
-      sleep(GlobalMenuWaitTime)
+      sleep(globalWait)
     end,
-    Parent = "user_general"
+    parent = "user_general"
   },
-  ["user_general_prev"] = {
-    Run = prev,
-    Parent = "user_general"
+  ["user_general_prevPage"] = {
+    run = prevPage,
+    parent = "user_general"
   },
-  ["user_general_next"] = {
-    Run = Next,
-    Parent = "user_general"  
+  ["user_general_nextPage"] = {
+    run = nextPage,
+    parent = "user_general"  
   },
   
   ["user_admin"] = {
     draw = function()
       Page = 0
       databaseLoad()
-      Header("Admin Managment","[4]Previous","[5]Next")
-      regBut("[4]Previous",1,2,4, "blue")
-      regBut("[5]Next",x - 7,2,5, "blue")
+      header("Admin Managment","[4]prevPage","[5]nextPage")
+      regBut("[4]prevPage",1,2,4, "blue")
+      regBut("[5]nextPage",x - 7,2,5, "blue")
       dark.printL("-", y-1, nil, "blue", "blue")
-      displayTNameColumn(masterdb[SLevel].user, Page, true, true)
+      displayTNameColumn(masterdb.user, Page, true, true)
       dark.printL("-", y, nil, "blue", "blue")
-      dark.printA("[1]Promote, [2]Demote, [3]Back, IDs:".. #masterdb[SLevel].user .." P:"..Page + 1 .."/"..gPage + 1, 1, y, nil, "white", "blue")
+      dark.printA("[1]Promote, [2]Demote, [3]Back, P:"..Page + 1 .."/"..gPage + 1, 1, y, nil, "white", "blue")
       regBut("[1]Promote,",1,y,1,"blue")
       regBut("[2]Demote,",13,y,2,"blue")
       regBut("[3]Back,",24,y,3,"blue")
     end,
-    options = {"user_admin_promote","user_admin_demote","user_main","user_admin_prev","user_admin_next"}  
+    options = {"user_admin_promote","user_admin_demote","user_main","user_admin_prevPage","user_admin_nextPage"}  
   },
   ["user_admin_promote"] = {
-    Run = function()
+    run = function()
       dark.cs()
-      Header("Promote User")
+      header("Promote User")
       write("User to promote to admin: ")
       username = read()
-      if masterdb[SLevel].user[username] then
-        masterdb[SLevel].user[username].admin = true
+      if masterdb.user[username] then
+        masterdb.user[username].admin = true
         databaseSave()
         print("\nUser promoted")
       else
         print("\nUser doesn't exist")
       end
-      sleep(GlobalMenuWaitTime)
+      sleep(globalWait)
     end,
-    Parent = "user_admin"
+    parent = "user_admin"
   },
   ["user_admin_demote"] = {
-    Run = function()
+    run = function()
       dark.cs()
-      Header("Demote User")
+      header("Demote User")
       write("User to demote from admin: ")
       username = read()
-      if masterdb[SLevel].user[username] then
-        masterdb[SLevel].user[username].admin = false
+      if masterdb.user[username] then
+        masterdb.user[username].admin = false
         databaseSave()
         print("\nUser demoted")
       else
         print("\nUser doesn't exist")
       end  
-      sleep(GlobalMenuWaitTime)
+      sleep(globalWait)
     end,
-    Parent = "user_admin"  
+    parent = "user_admin"  
   },
-  ["user_admin_prev"] = {
-    Run = prev,
-    Parent = "user_admin"
+  ["user_admin_prevPage"] = {
+    run = prevPage,
+    parent = "user_admin"
   },
-  ["user_admin_next"] = {
-    Run = Next,
-    Parent = "user_admin"  
+  ["user_admin_nextPage"] = {
+    run = nextPage,
+    parent = "user_admin"  
   },
   
-  -- pc menus
-  ["pc_main"] = {
-    draw = function()
-      Header("Pc Management")
-      printR("[1] Main Menu", 1)
-      print("")
-      printR("[2] Pc Whitelist", 2)
-      printR("[3] Super Pc List", 3)
-      Footer()
-    end,
-    options = {"main", "pc_general", "pc_super"}
-  },
-  
+  -- pc menus  
   ["pc_general"] = {
     draw = function()
       Page = 0
       databaseLoad()
-      Header("Pc Whitelist","[4]Previous","[5]Next")
-      regBut("[4]Previous",1,2,4, "blue")
-      regBut("[5]Next",x - 7,2,5, "blue")
+      header("Pc Whitelist","[4]prevPage","[5]nextPage")
+      regBut("[4]prevPage",1,2,4, "blue")
+      regBut("[5]nextPage",x - 7,2,5, "blue")
       dark.printL("-", y-1, nil, "blue", "blue")
-      displayTNameColumn(masterdb[SLevel].pc.general, Page)
+      displayTNameColumn(masterdb.pc, Page, true)
       dark.printL("-", y, nil, "blue", "blue")
-      dark.printA("[1]ADD, [2]Delete, [3]Back, IDs:".. #masterdb[SLevel].pc.general .." P:"..Page + 1 .."/"..gPage + 1, 1, y, nil, "white", "blue")
+      dark.printA("[1]ADD, [2]Delete, [3]Back, P:"..Page + 1 .."/"..gPage + 1, 1, y, nil, "white", "blue")
       regBut("[1]ADD,",1,y,1,"blue")
       regBut("[2]Delete,",9,y,2,"blue")
       regBut("[3]Back,",20,y,3,"blue")
     end,
-    options = {"pc_general_add","pc_general_remove","pc_main","pc_general_prev","pc_general_next"}
+    options = {"pc_general_add","pc_general_remove","main","pc_general_prevPage","pc_general_nextPage"}
   },
   ["pc_general_add"] = {
-    Run = function()
+    run = function()
       dark.cs()
-      Header("Pc whitelist - add")
-      write("ID to add to the whitelist: ")
+      header("Pc whitelist - add")
+      write("PC ID to add to the whitelist: ")
       repeat
         answer = read()
       until tonumber(answer)
-      
-      if dark.db.search(answer,masterdb[SLevel].pc.super) == 0 then
-        table.insert(masterdb[SLevel].pc.general, answer)
-        print("\nAdded!")
+      if not masterdb.pc[answer] then
+        masterdb.pc[answer] = {}
+        masterdb.pc[answer].enCode = dark.serialGen(5)
+        masterdb.pc[answer].area = slevel
+        masterdb.pc[answer].super = false
         databaseSave()
+        print("\nAdded!")
+        dark.setCol("yellow", "black")
+        print("\nEncryption Code for the new Client is: ".. masterdb.pc[answer].enCode)
+        dark.resetCol(true, true)
+        print("\nMake sure to take a note of this number!")
+        write("\nPress enter to continue.")
+        read()
       else
-        print("\nPc id exists in the super pc list.")
+        print("\nPc id exists.")
+        sleep(globalWait)
       end
-      sleep(GlobalMenuWaitTime)
     end,
-    Parent = "pc_general"
+    parent = "pc_general"
   },
   ["pc_general_remove"] = {
-    Run = function()
+    run = function()
       dark.cs()
-      Header("Pc whitelist - remove")
+      header("Pc whitelist - remove")
       write("ID to remove from whitelist: ")
       repeat
         answer = read()
       until tonumber(answer)
-      IndexNo = dark.db.search(answer, masterdb[SLevel].pc.general)
-      if IndexNo > 0 then
-        table.remove(masterdb[SLevel].pc.general, IndexNo)
+      if masterdb.pc[answer] then
+        masterdb.pc[answer] = nil
         databaseSave()
         print("\nRemoved!")
       else
         print("\nID not found!")
       end
-      sleep(GlobalMenuWaitTime)
+      sleep(globalWait)
     end,
-    Parent = "pc_general"    
+    parent = "pc_general"    
   },
-  ["pc_general_prev"] = {
-    Run = prev,
-    Parent = "pc_general"   
+  ["pc_general_prevPage"] = {
+    run = prevPage,
+    parent = "pc_general"   
   },
-  ["pc_general_next"] = {
-    Run = Next,
-    Parent = "pc_general"    
+  ["pc_general_nextPage"] = {
+    run = nextPage,
+    parent = "pc_general"    
   },
-  
-  ["pc_super"] = {
-    draw = function()
-      Page = 0
-      databaseLoad()
-      Header("Super Pc List","[4]Previous","[5]Next")
-      regBut("[4]Previous",1,2,4, "blue")
-      regBut("[5]Next",x - 7,2,5, "blue")
-      dark.printL("-", y-1, nil, "blue", "blue")
-      displayTNameColumn(masterdb[SLevel].pc.super, Page)
-      dark.printL("-", y, nil, "blue", "blue")
-      dark.printA("[1]ADD, [2]Delete, [3]Back, IDs:".. #masterdb[SLevel].pc.super .." P:"..Page + 1 .."/"..gPage + 1, 1, y, nil, "white", "blue")
-      regBut("[1]ADD,",1,y,1,"blue")
-      regBut("[2]Delete,",9,y,2,"blue")
-      regBut("[3]Back,",20,y,3,"blue")      
-    end,
-    options = {"pc_super_add","pc_super_remove","pc_main","pc_super_prev","pc_super_next"}
-  },
-  ["pc_super_add"] = {
-    Run = function()
-      dark.cs()
-      Header("Super Pc - add")
-      write("ID to promote / add: ")
-      repeat
-        answer = read()
-      until tonumber(answer)
-      table.insert(masterdb[SLevel].pc.super, answer)
-      
-      IndexNo = dark.db.search(answer, masterdb[SLevel].pc.general)
-      if IndexNo > 0 then
-        table.remove(masterdb[SLevel].pc.general, IndexNo)
-        print("\nPromoted!")
-      else
-        print("\nAdded!")
-      end
-      
-      databaseSave()
-      sleep(GlobalMenuWaitTime)
-    end,
-    Parent = "pc_super"
-  },
-  ["pc_super_remove"] = {
-    Run = function()
-      dark.cs()
-      Header("Super Pc - remove")
-      write("ID to remove: ")
-      repeat
-        answer = read()
-      until tonumber(answer)
-      IndexNo = dark.db.search(answer, masterdb[SLevel].pc.super)
-      if IndexNo > 0 then
-        table.remove(masterdb[SLevel].pc.super, IndexNo)
-        print("\nRemoved!")
-        print("\nShall I re-add the id to the pc whitelist?")
-        repeat
-          write("y or n: ")
-          answer2 = read()
-        until ((answer2 == "y") or (answer2 == "n"))
-        if answer2 == "y" then
-          table.insert(masterdb[SLevel].pc.general, answer)
-        end
-        databaseSave()
-        print("\nDone!")
-      else
-        print("\nID not found!")
-      end
-      sleep(GlobalMenuWaitTime)
-    end,
-    Parent = "pc_super"    
-  },
-  ["pc_super_prev"] = {
-    Run = prev,
-    Parent = "pc_super"   
-  },
-  ["pc_super_next"] = {
-    Run = Next,
-    Parent = "pc_super"    
-  },
- 
+
   -- security level menu
   ["secLev"] = {
     draw = function()
       databaseLoad()
-      Header("Security Level Manager")
+      header("Security Level Manager")
       printR("[1] Main Menu", 1)
-      print("\nSecurity Levels: ".. #masterdb)
+      print("")
+      print("Security Levels: ".. config.secLevels)
       print("")
       printR("[2] Select Level", 2)
-      printR("[3] Add Levels", 3)
-      printR("[4] Remove a Level", 4)
-      print("\nNote: Removing a level will remove everything inside that level from the database.")
-      Footer()
-      dark.printA("Current Security Level: "..SLevel, 1, y, nil, "white", "blue")
+      printR("[3] Modify Level Amount", 3)
+      footer()
+      dark.printA("Current Security Level: "..slevel, 1, y, nil, "white", "blue")
     end,
-    options = {"main","secLev_select","secLev_add","secLev_remove"}
+    options = {"main","secLev_select","secLev_modify"}
   },
   ["secLev_select"] = {
-    Run = function()
+    run = function()
       dark.cs()
-      Header("Security Level - select")
-      print("Currently Selected Security Level: "..SLevel)
-      print("Security Levels: ".. Config.securityLevelNumber)
+      header("Security Level - Select")
+      print("Currently Selected Security Level: "..slevel)
+      print("Security Levels: ".. config.secLevels)
       repeat
         write("\nSecurity Level to switch too: ")        
         answer = read()
       until tonumber(answer)
       answer = tonumber(answer)
-      if ((answer < 0) or (answer > Config.securityLevelNumber)) then
+      if ((answer < 0) or (answer > config.secLevels)) then
         print("\nInvalid number entered.")
       else
-        SLevel = answer
-        print("Switched to level: "..SLevel)
+        slevel = answer
+        print("Switched to level: "..slevel)
       end
-      sleep(GlobalMenuWaitTime)
+      sleep(globalWait)
     end,
-    Parent = "secLev"
+    parent = "secLev"
   },
-  ["secLev_add"] = {
-    Run = function()
+  ["secLev_modify"] = {
+    run = function()
       dark.cs()
-      Header("Security Level - add")
-      print("This will add new security levels to the database.")
+      header("Security Level - Modify")
+      print("\nSecurity Level Amount: ".. config.secLevels)
+      write("New security level amount: ")
       repeat
-        write("\nAmount of Security Levels to add: ")
         answer = read()
       until tonumber(answer)
-      answer = tonumber(answer)
-      for i = 1, answer do
-        table.insert(masterdb, makenew())
-      end
-      Config.securityLevelNumber = #masterdb
+      config.secLevels = tonumber(answer)
       databaseSave()
-      print("\nAdded "..answer.." security levels.")
-      sleep(GlobalMenuWaitTime)
+      print("Changed!")
+      sleep(globalWait)
     end,
-    Parent = "secLev"
-  },
-  ["secLev_remove"] = {
-    Run = function()
-      dark.cs()
-      Header("Security Level - remove")  
-      print("This will DELETE a security level from the database, removing all data from the chosen security level!")
-      print("Once a level is deleted, it is gone forever. (a very long time!")
-      print("Removing a security level in the middle of the table will cause the next avalible one to drop down.")
-      print("For Example: if you had 10 security levels and deleted 5, 6 would become 5")
-      repeat
-        write("Do you want to continue? y / n : ")
-        answer = read()
-      until ((answer == "y") or (answer == "n"))
-      if answer == "y" then
-        repeat
-          write("\nSecurity level you wish to erase: ")
-          answer = read()
-        until tonumber(answer)
-        answer = tonumber(answer)
-        if answer > #masterdb then
-          print("\nInvalid Level entered")
-        else
-          table.remove(masterdb, answer)
-          Config.securityLevelNumber = #masterdb
-          databaseSave()
-          print("\nRemoved security level: "..answer)
-        end
-      else
-        print("\nReturning to safety!")
-      end
-      sleep(GlobalMenuWaitTime)
-    end,
-    Parent = "secLev"
+    parent = "secLev"
   },
 }
-
+--Config file
 if fs.exists(".DarkS_conf") == false then 
-  Config = {}
-  masterdb = {}
-  Header("Dark Server Setup")
+  config = {}
+  masterdb = databaseNew()
+  header("Dark Server Setup")
   print("Computer's id is ".. os.getComputerID())
   repeat
     write("security level amount (must be a number): ")
     securityLevelNumber = io.read()
   until tonumber(securityLevelNumber)
-  Config.securityLevelNumber = tonumber(securityLevelNumber)
-  for i = 1, securityLevelNumber do
-    table.insert(masterdb, makenew())
-  end
-  Config.encryption = true
-  if fs.isDir(".DarkDB") == true then fs.delete(".DarkDB") end
+  config.secLevels = tonumber(securityLevelNumber)
+  
   dark.db.save(".DarkDB", masterdb)
-  dark.db.save(".DarkS_conf", Config)
+  dark.db.save(".DarkS_conf", config)
 end
-
+--Finale Stuff
 databaseLoad()
-parallel.waitForAll(RunServer, RunServerMenu, stealthUpdate)
+parallel.waitForAll(runServerBackend, runServerGui, stealthUpdate)

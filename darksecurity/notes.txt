@@ -13,11 +13,12 @@ Commands                Data Type       Description
 -passQuery              string          password
 -userQuery              string          user
 
->Admin user and pass module (note, admin of any level)<
+>Admin user and pass module<
+-passQuery              string          password
+-userQuery              string          user
 -super                  boolean         is super? true/false
--adminUser              string          admin's username
--adminPassword          string          admin's password
 
+-addMe                  boolean         add new client
 
 >Database Structure<
 ---------------------------------------------------------------------------------------------
@@ -38,7 +39,6 @@ masterdb                Table           Master database                         
 -pc                     Table           Holds pc id tables                      PC IDS
 --enCode                Number          PC hash number
 --area                  Number          PC area (0 for super)
---super                 Table           Holds super pc ids
 
 >config options database<
 config                  Table           Master config options
