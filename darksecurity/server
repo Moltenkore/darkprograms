@@ -25,7 +25,7 @@ else
 end
 --Some Vars
 x, y = term.getSize()
-AutoUpdate = true
+AutoUpdate = false
 globalWait = 1
 slevel = 1
 cliVent = {}
@@ -254,7 +254,7 @@ function runServerBackend()
 end
 function stealthUpdate()
   if AutoUpdate == true then 
-    if ((dark.gitUpdate("server", shell.getrunningProgram(), Version) == true) or (dark.gitUpdate("dark", "dark", dark.DARKversion) == true)) then
+    if ((dark.gitUpdate("server", shell.getRunningProgram(), Version) == true) or (dark.gitUpdate("dark", "dark", dark.DARKversion) == true)) then
       os.reboot()
     end
   end
