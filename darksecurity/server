@@ -1,5 +1,5 @@
 --Title: Dark Server
-Version = 6.0
+Version = 6.1
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 if fs.exists("dark") == false then
@@ -25,7 +25,7 @@ else
 end
 --Some Vars
 x, y = term.getSize()
-AutoUpdate = false
+AutoUpdate = true
 globalWait = 1
 slevel = 1
 cliVent = {}
@@ -232,8 +232,12 @@ function runServerBackend()
           if com.diskQuery and tonumber(com.diskQuery) and masterdb.ids[tostring(com.diskQuery)] and (masterdb.ids[tostring(com.diskQuery)].area == tonumber(com.area)) then
             sendE(S, "#granted")
           end
-          if com.userQuery and com.passQuery and masterdb.user[com.userQuery] and (masterdb.user[com.userQuery].area == tonumber(com.area)) and (decUser(com.userQuery) == com.passQuery) then
-            sendE(S, "#granted")
+          if com.userQuery and com.passQuery and masterdb.user[com.userQuery] and (decUser(com.userQuery) == com.passQuery) then
+            if masterdb.user[com.userQuery].area == tonumber(com.area) then
+              sendE(S, "#granted")
+            elseif (masterdb.user[com.userQuery].admin == true) then
+              sendE(S, "#granted")
+            end
           end
         else
           if com.super and com.userQuery and com.passQuery and masterdb.user[com.userQuery] and (decUser(com.userQuery) == com.passQuery) and (masterdb.user[com.userQuery].admin == true) then
