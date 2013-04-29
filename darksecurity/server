@@ -1,5 +1,5 @@
 --Title: Dark Server
-Version = 6.11
+Version = 6.20
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 if fs.exists("dark") == false then
@@ -29,8 +29,18 @@ AutoUpdate = true
 globalWait = 1
 slevel = 1
 cliVent = {}
+co = "blue"
+mLog = {}
 --Communication
+function logDat(Message)
+  table.insert(mLog, Message)
+end
 function sendE(ID, Message)
+  if debugMode and (debugMode == true) then
+    logDat("Sending to ID: "..ID)
+    logDat("Message: "..Message)
+    logDat("--------------------")
+  end
   if masterdb.pc[tostring(S)] and masterdb.pc[tostring(S)].enCode then
     Message = dark.repCrypt(Message, masterdb.pc[tostring(ID)].enCode)
   else
@@ -43,6 +53,12 @@ function recDec(S,M,D)
     M = dark.repdeCrypt(M, masterdb.pc[tostring(S)].enCode)
   else
     M = dark.decrypt(M, 1, true)
+  end
+  if debugMode and (debugMode == true) then
+    logDat("Sender: "..S)
+    logDat("Message: "..M)
+    logDat("Distance: "..D)
+    logDat("--------------------")
   end
   return S,M,D
 end
@@ -85,18 +101,28 @@ function databaseLoad()
 end
 --Gui Elements
 function header(text, lText, rText)
-  dark.printL("-", 1, nil, "blue", "blue")
-  dark.printA("|", x, 2, nil, "blue", "blue")
-  dark.printA("|", 1, 2, nil, "blue", "blue")
-  dark.printC(string.rep(" ", x), 2, nil, "white", "blue")
-  if lText then dark.printA(lText, 1, 2, nil, "white", "blue") end
-  if rText then dark.printA(rText, x - #rText, 2, nil, "white", "blue") end
-  dark.printC(text, 2, nil, "yellow", "blue")
-  dark.printL("-", 3, 5, "blue", "blue")
+  if debugMode and (debugMode == true) then
+    co = "red"
+  else
+    co = "blue"
+  end
+  dark.printL("-", 1, nil, co, co)
+  dark.printA("|", x, 2, nil, co, co)
+  dark.printA("|", 1, 2, nil, co, co)
+  dark.printC(string.rep(" ", x), 2, nil, "white", co)
+  if lText then dark.printA(lText, 1, 2, nil, "white", co) end
+  if rText then dark.printA(rText, x - #rText, 2, nil, "white", co) end
+  dark.printC(text, 2, nil, "yellow", co)
+  dark.printL("-", 3, 5, co, co)
 end
 function footer()
-  dark.printL("-", y, nil, "blue", "blue")
-  dark.printA("by darkrising", x-13, y, nil, "yellow", "blue")
+  if debugMode and (debugMode == true) then
+    co = "red"
+  else
+    co = "blue"
+  end
+  dark.printL("-", y, nil, co, co)
+  dark.printA("by darkrising", x-13, y, nil, "yellow", co)
 end
 function displayTNameColumn(TName, Page, Extrater, Admin)
   if Extrater then
@@ -190,10 +216,21 @@ function checkArea(tx,ty)
   end
 end
 --Server Loops
+function listen()
+  local cou = 1
+  while true do
+    os.pullEvent("D")
+    cou = cou + 1
+    if cou == 5 then
+      debugMode = not debugMode
+      cou = 1
+    end
+  end
+end
 function runServerGui()
   term.clear() 
   term.setCursorPos(1,1)
-  --dark.splash(1.5, "Powered by DarkGui")  
+  dark.splash(1.5, "Powered by DarkGui")  
   state = "main"
   Page = 0  
   while true do
@@ -204,12 +241,14 @@ function runServerGui()
       Co[state].draw()
       Event, key, mx, my = os.pullEvent()
       if Event == "char" then
-        key = tonumber(key)
+        if tonumber(key) then
+          key = tonumber(key)
+        end
         if Co[Co[state].options[key]] then
           state = Co[state].options[key]
-        else
-          print("\nOption doesn't exist!")
-          sleep(2)
+        end
+        if key == "d" then 
+          os.queueEvent("D")
         end
       elseif Event == "mouse_click" then
         checkArea(mx,my)
@@ -251,6 +290,8 @@ function runServerBackend()
             end
           end
         end
+      elseif (type(com) == "table") and com.ping then
+        sendE(S, "#pong")
       end
     end
   end
@@ -279,18 +320,50 @@ Co = {
   ["main"] = {
     draw = function()
       Page = 0
-      header("Welcome to the Server Control Panel", "V"..Version, "ID:".. os.getComputerID())
+      if debugMode and debugMode == true then
+        header("Debug mode enabled!", "V"..Version, "ID:".. os.getComputerID())
+        Co.main.options = {"ids", "user_main", "pc_general", "secLev", "help", "log"}
+      else
+        header("Welcome to the Server Control Panel", "V"..Version, "ID:".. os.getComputerID())
+        Co.main.options = {"ids", "user_main", "pc_general", "secLev", "help"}
+      end
       printR("[1] Disk ID managment", 1)
       printR("[2] User managment", 2)
       printR("[3] Pc managment", 3)
       printR("[4] Security Level Manager", 4)
 	    printR("[5] Help", 5)
-      dark.printL("-", y, nil, "blue", "blue")
-      dark.printA("by darkrising", x-13, y, nil, "yellow", "blue")
-	    dark.printA("                 ", 1, y, nil, "blue", "blue")
-      dark.printA("Current Security Level: "..slevel, 1, y, nil, "white", "blue")
+      print("")
+      if debugMode and debugMode == true then printR("[6] Log", 6) end
+      dark.printL("-", y, nil, co, co)
+      dark.printA("by darkrising", x-13, y, nil, "yellow", co)
+	    dark.printA("                 ", 1, y, nil, co, co)
+      dark.printA("Current Security Level: "..slevel, 1, y, nil, "white", co)
     end,
-    options = {"ids", "user_main", "pc_general", "secLev", "help"}
+  },
+  ["log"] = {
+    draw = function()
+      term.setCursorPos(1,4)
+      for name, stuff in pairs(mLog) do
+        print(stuff)
+      end
+      header("Communications Log - [1]Go Back, [2]Dump Log")
+    end,
+    options = {"main", "dump"}
+  },
+  ["dump"] = {
+    run = function()
+      header("Log Dump")
+      write("log filename: ")
+      local filename = "/"..read()
+      local file = fs.open(filename, "w")
+      for name, stuff in pairs(mLog) do
+        file.writeLine(stuff)
+      end
+      file.close()
+      print("\nDone!")
+      sleep(2)
+    end,
+    parent = "log"
   },
   
   -- disk ids menu
@@ -298,19 +371,19 @@ Co = {
     draw = function()
       databaseLoad()
       header("ID managment","[4]prevPage","[5]nextPage")
-      regBut("[4]prevPage",1,2,4, "blue")
-      regBut("[5]nextPage",x - 7,2,5, "blue")
-      dark.printL("-", y-1, nil, "blue", "blue")
+      regBut("[4]prevPage",1,2,4, co)
+      regBut("[5]nextPage",x - 7,2,5, co)
+      dark.printL("-", y-1, nil, co, co)
       local tempList = {}
       for name in pairs(masterdb.ids) do
         table.insert(tempList, name)
       end
       displayTNameColumn(tempList, Page)
-      dark.printL("-", y, nil, "blue", "blue")
-      dark.printA("[1]ADD, [2]Delete, [3]Back, P:"..Page + 1 .."/"..gPage + 1, 1, y, nil, "white", "blue")
-      regBut("[1]ADD,",1,y,1,"blue")
-      regBut("[2]Delete,",9,y,2,"blue")
-      regBut("[3]Back,",20,y,3,"blue")
+      dark.printL("-", y, nil, co, co)
+      dark.printA("[1]ADD, [2]Delete, [3]Back, P:"..Page + 1 .."/"..gPage + 1, 1, y, nil, "white", co)
+      regBut("[1]ADD,",1,y,1,co)
+      regBut("[2]Delete,",9,y,2,co)
+      regBut("[3]Back,",20,y,3,co)
     end,
     options = {"ids_add", "ids_delete", "main", "ids_prevPage", "ids_nextPage"}
   },
@@ -404,9 +477,9 @@ Co = {
       Page = 0
       databaseLoad()
       header("General User Managment","[4]prevPage","[5]nextPage")
-      regBut("[4]prevPage",1,2,4, "blue")
-      regBut("[5]nextPage",x - 7,2,5, "blue")
-      dark.printL("-", y-1, nil, "blue", "blue")
+      regBut("[4]prevPage",1,2,4, co)
+      regBut("[5]nextPage",x - 7,2,5, co)
+      dark.printL("-", y-1, nil, co, co)
       tempList = {}
       for name, data in pairs(masterdb.user) do
         if (data.area == slevel) and (data.admin == false) then
@@ -414,11 +487,11 @@ Co = {
         end
       end
       displayTNameColumn(tempList, Page)
-      dark.printL("-", y, nil, "blue", "blue")
-      dark.printA("[1]ADD, [2]Delete, [3]Back, P:"..Page + 1 .."/"..gPage + 1, 1, y, nil, "white", "blue")
-      regBut("[1]ADD,",1,y,1,"blue")
-      regBut("[2]Delete,",9,y,2,"blue")
-      regBut("[3]Back,",20,y,3,"blue")
+      dark.printL("-", y, nil, co, co)
+      dark.printA("[1]ADD, [2]Delete, [3]Back, P:"..Page + 1 .."/"..gPage + 1 .." Level:"..slevel, 1, y, nil, "white", co)
+      regBut("[1]ADD,",1,y,1,co)
+      regBut("[2]Delete,",9,y,2,co)
+      regBut("[3]Back,",20,y,3,co)
     end,
     options = {"user_general_add","user_general_remove","user_main","user_general_prevPage","user_general_nextPage"}
   },
@@ -472,15 +545,15 @@ Co = {
       Page = 0
       databaseLoad()
       header("Admin Managment","[4]prevPage","[5]nextPage")
-      regBut("[4]prevPage",1,2,4, "blue")
-      regBut("[5]nextPage",x - 7,2,5, "blue")
-      dark.printL("-", y-1, nil, "blue", "blue")
+      regBut("[4]prevPage",1,2,4, co)
+      regBut("[5]nextPage",x - 7,2,5, co)
+      dark.printL("-", y-1, nil, co, co)
       displayTNameColumn(masterdb.user, Page, true, true)
-      dark.printL("-", y, nil, "blue", "blue")
-      dark.printA("[1]Promote, [2]Demote, [3]Back, P:"..Page + 1 .."/"..gPage + 1, 1, y, nil, "white", "blue")
-      regBut("[1]Promote,",1,y,1,"blue")
-      regBut("[2]Demote,",13,y,2,"blue")
-      regBut("[3]Back,",24,y,3,"blue")
+      dark.printL("-", y, nil, co, co)
+      dark.printA("[1]Promote, [2]Demote, [3]Back, P:"..Page + 1 .."/"..gPage + 1, 1, y, nil, "white", co)
+      regBut("[1]Promote,",1,y,1,co)
+      regBut("[2]Demote,",13,y,2,co)
+      regBut("[3]Back,",24,y,3,co)
     end,
     options = {"user_admin_promote","user_admin_demote","user_main","user_admin_prevPage","user_admin_nextPage"}  
   },
@@ -533,9 +606,9 @@ Co = {
       Page = 0
       databaseLoad()
       header("Pc Whitelist","[4]prevPage","[5]nextPage")
-      regBut("[4]prevPage",1,2,4, "blue")
-      regBut("[5]nextPage",x - 7,2,5, "blue")
-      dark.printL("-", y-1, nil, "blue", "blue")
+      regBut("[4]prevPage",1,2,4, co)
+      regBut("[5]nextPage",x - 7,2,5, co)
+      dark.printL("-", y-1, nil, co, co)
       tempList = {}
       for name, data in pairs(masterdb.pc) do
         if data.area == slevel then
@@ -543,11 +616,11 @@ Co = {
         end
       end
       displayTNameColumn(tempList, Page)
-      dark.printL("-", y, nil, "blue", "blue")
-      dark.printA("[1]ADD, [2]Delete, [3]Back, P:"..Page + 1 .."/"..gPage + 1, 1, y, nil, "white", "blue")
-      regBut("[1]ADD,",1,y,1,"blue")
-      regBut("[2]Delete,",9,y,2,"blue")
-      regBut("[3]Back,",20,y,3,"blue")
+      dark.printL("-", y, nil, co, co)
+      dark.printA("[1]ADD, [2]Delete, [3]Back, P:"..Page + 1 .."/"..gPage + 1 .." Level:"..slevel, 1, y, nil, "white", co)
+      regBut("[1]ADD,",1,y,1,co)
+      regBut("[2]Delete,",9,y,2,co)
+      regBut("[3]Back,",20,y,3,co)
     end,
     options = {"pc_general_add","pc_general_remove","main","pc_general_prevPage","pc_general_nextPage"}
   },
@@ -618,7 +691,7 @@ Co = {
       printR("[2] Select Level", 2)
       printR("[3] Modify Level Amount", 3)
       footer()
-      dark.printA("Current Security Level: "..slevel, 1, y, nil, "white", "blue")
+      dark.printA("Current Security Level: "..slevel, 1, y, nil, "white", co)
     end,
     options = {"main","secLev_select","secLev_modify"}
   },
@@ -677,4 +750,4 @@ if fs.exists(".DarkS_conf") == false then
 end
 --Finale Stuff
 databaseLoad()
-parallel.waitForAll(runServerBackend, runServerGui, stealthUpdate)
+parallel.waitForAll(runServerBackend, runServerGui, stealthUpdate, listen)

@@ -3,6 +3,9 @@
 Commands                Data Type       Description
 -----------------------------------------------------------
 >Base Info<
+-ping                   boolean         server will return pong
+
+>Base Info<
 -area                   number          computer's area
 -computerid             number          computer's id
 
