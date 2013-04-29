@@ -25,7 +25,7 @@ else
 end
 --Some Vars
 x, y = term.getSize()
-AutoUpdate = false
+AutoUpdate = true
 globalWait = 1
 slevel = 1
 cliVent = {}
