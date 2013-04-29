@@ -2,7 +2,7 @@
 Version = 4.0
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
-AutoUpdate = false
+AutoUpdate = true
 x,y = term.getSize()
 if fs.exists("dark") == false then -- load darkAPI
   print("Missing DarkAPI")
