@@ -1,5 +1,5 @@
 --Title: Dark Client
-Version = 4.0
+Version = 4.1
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 AutoUpdate = true
@@ -188,12 +188,12 @@ if fs.exists(".DarkC_conf") == false then
     com.userQuery = read()
     write("Password: ")
     com.passQuery = read("*")    
-    com.area = config.securityLevel
+    com.area = tonumber(config.securityLevel)
     com.computerid = os.getComputerID()
     com.super = true
     com.addMe = true
     message = textutils.serialize(com)
-    rednetSendE(3, message)
+    rednetSendE(config.serverID, message)
     s,m,d = rednetReceiveE(2)
     if s then
       print("Success!")
