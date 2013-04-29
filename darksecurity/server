@@ -1,5 +1,5 @@
 --Title: Dark Server
-Version = 6.1
+Version = 6.11
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 if fs.exists("dark") == false then
@@ -25,7 +25,7 @@ else
 end
 --Some Vars
 x, y = term.getSize()
-AutoUpdate = true
+AutoUpdate = false
 globalWait = 1
 slevel = 1
 cliVent = {}
@@ -247,7 +247,6 @@ function runServerBackend()
               masterdb.pc[tostring(com.computerid)] = {}
               masterdb.pc[tostring(com.computerid)].enCode = genCode
               masterdb.pc[tostring(com.computerid)].area = tonumber(com.area)
-              masterdb.pc[tostring(com.computerid)].super = false
               databaseSave()
             end
           end
@@ -280,7 +279,7 @@ Co = {
   ["main"] = {
     draw = function()
       Page = 0
-      header("Welcome to the Server Control Panel", "V"..Version)
+      header("Welcome to the Server Control Panel", "V"..Version, "ID:".. os.getComputerID())
       printR("[1] Disk ID managment", 1)
       printR("[2] User managment", 2)
       printR("[3] Pc managment", 3)
@@ -408,7 +407,13 @@ Co = {
       regBut("[4]prevPage",1,2,4, "blue")
       regBut("[5]nextPage",x - 7,2,5, "blue")
       dark.printL("-", y-1, nil, "blue", "blue")
-      displayTNameColumn(masterdb.user, Page, true)
+      tempList = {}
+      for name, data in pairs(masterdb.user) do
+        if (data.area == slevel) and (data.admin == false) then
+          table.insert(tempList, name)
+        end
+      end
+      displayTNameColumn(tempList, Page)
       dark.printL("-", y, nil, "blue", "blue")
       dark.printA("[1]ADD, [2]Delete, [3]Back, P:"..Page + 1 .."/"..gPage + 1, 1, y, nil, "white", "blue")
       regBut("[1]ADD,",1,y,1,"blue")
@@ -431,7 +436,7 @@ Co = {
       until pass1 == pass2
       pass1 = tostring(pass1)
       username = string.lower(username)
-      newUser(slevel, username, pass1, false)
+      newUser(tonumber(slevel), username, pass1, false)
       print("\nUser Added!")
       sleep(globalWait)
     end,
@@ -531,7 +536,13 @@ Co = {
       regBut("[4]prevPage",1,2,4, "blue")
       regBut("[5]nextPage",x - 7,2,5, "blue")
       dark.printL("-", y-1, nil, "blue", "blue")
-      displayTNameColumn(masterdb.pc, Page, true)
+      tempList = {}
+      for name, data in pairs(masterdb.pc) do
+        if data.area == slevel then
+          table.insert(tempList, name)
+        end
+      end
+      displayTNameColumn(tempList, Page)
       dark.printL("-", y, nil, "blue", "blue")
       dark.printA("[1]ADD, [2]Delete, [3]Back, P:"..Page + 1 .."/"..gPage + 1, 1, y, nil, "white", "blue")
       regBut("[1]ADD,",1,y,1,"blue")
@@ -552,7 +563,6 @@ Co = {
         masterdb.pc[answer] = {}
         masterdb.pc[answer].enCode = dark.serialGen(5)
         masterdb.pc[answer].area = slevel
-        masterdb.pc[answer].super = false
         databaseSave()
         print("\nAdded!")
         dark.setCol("yellow", "black")
