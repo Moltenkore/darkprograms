@@ -1,5 +1,5 @@
 --Written by darkrising
-DARKversion = 3.23
+DARKversion = 3.24
 
 db = {}
 db.__index = db
@@ -318,4 +318,39 @@ function serialGen(digits)
     end
   end
   return serial
+end
+function repCrypt(Input, numHash)
+  local keystore = {}
+  local i = 1
+  local dec = ""
+  local keyLength = #tostring(numHash)
+  numHash = tonumber(numHash)
+  local posCou = 1
+  repeat
+    if posCou > keyLength then posCou = 1 end
+    key = tonumber(string.sub(numHash, posCou, posCou))
+    posCou = posCou + 1
+    table.insert(keystore, key)
+    local tstr = string.char(Input:byte(i) - key)
+    dec = dec .. tstr
+    i = i + 1    
+  until Input:byte(i) == nil
+  return dec
+end
+function repdeCrypt(Input, numHash)
+  local i = 1
+  local dec = ""
+  local keyLength = #tostring(numHash)
+  numHash = tonumber(numHash)
+  local posCou = 1
+  repeat
+    if posCou > keyLength then posCou = 1 end
+    key = tonumber(string.sub(numHash, posCou, posCou))
+    posCou = posCou + 1
+    tstr = string.sub(Input, i, i)
+    tstr = string.char(Input:byte(i) + key)
+    dec = dec .. tstr
+    i = i + 1
+  until Input:byte(i) == nil
+  return dec
 end
