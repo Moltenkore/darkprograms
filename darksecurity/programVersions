@@ -1,4 +1,4 @@
-{["server"]={["GitURL"]="https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/server",["Version"]=6.20,},
+{["server"]={["GitURL"]="https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/server",["Version"]=6.21,},
 ["client"]={["GitURL"]="https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/client",["Version"]=4.11,},
 ["dark"]={["GitURL"]="https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/dark",["Version"]=3.24,},
 ["screen"]={["GitURL"]="https://github.com/darkrising/darkprograms/raw/darkprograms/screen",["Version"]=3.36,},

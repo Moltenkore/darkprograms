@@ -1,5 +1,5 @@
 --Title: Dark Server
-Version = 6.20
+Version = 6.21
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 if fs.exists("dark") == false then
@@ -322,7 +322,7 @@ Co = {
       Page = 0
       if debugMode and debugMode == true then
         header("Debug mode enabled!", "V"..Version, "ID:".. os.getComputerID())
-        Co.main.options = {"ids", "user_main", "pc_general", "secLev", "help", "log"}
+        Co.main.options = {"ids", "user_main", "pc_general", "secLev", "help", "log", "lua", "shell"}
       else
         header("Welcome to the Server Control Panel", "V"..Version, "ID:".. os.getComputerID())
         Co.main.options = {"ids", "user_main", "pc_general", "secLev", "help"}
@@ -333,7 +333,11 @@ Co = {
       printR("[4] Security Level Manager", 4)
 	    printR("[5] Help", 5)
       print("")
-      if debugMode and debugMode == true then printR("[6] Log", 6) end
+      if debugMode and debugMode == true then 
+        printR("[6] Log", 6) 
+        printR("[7] Lua Command Prompt", 7) 
+        printR("[8] Shell", 8) 
+      end
       dark.printL("-", y, nil, co, co)
       dark.printA("by darkrising", x-13, y, nil, "yellow", co)
 	    dark.printA("                 ", 1, y, nil, co, co)
@@ -364,6 +368,22 @@ Co = {
       sleep(2)
     end,
     parent = "log"
+  },
+  ["lua"] = {
+    run = function()
+      print("Opened direct Lua input, the program is still running.")
+      print("")
+      shell.run("lua")
+    end,
+    parent = "main"
+  },
+  ["shell"] = {
+    run = function()
+      print("Dropped to shell, type 'exit' to exit.")
+      print("")
+      shell.run("shell")
+    end,
+    parent = "main"
   },
   
   -- disk ids menu
