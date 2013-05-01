@@ -1,5 +1,5 @@
 --Title: Dark buttons
-Version = 1.22
+Version = 1.23
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 if not term.isColour() then
@@ -16,11 +16,9 @@ if fs.exists("dark") == false then -- load darkAPI
   getGit = getGit.readAll()
   file = fs.open("dark", "w")
   file.write(getGit)
-  file.close()
-  os.reboot()
-else
-  os.loadAPI("dark")
+  file.close()  
 end
+os.loadAPI("dark")
 
 monSids = {} -- stores monitor sides
 buttons = {} -- stores buttons data
@@ -115,12 +113,14 @@ function draw()
     mon.clear()
   end
   for name, data in pairs(buttons) do
-    mon = peripheral.wrap(data.side)
-    x,y = mon.getSize()
-    if data.active == true then
-      textBox(name,data.xmin,data.xmax,data.ymin,data.ymax,data.tCol,data.actCol)
-    else
-      textBox(name,data.xmin,data.xmax,data.ymin,data.ymax,data.tCol,data.bgCol)
+    if peripheral.wrap(data.side) then
+      mon = peripheral.wrap(data.side)
+      x,y = mon.getSize()
+      if data.active == true then
+        textBox(name,data.xmin,data.xmax,data.ymin,data.ymax,data.tCol,data.actCol)
+      else
+        textBox(name,data.xmin,data.xmax,data.ymin,data.ymax,data.tCol,data.bgCol)
+      end
     end
   end
 end
@@ -194,12 +194,18 @@ function stealthUpdate()
   end
   return
 end
---Event driven looping functions
+function breakListen()
+  while true do
+    os.pullEvent("monitor_resize")
+    draw()
+  end
+end
 function hitListen()
   while true do
     draw()
     Event,Side,hx,hy = os.pullEvent()
     if Event == "monitor_touch" then
+      getMonitors()
       check(hx,hy,Side)
       draw()
       saveState()
@@ -458,4 +464,4 @@ options = {}
 options.wireSide = "bottom"
 LoadState()
 getMonitors()
-parallel.waitForAll(hitListen, terminalMenu, stealthUpdate)
+parallel.waitForAll(hitListen, breakListen, terminalMenu, stealthUpdate)
