@@ -1,5 +1,5 @@
 --Title: Dark Server
-Version = 6.21
+Version = 6.22
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 if fs.exists("dark") == false then
@@ -755,6 +755,7 @@ Co = {
 }
 --Config file
 if fs.exists(".DarkS_conf") == false then 
+  dark.cs()
   config = {}
   masterdb = databaseNew()
   header("Dark Server Setup")
