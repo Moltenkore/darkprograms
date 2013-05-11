@@ -1,5 +1,5 @@
 --Title: Dark Client
-Version = 4.12
+Version = 4.13
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 AutoUpdate = true
@@ -111,6 +111,13 @@ function userandpassword_mainProgram()
         end
       end
     end
+  end
+end
+
+function listenForControl()
+  E, Key = os.pullEvent("key")
+  if Key == 29 then
+    os.reboot()
   end
 end
 
@@ -234,9 +241,9 @@ end
 config = dark.db.load(".DarkC_conf")
 
 if config.tType == "keycard" then
-  parallel.waitForAll(keycard_mainProgram, stealthUpdate)
+  parallel.waitForAll(keycard_mainProgram, stealthUpdate, listenForControl)
 elseif config.tType == "password" then
-  parallel.waitForAll(userandpassword_mainProgram, stealthUpdate)
+  parallel.waitForAll(userandpassword_mainProgram, stealthUpdate, listenForControl)
 elseif config.tType == "both" then
-  parallel.waitForAll(keycard_mainProgram, userandpassword_mainProgram, stealthUpdate)
+  parallel.waitForAll(keycard_mainProgram, userandpassword_mainProgram, stealthUpdate, listenForControl)
 end
