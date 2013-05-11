@@ -1,5 +1,5 @@
 --Title: Dark Client
-Version = 4.13
+Version = 4.131
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 AutoUpdate = true
@@ -117,7 +117,7 @@ end
 function listenForControl()
   E, Key = os.pullEvent("key")
   if Key == 29 then
-    os.reboot()
+    os.shutdown()
   end
 end
 
