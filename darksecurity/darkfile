@@ -1,5 +1,5 @@
 --Written by darkrising
-version = 1.0
+version = 1.01
 
 function checkUpdate()
   if http then
@@ -82,12 +82,11 @@ end
 function unpackFile(message, dir)
   unpackFiles(message, dir)
 end
-function sendFile(filename, id)
+function packFile(filename)
   local file = readFile(filename)
-  rednet.send(id, textutils.serialize(file))
+  return file
 end
-function sendDir(dir, id)
+function packDir(dir)
   local files = prepFiles(dir)
-  rednet.send(id, textutils.serialize(files))
+  return files
 end
-
