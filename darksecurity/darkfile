@@ -1,5 +1,5 @@
 --Written by darkrising
-version = 1.01
+version = 1.1
 
 function checkUpdate()
   if http then
@@ -28,7 +28,7 @@ local function readFile(filename)
         table.insert(contents, line)
       else
         file.close()
-        contents.filename = filename
+        contents.filename = fs.getName(filename)
         return contents
       end
     end
@@ -43,7 +43,7 @@ local function prepFiles(dir)
     contents.bunch = true
     for _,name in pairs(files) do
       if fs.isDir(name) == false then
-        contents[name] = readFile(name)
+        contents[name] = readFile(dir..name)
       end
     end
     return contents
@@ -53,7 +53,6 @@ local function prepFiles(dir)
 end
 
 function unpackFiles(m, dir)
-  m = textutils.unserialize(m)
   if (fs.exists(dir) == false) and (fs.isDir(dir) == false) then
     error("Passed dir is not a dir or doesn't exist")
   end
@@ -87,6 +86,6 @@ function packFile(filename)
   return file
 end
 function packDir(dir)
-  local files = prepFiles(dir)
-  return files
+  local filer = prepFiles(dir)
+  return filer
 end
