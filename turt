@@ -1,10 +1,6 @@
 arg = {...}
-Version = 1.0
+Version = 1
 AutoUpdate = true
-if #arg == 0 then
-  print("Usage: <filename>")
-  return exit
-end
 local function gitUpdate(ProgramName, Filename, ProgramVersion)
   if http then
     local getGit = http.get("https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/programVersions")
@@ -162,9 +158,15 @@ local function inTur(cString)
     cou = cou + 1
   until cou == #ex
 end
-print("Checking for updates...")
-if stealthUpdate() == false then
-  print("Program up-to-date.")
+if http then
+  print("Checking for updates...")
+  if stealthUpdate() == false then
+    print("Program up-to-date.")
+  end
+end
+if #arg == 0 then
+  print("Usage: <filename>")
+  return exit
 end
 file = fs.open(arg[1], "r")
 wFile = file.readAll()
