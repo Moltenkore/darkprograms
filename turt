@@ -1,4 +1,5 @@
 arg = {...}
+Version = 1.0
 AutoUpdate = true
 if #arg == 0 then
   print("Usage: <filename>")
