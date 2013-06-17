@@ -1,6 +1,12 @@
 arg = {...}
-Version = 1.1
+Version = 1.11
 AutoUpdate = true
+if #arg == 0 then
+  print("Usage:") 
+  print("turt <filename>")
+  print("turt update")
+  return exit
+end
 local function gitUpdate(ProgramName, Filename, ProgramVersion)
   if http then
     local getGit = http.get("https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/programVersions")
@@ -64,6 +70,14 @@ regComs = {
   PF = turtle.place,
   PU = turtle.placeUp,
   PD = turtle.placeDown,
+  
+  SF = turtle.suck,
+  SU = turtle.suckUp,
+  SD = turtle.suckDown,
+  
+  FF = turtle.drop,
+  FU = turtle.dropUp,
+  FD = turtle.dropDown,
 } 
 speComs = {
   SL = {
@@ -158,18 +172,15 @@ local function inTur(cString)
     cou = cou + 1
   until cou == #ex
 end
-if http then
+if arg[1] == "update" then
   print("Checking for updates...")
   if stealthUpdate() == true then
     print("Program updated.")
     return exit
   elseif stealthUpdate() == false then
     print("Program up-to-date.")
+    return exit
   end
-end
-if #arg == 0 then
-  print("Usage: <filename>")
-  return exit
 end
 file = fs.open(arg[1], "r")
 wFile = file.readAll()
