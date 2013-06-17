@@ -6,5 +6,5 @@
 ["screen"]={["GitURL"]="https://github.com/darkrising/darkprograms/raw/darkprograms/screen",["Version"]=3.36,},
 ["chat"]={["GitURL"]="https://github.com/darkrising/darkprograms/raw/darkprograms/chat",["Version"]=1.42,},
 ["darkbuttons"]={["GitURL"]="https://github.com/darkrising/darkprograms/raw/darkprograms/darkbuttons",["Version"]=1.23,},
-["turt"]={["GitURL"]="https://github.com/darkrising/darkprograms/raw/darkprograms/turt",["Version"]=1.11,},
+["turt"]={["GitURL"]="https://github.com/darkrising/darkprograms/raw/darkprograms/turt",["Version"]=1.12,},
 }

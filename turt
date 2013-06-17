@@ -1,5 +1,5 @@
 arg = {...}
-Version = 1.11
+Version = 1.12
 AutoUpdate = true
 if #arg == 0 then
   print("Usage:") 
@@ -170,7 +170,7 @@ local function inTur(cString)
       end
     end
     cou = cou + 1
-  until cou == #ex
+  until cou >= #ex
 end
 if arg[1] == "update" then
   print("Checking for updates...")
