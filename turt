@@ -1,5 +1,5 @@
 arg = {...}
-AutoUpdate == true
+AutoUpdate = true
 if #arg == 0 then
   print("Usage: <filename>")
   return exit
