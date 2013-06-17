@@ -1,5 +1,5 @@
 arg = {...}
-Version = 1
+Version = 1.1
 AutoUpdate = true
 local function gitUpdate(ProgramName, Filename, ProgramVersion)
   if http then
@@ -39,7 +39,7 @@ end
 local function stealthUpdate()
   if AutoUpdate == true then 
     if gitUpdate("turt", shell.getRunningProgram(), Version) == true then
-      os.reboot()
+      return true
     end
   end
   return false
@@ -160,7 +160,10 @@ local function inTur(cString)
 end
 if http then
   print("Checking for updates...")
-  if stealthUpdate() == false then
+  if stealthUpdate() == true then
+    print("Program updated.")
+    return exit
+  elseif stealthUpdate() == false then
     print("Program up-to-date.")
   end
 end
