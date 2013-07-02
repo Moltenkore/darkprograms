@@ -6,7 +6,7 @@ chat = {}
 lineCount = 1
 modifier = 0
 X, Y = term.getSize()
-Version = 1.42
+Version = 1.43
 BottomText = "Message: "
 KeyCount = 0
 user = ""
@@ -357,6 +357,21 @@ comD = {
     run = helpGen,
     help = ""
   },
+  ["nick"] = {
+    run = function(Nickname)
+      rSend("is now known as "..Nickname[2], true)
+      user = Nickname[2]
+      if config.private == true then
+        config.user = Nickname[2]
+        local F = fs.open(".darkChatConf", "w")
+        local configString = textutils.serialize(config)
+        F.write(configString)
+        F.close()
+      end
+      draw()
+    end,
+    help = "<nickname>"
+  },
 }
 --[[
 28: enter
@@ -371,7 +386,7 @@ if fs.exists(".darkChatConf") == true then
 else
   config = {}
   repeat
-    print("Do you want DarkChat private mode?")
+    print("Do you want your username to be stored? (Private Mode)")
     write("y / n : ")
     Qprivate = read()
   until Qprivate == "y" or Qprivate == "n"
