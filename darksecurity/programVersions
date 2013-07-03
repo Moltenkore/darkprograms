@@ -3,14 +3,14 @@
     ["GitURL"]="https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/server",
     ["Version"]=6.22,
     ["Type"]="program",
-    ["Name"]="Dark Server",
+    ["Name"]="Dark Programs Server",
     ["Description"]="Dark Programs Base Security Server",
   },
   ["client"]={
     ["GitURL"]="https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/client",
     ["Version"]=4.131,
     ["Type"]="program",
-    ["Name"]="Dark Client",
+    ["Name"]="Dark Programs Client",
     ["Description"]="Dark Programs Base Security Client",
   },  
   ["dark"]={
@@ -24,7 +24,7 @@
     ["GitURL"]="https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/darkfile",
     ["Version"]=1.1,
     ["Type"]="api",
-    ["Name"]="Dark File",
+    ["Name"]="Dark File API",
     ["Description"]="File API used for compression and other things",
   },
   ["screen"]={
