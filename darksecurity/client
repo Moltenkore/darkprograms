@@ -1,9 +1,10 @@
 --Title: Dark Client
-Version = 4.131
+Version = 4.133
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 AutoUpdate = true
 x,y = term.getSize()
+os.pullEvent = os.pullEventRaw
 if fs.exists("dark") == false then -- load darkAPI
   print("Missing DarkAPI")
   sleep(2)
@@ -12,8 +13,7 @@ if fs.exists("dark") == false then -- load darkAPI
   getGit = getGit.readAll()
   file = fs.open("dark", "w")
   file.write(getGit)
-  file.close()
-  os.reboot()  
+  file.close() 
 end
 os.loadAPI("dark")
 function rednetSendE(ID, Message)
@@ -51,7 +51,7 @@ function footer()
 end
 function keycard_mainProgram()
   while true do
-    event, eventinfo, extrainfo = os.pullEvent("disk")
+    event, eventinfo, extrainfo = os.pullEventRaw("disk")
     com2 = {}
     com2.computerid = os.getComputerID()
     com2.area = tonumber(config.securityLevel)
@@ -115,9 +115,11 @@ function userandpassword_mainProgram()
 end
 
 function listenForControl()
-  E, Key = os.pullEvent("key")
-  if Key == 29 then
-    os.shutdown()
+  while true do
+    E, Key = os.pullEvent("key")
+    if Key == 29 then
+      os.shutdown()
+    end
   end
 end
 
@@ -245,5 +247,5 @@ if config.tType == "keycard" then
 elseif config.tType == "password" then
   parallel.waitForAll(userandpassword_mainProgram, stealthUpdate, listenForControl)
 elseif config.tType == "both" then
-  parallel.waitForAll(keycard_mainProgram, userandpassword_mainProgram, stealthUpdate, listenForControl)
+  parallel.waitForAll(userandpassword_mainProgram, keycard_mainProgram, stealthUpdate, listenForControl)
 end
