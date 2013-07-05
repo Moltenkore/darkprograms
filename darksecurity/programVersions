@@ -8,7 +8,7 @@
   },
   ["client"]={
     ["GitURL"]="https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/client",
-    ["Version"]=4.131,
+    ["Version"]=4.132,
     ["Type"]="program",
     ["Name"]="Dark Programs Client",
     ["Description"]="Dark Programs Base Security Client",
