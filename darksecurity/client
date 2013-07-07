@@ -1,9 +1,10 @@
 --Title: Dark Client
-Version = 4.132
+Version = 4.143
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 AutoUpdate = true
 x,y = term.getSize()
+oldEvent = os.pullEvent
 os.pullEvent = os.pullEventRaw
 if fs.exists("dark") == false then -- load darkAPI
   print("Missing DarkAPI")
@@ -52,26 +53,28 @@ end
 function keycard_mainProgram()
   while true do
     event, eventinfo, extrainfo = os.pullEventRaw("disk")
-    com2 = {}
-    com2.computerid = os.getComputerID()
-    com2.area = tonumber(config.securityLevel)
+    if event == "disk" then
+      com2 = {}
+      com2.computerid = os.getComputerID()
+      com2.area = tonumber(config.securityLevel)
     
-    if disk.hasData(eventinfo) == true then
-      com2.diskQuery = disk.getID(eventinfo) 
-      SendString = textutils.serialize(com2)
-      rednetSendE(config.serverID, SendString)
+      if disk.hasData(eventinfo) == true then
+        com2.diskQuery = disk.getID(eventinfo) 
+        SendString = textutils.serialize(com2)
+        rednetSendE(config.serverID, SendString)
       
-      S, M = rednetReceiveE(2)
-      
-      if M == "#granted" then
+        S, M = rednetReceiveE(2)
+        
+        if M == "#granted" then
+          disk.eject(eventinfo)
+          rs.setOutput(config.doorside, true)
+          sleep(config.pulseTime)
+          rs.setOutput(config.doorside, false)
+        end
         disk.eject(eventinfo)
-        rs.setOutput(config.doorside, true)
-        sleep(config.pulseTime)
-        rs.setOutput(config.doorside, false)
+      else
+        disk.eject(eventinfo)
       end
-      disk.eject(eventinfo)
-    else
-      disk.eject(eventinfo)
     end
   end
 end
@@ -110,15 +113,6 @@ function userandpassword_mainProgram()
           rs.setOutput(config.doorside, false)
         end
       end
-    end
-  end
-end
-
-function listenForControl()
-  while true do
-    E, Key = os.pullEvent("key")
-    if Key == 29 then
-      os.shutdown()
     end
   end
 end
@@ -243,9 +237,10 @@ end
 config = dark.db.load(".DarkC_conf")
 
 if config.tType == "keycard" then
-  parallel.waitForAll(keycard_mainProgram, stealthUpdate, listenForControl)
+  parallel.waitForAll(keycard_mainProgram, stealthUpdate)
 elseif config.tType == "password" then
-  parallel.waitForAll(userandpassword_mainProgram, stealthUpdate, listenForControl)
+  parallel.waitForAll(userandpassword_mainProgram, stealthUpdate)
 elseif config.tType == "both" then
-  parallel.waitForAll(userandpassword_mainProgram, keycard_mainProgram, stealthUpdate, listenForControl)
+  parallel.waitForAll(userandpassword_mainProgram, keycard_mainProgram, stealthUpdate)
 end
+os.pullEvent = oldEvent
