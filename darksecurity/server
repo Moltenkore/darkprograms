@@ -1,5 +1,5 @@
 --Title: Dark Server
-Version = 6.222
+Version = 6.3
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 if fs.exists("dark") == false then
@@ -249,6 +249,9 @@ function runServerGui()
         if key == "d" then 
           os.queueEvent("D")
         end
+        if key == "l" then
+          Co["secLev_select"].run()
+        end
       elseif Event == "mouse_click" then
         checkArea(mx,my)
       end
@@ -267,11 +270,11 @@ function runServerBackend()
       com = textutils.unserialize(M)
       if (type(com) == "table") and com.area and com.computerid and tonumber(com.area) and tonumber(com.computerid) then
         if (not com.super) and masterdb.pc[tostring(com.computerid)] and (masterdb.pc[tostring(com.computerid)].area == com.area) then
-          if com.diskQuery and tonumber(com.diskQuery) and masterdb.ids[tostring(com.diskQuery)] and (masterdb.ids[tostring(com.diskQuery)].area == tonumber(com.area)) then
+          if com.diskQuery and tonumber(com.diskQuery) and masterdb.ids[tostring(com.diskQuery)] and (masterdb.ids[tostring(com.diskQuery)].area <= tonumber(com.area)) then
             sendE(S, "#granted")
           end
           if com.userQuery and com.passQuery and masterdb.user[com.userQuery] and (decUser(com.userQuery) == com.passQuery) then
-            if masterdb.user[com.userQuery].area == tonumber(com.area) then
+            if masterdb.user[com.userQuery].area <= tonumber(com.area) then
               sendE(S, "#granted")
             elseif (masterdb.user[com.userQuery].admin == true) then
               sendE(S, "#granted")
@@ -394,12 +397,14 @@ Co = {
       regBut("[5]nextPage",x - 7,2,5, co)
       dark.printL("-", y-1, nil, co, co)
       local tempList = {}
-      for name in pairs(masterdb.ids) do
-        table.insert(tempList, name)
+      for name, data in pairs(masterdb.ids) do
+        if data.area == slevel then
+          table.insert(tempList, name)
+        end
       end
       displayTNameColumn(tempList, Page)
       dark.printL("-", y, nil, co, co)
-      dark.printA("[1]ADD, [2]Delete, [3]Back, P:"..Page + 1 .."/"..gPage + 1, 1, y, nil, "white", co)
+      dark.printA("[1]ADD, [2]Delete, [3]Back, P:"..Page + 1 .."/"..gPage + 1 .." Level:"..slevel, 1, y, nil, "white", co)
       regBut("[1]ADD,",1,y,1,co)
       regBut("[2]Delete,",9,y,2,co)
       regBut("[3]Back,",20,y,3,co)

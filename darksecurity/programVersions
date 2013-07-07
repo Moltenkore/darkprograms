@@ -1,14 +1,14 @@
 {
   ["server"]={
     ["GitURL"]="https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/server",
-    ["Version"]=6.222,
+    ["Version"]=6.3,
     ["Type"]="program",
     ["Name"]="Dark Programs Server",
     ["Description"]="Dark Programs Base Security Server",
   },
   ["client"]={
     ["GitURL"]="https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/client",
-    ["Version"]=4.144,
+    ["Version"]=4.2,
     ["Type"]="program",
     ["Name"]="Dark Programs Client",
     ["Description"]="Dark Programs Base Security Client",
