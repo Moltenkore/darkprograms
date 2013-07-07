@@ -1,5 +1,5 @@
 --Title: Dark Client
-Version = 4.143
+Version = 4.144
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 AutoUpdate = true
@@ -19,7 +19,7 @@ end
 os.loadAPI("dark")
 function rednetSendE(ID, Message)
   if not config.enCode then
-    Message = dark.encrypt(Message, 1)
+    Message = dark.repCrypt(Message, 1)
   else
     Message = dark.repCrypt(Message, config.enCode)
   end
@@ -29,7 +29,7 @@ function rednetReceiveE(TimeA)
   local Se,Me,Di = rednet.receive(TimeA)
   if Me then
     if not config.enCode then
-      Me = dark.decrypt(Me, 1, true)
+      Me = dark.repdeCrypt(Me, 1)
     else
       Me = dark.repdeCrypt(Me, config.enCode)
     end
@@ -143,7 +143,7 @@ if fs.exists(".DarkC_conf") == false then
   while true do
     write("\nPlease type the server's computer id: ")
     config.serverID = tonumber(io.read())
-    print("Pinging server...")
+    print("\nPinging server...")
     sleep(1)
     com = {}
     com.ping = true
@@ -155,7 +155,7 @@ if fs.exists(".DarkC_conf") == false then
     else
       print("\nNo response, this could be down to a number of things...")
       print("\nTry again?")
-      write("y/n :")
+      write("y / n: ")
       ans = read()
     end
     if ans == "n" then
@@ -190,13 +190,13 @@ if fs.exists(".DarkC_conf") == false then
   until ((tType == "keycard") or (tType == "password") or (tType == "both"))
   config.tType = tType
     
-  print("\nDid you add this client computer's id manually to the server?")
+  print("\nShall I try and add myself automatically to the server?")
   print("options: y / n")
   repeat
     write(": ")
     encKey = read()
   until (encKey == "y") or (encKey == "n")
-  if encKey == "y" then
+  if encKey == "n" then
     repeat
       write("Encryption key: ")
       encKey = read()

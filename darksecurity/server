@@ -1,5 +1,5 @@
 --Title: Dark Server
-Version = 6.22
+Version = 6.222
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 if fs.exists("dark") == false then
@@ -11,8 +11,7 @@ if fs.exists("dark") == false then
   file.write(getGit)
   file.close()
   print("Done!")
-  sleep(1)
-  os.loadAPI("dark")
+  sleep(0.5)
 end
 os.loadAPI("dark")
 --Search for a modem
@@ -44,7 +43,7 @@ function sendE(ID, Message)
   if masterdb.pc[tostring(S)] and masterdb.pc[tostring(S)].enCode then
     Message = dark.repCrypt(Message, masterdb.pc[tostring(ID)].enCode)
   else
-    Message = dark.encrypt(Message, 1)
+    Message = dark.repCrypt(Message, 1)
   end
   rednet.send(ID, Message)
 end
@@ -52,7 +51,7 @@ function recDec(S,M,D)
   if masterdb.pc[tostring(S)] and masterdb.pc[tostring(S)].enCode then
     M = dark.repdeCrypt(M, masterdb.pc[tostring(S)].enCode)
   else
-    M = dark.decrypt(M, 1, true)
+    M = dark.repdeCrypt(M, 1, true)
   end
   if debugMode and (debugMode == true) then
     logDat("Sender: "..S)
@@ -281,8 +280,8 @@ function runServerBackend()
         else
           if com.super and com.userQuery and com.passQuery and masterdb.user[com.userQuery] and (decUser(com.userQuery) == com.passQuery) and (masterdb.user[com.userQuery].admin == true) then
             if com.addMe then
-              local genCode = dark.serialGen(5)
-              sendE(S, genCode)
+              local genCode = dark.serialGen(18)
+              sendE(S, tostring(genCode))
               masterdb.pc[tostring(com.computerid)] = {}
               masterdb.pc[tostring(com.computerid)].enCode = genCode
               masterdb.pc[tostring(com.computerid)].area = tonumber(com.area)

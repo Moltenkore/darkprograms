@@ -1,21 +1,21 @@
 {
   ["server"]={
     ["GitURL"]="https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/server",
-    ["Version"]=6.22,
+    ["Version"]=6.222,
     ["Type"]="program",
     ["Name"]="Dark Programs Server",
     ["Description"]="Dark Programs Base Security Server",
   },
   ["client"]={
     ["GitURL"]="https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/client",
-    ["Version"]=4.143,
+    ["Version"]=4.144,
     ["Type"]="program",
     ["Name"]="Dark Programs Client",
     ["Description"]="Dark Programs Base Security Client",
   },  
   ["dark"]={
     ["GitURL"]="https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/dark",
-    ["Version"]=3.24,
+    ["Version"]=3.242,
     ["Type"]="api",
     ["Name"]="Dark API",
     ["Description"]="API that is used in most Dark Programs",

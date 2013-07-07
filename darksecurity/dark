@@ -1,5 +1,5 @@
 --Written by darkrising
-DARKversion = 3.24
+DARKversion = 3.242
 
 db = {}
 db.__index = db
@@ -263,10 +263,14 @@ function hashSplit(Hash) -- transfers a long hash number into a table
   return HashTable
 end
 function encrypt(Input, keyN) -- takes a string and returns an encrypted version, if keyN 1 - 9 returns encrypted string with solid number hash
+  local inType = type(Input)
   local keystore = {}
   local i = 1
   local dec = ""
   local key
+  if inType == "number" then
+    Input = tostring(Input)
+  end
   repeat
     if keyN then 
       key = keyN
@@ -308,7 +312,7 @@ function decrypt(Input, Hash, keyY) -- takes encrypted string with either hash (
   until Input:byte(i) == nil
   return dec
 end
-function serialGen(digits)
+function serialGen(digits) -- seems to become unstable above 18 digits long
   local serial
   for i = 1, digits do
     if i == 1 then
@@ -317,6 +321,7 @@ function serialGen(digits)
       serial = serial.. math.random(9)
     end
   end
+  serial = tonumber(serial)
   return serial
 end
 function repCrypt(Input, numHash)
