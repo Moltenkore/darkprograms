@@ -1,0 +1,37 @@
+--Title: Dark Server
+Version = 1.0
+--Author: Darkrising (minecraft name djhannz)
+--Platform: ComputerCraft Lua Virtual Machine
+
+url = "http://localhost/flare/"
+sendUrl = url .. "send.php"
+receiveUrl = url .. "receive.php"
+
+rdb = {}
+rdb.__index = rdb
+
+function rdb.send(id, tab, serialize)
+  if serialize then
+    tab = textutils.urlEncode(textutils.serialize(tab))
+  else
+    tab = textutils.urlEncode(tab)
+  end
+  local data = http.post(sendUrl, "id=" .. id .. "&" .. "data=" .. tab)
+  if data then
+    return data.readAll()
+  else
+    return false
+  end
+end
+function rdb.receive(id, serialize)
+  local data = http.post(receiveUrl, "id=" .. id)
+  if data then
+    if serialize then
+      return textutils.unserialize(data.readAll())
+    else
+      return data.readAll()
+    end
+  else
+    return false
+  end
+end
