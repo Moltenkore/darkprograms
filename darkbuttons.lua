@@ -1,5 +1,5 @@
 --Title: Dark buttons
-Version = 1.23
+Version = 1.231
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 if not term.isColour() then
@@ -12,7 +12,7 @@ if fs.exists("dark") == false then -- load darkAPI
   if not http then
     error("Enable the HTTP API to download DarkAPI")
   end
-  getGit = http.get("https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/dark.lua")
+  getGit = http.get("https://raw.github.com/darkrising/darkprograms/darkprograms/api/dark.lua")
   getGit = getGit.readAll()
   file = fs.open("dark", "w")
   file.write(getGit)

@@ -1,5 +1,5 @@
 --Written by darkrising
-DARKversion = 3.245
+DARKversion = 3.246
 
 db = {}
 db.__index = db

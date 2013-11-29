@@ -1,5 +1,5 @@
 --Written by darkrising
-version = 1.1
+version = 1.101
 
 function checkUpdate()
   if http then

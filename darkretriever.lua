@@ -36,7 +36,7 @@ printLine("-", 1)
 printC(" Dark Retriever "..tostring(Version).." ", 1, 3)
 
 write("-> Grabbing file...")
-cat = getUrlFile("https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/programVersions")
+cat = getUrlFile("https://raw.github.com/darkrising/darkprograms/darkprograms/programVersions")
 cat = textutils.unserialize(cat)
 write(" Done.")
 

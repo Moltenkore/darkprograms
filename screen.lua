@@ -1,6 +1,6 @@
 arg = { ... }
 --Title: Dark Screen
-Version = 3.36
+Version = 3.361
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 AutoUpdate = true
@@ -11,7 +11,7 @@ if not fs.exists("dark") then -- load darkAPI
   end
   sleep(2)
   print("Attempting to download...")
-  getGit = http.get("https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/dark.lua")
+  getGit = http.get("https://raw.github.com/darkrising/darkprograms/darkprograms/api/dark.lua")
   getGit = getGit.readAll()
   file = fs.open("dark", "w")
   file.write(getGit)
