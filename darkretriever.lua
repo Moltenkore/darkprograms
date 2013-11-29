@@ -1,4 +1,4 @@
-Version = 1.1
+Version = 1.11
 x,y = term.getSize()
 if not http then
   print("Herp derp, forget to enable http?")
@@ -15,15 +15,30 @@ function writeFile(filename, data)
   file.close()
 end
 function printC(text, line, nextline)
+  if term.isColor() then
+    term.setBackgroundColor(colors.blue)
+    term.setTextColor(colors.yellow)
+  end  
   term.setCursorPos((x/2) - (#text/2), line)
   term.write(text)
+  if term.isColor() then
+    term.setBackgroundColor(colors.black)
+    term.setTextColor(colors.white)
+  end
   if nextline then
     term.setCursorPos(1, nextline)
   end
 end
 function printLine(text, line, nextline)
+  if term.isColor() then
+    term.setBackgroundColor(colors.blue)
+    text = " "
+  end  
   term.setCursorPos(1, line)
   term.write(string.rep(text, x))
+  if term.isColor() then
+    term.setBackgroundColor(colors.black)
+  end
   if nextline then
     term.setCursorPos(1, nextline)
   end
@@ -43,15 +58,16 @@ write(" Done.")
 term.setCursorPos(1,5)
 
 programs = {}
+pname = {}
 for name,data in pairs(cat) do
+  table.insert(pname, data.Name .." ".. data.Version)
   table.insert(programs, name)
 end
-
-for number,name in pairs(programs) do
+for number,name in pairs(pname) do
   print("["..number.."]".." "..name)
 end
 
-print("\nPress a number on the keyboard to download the selected program.")
+print("\nPress a number on the keyboard to download the selected program. Or press 'Q' to exit.")
 
 event, char = os.pullEvent("char")
 char = tonumber(char)
@@ -60,6 +76,10 @@ if programs[char] then
   program = getUrlFile(cat[programs[char]].GitURL)
   writeFile(programs[char], program)
   print("\nDownloaded "..programs[char])
-  print("You can run it by typing chat")
+  if cat[programs[char]].Type == "program" then
+    print("You can run it by typing: "..programs[char])
+  end
   print("Thanks for using Dark Retriever!")
+else
+  print("\nExiting!")
 end
