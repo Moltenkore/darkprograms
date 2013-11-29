@@ -11,7 +11,7 @@ if not fs.exists("dark") then -- load darkAPI
   end
   sleep(2)
   print("Attempting to download...")
-  getGit = http.get("https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/dark")
+  getGit = http.get("https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/dark.lua")
   getGit = getGit.readAll()
   file = fs.open("dark", "w")
   file.write(getGit)

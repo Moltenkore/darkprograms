@@ -41,7 +41,7 @@ until ((installAnswer == "Server") or (installAnswer == "Client") or (installAns
 	end
 
 	print("Downloading requested programs...")
-	local getGit = http.get("https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/programVersions")
+	local getGit = http.get("https://raw.github.com/darkrising/darkprograms/darkprograms/programVersions")
 	local getGit = getGit.readAll()
 	NVersion = textutils.unserialize(getGit)
 

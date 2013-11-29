@@ -1,5 +1,5 @@
 --Title: Dark Client
-Version = 4.2
+Version = 4.21
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 AutoUpdate = true
@@ -10,7 +10,7 @@ if fs.exists("dark") == false then -- load darkAPI
   print("Missing DarkAPI")
   sleep(2)
   print("Attempting to download...")
-  getGit = http.get("https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/dark")
+  getGit = http.get("https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/dark.lua")
   getGit = getGit.readAll()
   file = fs.open("dark", "w")
   file.write(getGit)

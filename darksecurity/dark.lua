@@ -1,5 +1,5 @@
 --Written by darkrising
-DARKversion = 3.242
+DARKversion = 3.245
 
 db = {}
 db.__index = db
@@ -115,7 +115,7 @@ function getPBFile(PBCode, uPath) -- pastebin code of the file, and path to save
 end
 function gitUpdate(ProgramName, Filename, ProgramVersion)
   if http then
-    local getGit = http.get("https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/programVersions")
+    local getGit = http.get("https://raw.github.com/darkrising/darkprograms/darkprograms/programVersions")
     local getGit = getGit.readAll()
     NVersion = textutils.unserialize(getGit)
     if NVersion[ProgramName].Version > ProgramVersion then
