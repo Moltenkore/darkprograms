@@ -61,5 +61,12 @@
     ["Type"]="program",
     ["Name"]="Stargate Touch Program",
     ["Description"]="A program that allows you to dial gates using a touch screen, stargate and terminal.",
-  },  
+  },
+  ["darkretriever"]={
+    ["GitURL"]="https://raw.github.com/darkrising/darkprograms/darkprograms/darkretriever.lua",
+    ["Version"]=1.101,
+    ["Type"]="program",
+    ["Name"]="darkretriever",
+    ["Description"]="Downloads programs from github",
+  },
 }
