@@ -1,10 +1,10 @@
 {
   ["stargatetouch"]={
-    ["GitURL"]="https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/client",
-    ["Version"]=4.2,
+    ["GitURL"]="https://raw.github.com/darkrising/darkprograms/darkprograms/stargate/stargatetouch.lua",
+    ["Version"]=0.1,
     ["Type"]="program",
-    ["Name"]="Dark Programs Client",
-    ["Description"]="Dark Programs Base Security Client",
+    ["Name"]="Stargate Touch Program",
+    ["Description"]="A program that allows you to dial gates using a touch screen, stargate and terminal.",
   },  
   ["dark"]={
     ["GitURL"]="https://github.com/darkrising/darkprograms/raw/darkprograms/darksecurity/dark",
