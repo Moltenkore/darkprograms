@@ -2,7 +2,7 @@
 dbFName = ".SG_Data"
 
 --Global Vars
-Version = 0.1
+Version = 1.001
 cpage = 1
 
 --Missing API
