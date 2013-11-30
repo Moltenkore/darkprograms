@@ -2,8 +2,29 @@
 dbFName = ".SG_Data"
 
 --Global Vars
-version = 0.1
+Version = 0.1
 cpage = 1
+
+--Missing API
+if fs.exists("dark") == false then
+  print("Missing DarkAPI")
+  print("Attempting to download...")
+  getGit = http.get("https://raw.github.com/darkrising/darkprograms/darkprograms/api/dark.lua")
+  getGit = getGit.readAll()
+  file = fs.open("dark", "w")
+  file.write(getGit)
+  file.close()
+  print("Done!")
+  sleep(0.5)
+end
+os.loadAPI("dark")
+
+print("Checking for updates...")
+if ((dark.gitUpdate("stargatetouch", shell.getRunningProgram(), Version) == true) or (dark.gitUpdate("dark", "dark", dark.DARKVersion) == true)) then
+  print("Updates found, updating!")
+  shell.run(shell.getRunningProgram())
+end
+sleep(1)
 
 --Database
 local function saveDB(filen, tabl)
@@ -99,7 +120,7 @@ local function header(per,text)
 
   writeAt(per,string.rep(" ",x),1,y)
   writeAt(per,"By Darkrising",x-13,y)
-  writeAt(per,version,1,2)
+  writeAt(per,Version,1,2)
   
   wCent(text, per, 2)
   
