@@ -1,85 +1,244 @@
-Version = 1.101
+Version = 2.001
 x,y = term.getSize()
 if not http then
   print("Herp derp, forget to enable http?")
   return exit
 end
-function getUrlFile(url)
+local function getUrlFile(url)
   local mrHttpFile = http.get(url)
   mrHttpFile = mrHttpFile.readAll()
   return mrHttpFile
 end
-function writeFile(filename, data)
+local function writeFile(filename, data)
   local file = fs.open(filename, "w")
   file.write(data)
   file.close()
 end
-function printC(text, line, nextline)
+local function cs()
+  term.clear()
+  term.setCursorPos(1,1)
+end
+local function tc(tcolor,bcolor)
   if term.isColor() then
-    term.setBackgroundColor(colors.blue)
-    term.setTextColor(colors.yellow)
-  end  
-  term.setCursorPos((x/2) - (#text/2), line)
-  term.write(text)
-  if term.isColor() then
-    term.setBackgroundColor(colors.black)
-    term.setTextColor(colors.white)
-  end
-  if nextline then
-    term.setCursorPos(1, nextline)
+    if tcolor then
+      term.setTextColor(colors[tcolor])
+    end
+    if bcolor then
+      term.setBackgroundColor(colors[bcolor])  
+    end
   end
 end
-function printLine(text, line, nextline)
-  if term.isColor() then
-    term.setBackgroundColor(colors.blue)
-    text = " "
-  end  
-  term.setCursorPos(1, line)
-  term.write(string.rep(text, x))
-  if term.isColor() then
-    term.setBackgroundColor(colors.black)
-  end
-  if nextline then
-    term.setCursorPos(1, nextline)
-  end
+local function writeC(text,line)
+  term.setCursorPos((x / 2) - (#text / 2),line)
+  term.write(text)
+end
+local function header(text)
+  tc("white","blue")
+  writeC(string.rep("  ",x),1)
+  writeC(string.rep("  ",x),y)
+  writeC(text,1)
+  tc("white","black")
 end
 
 x,y = term.getSize()
-
-term.clear()
-printLine("-", 1)
-printC(" Dark Retriever "..tostring(Version).." ", 1, 3)
-
+cs()
 write("-> Grabbing file...")
 cat = getUrlFile("https://raw.github.com/darkrising/darkprograms/darkprograms/programVersions")
 cat = textutils.unserialize(cat)
 write(" Done.")
+sleep(1)
+cs()
 
-term.setCursorPos(1,5)
+menu = {}
+rawName = {}
 
-programs = {}
-pname = {}
+--[[
+
+-Author
+--Package
+---Program
+
+]]--
+
 for name,data in pairs(cat) do
-  table.insert(pname, data.Name .." ".. data.Version)
-  table.insert(programs, name)
-end
-for number,name in pairs(pname) do
-  print("["..number.."]".." "..name)
-end
-
-print("\nPress a number on the keyboard to download the selected program. Or press 'Q' to exit.")
-
-event, char = os.pullEvent("char")
-char = tonumber(char)
-if programs[char] then
-  print("\nSelected: "..programs[char])
-  program = getUrlFile(cat[programs[char]].GitURL)
-  writeFile(programs[char], program)
-  print("\nDownloaded "..programs[char])
-  if cat[programs[char]].Type == "program" then
-    print("You can run it by typing: "..programs[char])
+  if not menu[data.Author] then
+    menu[data.Author] = {}
   end
-  print("Thanks for using Dark Retriever!")
-else
-  print("\nExiting!")
+  if not menu[data.Author][data.Package] then
+    menu[data.Author][data.Package] = {}
+  end
+  if not menu[data.Author][data.Package][name] then
+    menu[data.Author][data.Package][data.Name] = data
+    rawName[data.Name] = name
+  end
 end
+
+state = "top"
+csel = 1 --Current selected
+osel = {1} --breadcrumb
+
+page = 0
+ind = 3 --Y indent
+ava = y - ind --Available space
+level = 1
+
+function selection(no,list,totpage)
+  term.setCursorPos(1, (no - mod) + (ind - 1))
+  tc("yellow")
+  term.write("[".. list[no] .. "]")
+  tc("white","black")
+  term.setCursorPos(1,y)
+  tc("white","blue")
+  term.write("Page: ".. page + 1 .. "/" .. totpage)
+  term.setCursorPos(x - 14, y)
+  term.write("By Darkrising")
+  tc("white","black")
+end
+function draw(tbl)
+  local c = 1
+  local sdat = {}
+  local odat = {}
+  for n,d in pairs(tbl) do
+    table.insert(sdat, n)
+    table.insert(odat, d)
+    c = c + 1
+  end
+  if level ~= 4 then
+    table.sort(sdat)
+  end
+    
+  tpages = math.ceil(c / (y - ind))
+  mod = page * (y - ind)
+  
+  for i = 1, y - ind do 
+    term.setCursorPos(2, i + ind - 1)
+    term.write(sdat[i + mod])
+    
+    if level == 4 then
+      term.setCursorPos(15, i + ind - 1)
+      if type(odat[i + mod]) == "string" and #odat[i + mod] + 14 > x then
+        term.write(string.sub(odat[i + mod],1,x-14-2).."..")
+      else
+        term.write(odat[i + mod])
+      end
+    end   
+  end
+  
+  if level == 4 then
+    term.setCursorPos(1, y-2)
+    writeC("Press enter to download.",y-2)
+  end
+  
+  return sdat, tpages, mod
+end
+function runMenu()
+  while true do
+    cs()
+    if level == 1 then
+      list,totpage,mod = draw(menu)
+      header("Authors")
+      
+      tc("yellow","black")
+      writeC("Press 'h' for help, 'q' to quit.",2)
+      tc("white","black")
+      
+    elseif level == 2 then
+      list,totpage,mod = draw(menu[auna])
+      header("Packages")
+    elseif level == 3 then
+      list,totpage,mod = draw(menu[auna][pkg])
+      header("Programs")
+    elseif level == 4 then
+      header("Program Data")
+      list,totpage,mod = draw(menu[auna][pkg][pro])
+    end
+    
+    selection(csel, list, totpage)
+    
+    e,key = os.pullEvent("key")  
+    
+    if key == keys.h then
+      cs()
+      header("Help")
+      term.setCursorPos(1,ind)
+      print("Use the up and down arrows to move through the list.")
+      print("use the right arrow to enter a menu item and the left arrow to exit")
+      print("")
+      _,cy = term.getCursorPos()
+      tc("yellow","black")
+      writeC("Press enter to continue.",cy)
+      tc("white","black")
+      read(" ")
+    end
+    
+    if key == keys.up then
+      csel = csel - 1
+    end
+    if key == keys.down then
+      csel = csel + 1
+    end
+    if key == keys.enter then
+      
+    end
+    if key == keys.right then
+      osel[level] = csel
+      level = level + 1
+       
+      if level == 2 then
+        auna = list[csel]       
+      elseif level == 3 then
+        pkg = list[csel]
+      elseif level == 4 then
+        pro = list[csel]
+      end
+      
+      if level > 4 then level = 4 end
+      
+      csel = 1
+      osel[level] = 1
+    end  
+    if key == keys.q then
+      cs()
+      return exit
+    end
+    if key == keys.rightBracket then
+      csel = csel + ava
+    end
+    if key == keys.leftBracket then
+      csel = csel - ava
+    end
+    
+    if key == keys.enter and level == 4 then
+      cs()
+      p = cat[pro]
+      writeC("Downloading ".. cat[rawName[pro]].Name .. " to /" .. rawName[pro], y/2)
+      status = getUrlFile(cat[rawName[pro]].GitURL)
+      sleep(1)
+      if status then
+        writeFile(rawName[pro], status)
+      end
+      
+      cs()
+      writeC("Success!", y/2)
+      sleep(1)
+    end
+    
+    if csel < 1 then --Can't go below beginning of the list
+      csel = 1
+    end
+    if csel > #list then --Can't go above length of the list
+      csel = #list
+    end
+    
+    if key == keys.left then      
+      level = level - 1
+      if level < 1 then level = 1 end
+      csel = osel[level]
+    end
+    
+    page = math.floor(csel / (ava + 1))
+    
+  end
+end
+
+runMenu()
