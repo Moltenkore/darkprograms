@@ -20,7 +20,7 @@ end
 os.loadAPI("dark")
 
 print("Checking for updates...")
-if ((dark.gitUpdate("stargatetouch", shell.getRunningProgram(), Version) == true) or (dark.gitUpdate("dark", "dark", dark.DARKVersion) == true)) then
+if ((dark.gitUpdate("stargatetouch", shell.getRunningProgram(), Version) == true) or (dark.gitUpdate("dark", "dark", dark.DARKversion) == true)) then
   print("Updates found, updating!")
   os.reboot()
 end
