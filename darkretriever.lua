@@ -1,4 +1,4 @@
-Version = 2.114
+Version = 2.115
 x,y = term.getSize()
 if not http then
   print("Herp derp, forget to enable http?")
@@ -243,7 +243,7 @@ function runMenu()
       status = getUrlFile(cat[rawName[pro]].GitURL)
       sleep(1)
       if status then
-        writeFile(rawName[pro], status)
+        writeFile("/".. rawName[pro], status)
       end
       
       cs()
@@ -261,7 +261,7 @@ function runMenu()
         cs()
         writeC("Writing startup script...", y/2)
         
-        star = fs.open("startup","w")
+        star = fs.open("/startup","w")
         star.write("shell.run('".. rawName[pro] .. "')")
         star.close()
         
