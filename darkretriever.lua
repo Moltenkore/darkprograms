@@ -59,7 +59,7 @@ end
 
 cs()
 print("Checking for updates...")
-if dark.gitUpdate("darkretriever", shell.getRunningProgram(), Version) == true then
+if gitUpdate("darkretriever", shell.getRunningProgram(), Version) == true then
   print("Update found.")
   shell.run(shell.getRunningProgram())
 else
