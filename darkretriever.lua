@@ -1,4 +1,4 @@
-Version = 2.001
+Version = 2.011
 x,y = term.getSize()
 if not http then
   print("Herp derp, forget to enable http?")
@@ -39,6 +39,33 @@ local function header(text)
   writeC(text,1)
   tc("white","black")
 end
+local function gitUpdate(ProgramName, Filename, ProgramVersion)
+  if http then
+    local getGit = http.get("https://raw.github.com/darkrising/darkprograms/darkprograms/programVersions")
+    local getGit = getGit.readAll()
+    NVersion = textutils.unserialize(getGit)
+    if NVersion[ProgramName].Version > ProgramVersion then
+      getGit = http.get(NVersion[ProgramName].GitURL)
+      getGit = getGit.readAll()
+      local file = fs.open(Filename, "w")
+      file.write(getGit)
+      file.close()
+      return true
+    end
+  else
+    return false
+  end
+end
+
+cs()
+print("Checking for updates...")
+if dark.gitUpdate("darkretriever", shell.getRunningProgram(), Version) == true then
+  print("Update found.")
+  shell.run(shell.getRunningProgram())
+else
+  print("Program up-to-date.")
+end
+sleep(1)
 
 x,y = term.getSize()
 cs()
