@@ -1,4 +1,4 @@
-Version = 2.013
+Version = 2.014
 x,y = term.getSize()
 if not http then
   print("Herp derp, forget to enable http?")
@@ -60,7 +60,7 @@ end
 cs()
 print("Checking for updates...")
 if gitUpdate("darkretriever", shell.getRunningProgram(), Version) == true then
-  print("Update found.")
+  print("Update found and downloaded.")
   print("\nPlease run ".. shell.getRunningProgram() .. " again.")
   return exit
 else
