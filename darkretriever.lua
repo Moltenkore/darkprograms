@@ -1,4 +1,4 @@
-Version = 2.014
+Version = 2.114
 x,y = term.getSize()
 if not http then
   print("Herp derp, forget to enable http?")
@@ -249,6 +249,26 @@ function runMenu()
       cs()
       writeC("Success!", y/2)
       sleep(1)
+      
+      repeat
+        cs()
+        writeC("Would you like to generate a startup script? ", y/2)
+        writeC("Y / N : ",y/2 + 1)
+        answer = string.lower(read())
+      until answer == "y" or answer == "n"
+      
+      if answer == "y" then
+        cs()
+        writeC("Writing startup script...", y/2)
+        
+        star = fs.open("startup","w")
+        star.write("shell.run('".. rawName[pro] .. "')")
+        star.close()
+        
+        cs()
+        writeC("Success! Hold [Ctrl] + R to reboot.", y/2)
+        sleep(2)
+      end
     end
     
     if csel < 1 then --Can't go below beginning of the list
