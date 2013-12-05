@@ -480,6 +480,7 @@ do -- A few tests
     print("Checking for updates...")
     if gitUpdate("stargatetouch", shell.getRunningProgram(), Version) == true then
       print("Updates found, updating!")
+      sleep(1)
       shell.run(shell.getRunningProgram())
     end
     sleep(1)
