@@ -73,7 +73,7 @@
   },
   ["stargatetouch"]={
     ["GitURL"]="https://raw.github.com/darkrising/darkprograms/darkprograms/stargate/stargatetouch.lua",
-    ["Version"]=1.001,
+    ["Version"]=1.202,
     ["Type"]="program",
     ["Name"]="Stargate Touch Program",
     ["Description"]="A program that allows you to dial gates using a touch screen, stargate and terminal.",

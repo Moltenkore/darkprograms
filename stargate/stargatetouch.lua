@@ -1,30 +1,29 @@
 --Config
 dbFName = ".SG_Data"
+autoUpdate = true
+gateTimeoutPeriod = 30
 
 --Global Vars
-Version = 1.001
+Version = 1.202
 cpage = 1
-
---Missing API
-if fs.exists("dark") == false then
-  print("Missing DarkAPI")
-  print("Attempting to download...")
-  getGit = http.get("https://raw.github.com/darkrising/darkprograms/darkprograms/api/dark.lua")
-  getGit = getGit.readAll()
-  file = fs.open("dark", "w")
-  file.write(getGit)
-  file.close()
-  print("Done!")
-  sleep(0.5)
+--Taken from DarkAPI
+function gitUpdate(ProgramName, Filename, ProgramVersion)
+  if http then
+    local getGit = http.get("https://raw.github.com/darkrising/darkprograms/darkprograms/programVersions")
+    local getGit = getGit.readAll()
+    NVersion = textutils.unserialize(getGit)
+    if NVersion[ProgramName].Version > ProgramVersion then
+      getGit = http.get(NVersion[ProgramName].GitURL)
+      getGit = getGit.readAll()
+      local file = fs.open(Filename, "w")
+      file.write(getGit)
+      file.close()
+      return true
+    end
+  else
+    return false
+  end
 end
-os.loadAPI("dark")
-
-print("Checking for updates...")
-if ((dark.gitUpdate("stargatetouch", shell.getRunningProgram(), Version) == true) or (dark.gitUpdate("dark", "dark", dark.DARKversion) == true)) then
-  print("Updates found, updating!")
-  shell.run(shell.getRunningProgram())
-end
-sleep(1)
 
 --Database
 local function saveDB(filen, tabl)
@@ -82,6 +81,10 @@ local function wCent(text, per, ty) --Text to write, peripheral to write to, opt
   end
   per.setCursorPos((x / 2) - (#text / 2), ty)
   per.write(text)
+end
+local function sc(per,tc,bc) -- Set Colors
+  if tc then per.setTextColor(colors[tc]) end
+  if bc then per.setBackgroundColor(colors[bc]) end  
 end
 local function cc(per) -- Reset colors to default
   per.setBackgroundColor(colors.black) 
@@ -169,33 +172,43 @@ local function tab_popup(per,name)
   
   if star.getAddress() ~= name then valid = star.isValidAddress(name) else valid = false end
   if valid ~= true then 
-    if type(valid) == "string" then
-      wCent("Error: Address not valid",per, y/2)
-    else
-      wCent("Gate Failed to dial address...",per, y/2)
-    end
+    sc(per,"white","red") wCent("Gate Failed to dial address...",per, y/2) cc(per)
+  elseif star.isBusy(name) == true then
+    sc(per,"white","red") wCent("Gate Dialed is busy.", per, y/2-1) cc(per)
   elseif star.hasFuel() == true then
     star.dial(name)
-    wCent("Gate Dialing...",per, y/2)
+    sc(per,"white","blue") wCent(" Gate Dialing... ", per, y/2-1) cc(per)
+    wCent("Tab to disconnect...", per, y/2 + 2)
+    
+    if db.gateList[name] then
+      wCent(name..", ".. db.gateList[name].name ..", ".. db.gateList[name].owner  ,mon,y/2+1)
+    end
+    
+    os.queueEvent("start_helper")
+    
     repeat
       sleep(1)
     until not star.isDialing()
     
     status = star.isConnected()
     if status == true then
-      for i = 45, 1, -1 do
+      for i = gateTimeoutPeriod, 1, -1 do
         cs(per)
-        wCent("Gate Connected",per, y/2)
+        sc(per,"white","green") wCent(" Gate Connected ",per, y/2-1) cc(per)
         wCent("Time Left : "..i,per,(y/2)+1)
+        wCent("Tab to disconnect...", per, y/2 + 2)
         sleep(1)
+        if star.isConnected() == false then break end
       end
       cs(per)
-      wCent("Gate closing...",per, y/2)
+      sc(per,"white","red") wCent(" Gate closing... ",per, y/2-1) cc(per)
       star.disconnect()
     else
-      wCent("Gate has failed to connect.",per, y/2)
+      sc(per,"white","red") wCent(" Gate interrupted. ",per, y/2-1) cc(per)
     end
   end
+  
+  os.queueEvent("stop_helper")
   sleep(2)
 end
 
@@ -364,6 +377,18 @@ term_gui = {
 }
   
 --Loop
+local function stopHelper()
+  while true do
+    e = os.pullEvent("start_helper")
+    repeat
+      e = os.pullEvent()
+    until e == "stop_helper" or e == "monitor_touch"
+    if e == "monitor_touch" then
+      star.disconnect()
+      sleep(5)
+    end
+  end
+end
 local function terminal()
   state = "main"
   lstate = "main"
@@ -413,7 +438,7 @@ local function monitors()
             mon = peripheral.wrap(v)
             local x,y = mon.getSize()
             cc(mon) cs(mon)
-            wCent("[Gate Busy]",mon, y/2)
+            wCent("[Operation Active]",mon, y/2)
           end
           mon = peripheral.wrap(tper)
           tab_popup(mon, name)
@@ -426,11 +451,21 @@ local function monitors()
         mon = peripheral.wrap(v)
         local x,y = mon.getSize()
         cc(mon) cs(mon)
-        wCent("!! Warning !!",mon,y/2 - 1)
-        wCent("Incoming Wormhole!",mon,y/2)
-        wCent("Tap to disconnect...",mon,y/2 + 1)
+        sc(mon,"white","red")
+        wCent(" Warning - Incoming Wormhole ", mon, y/2 - 1)
+        cc(mon)
+        if db.gateList[gid] then
+          wCent(gid..", ".. db.gateList[gid].name ..", ".. db.gateList[gid].owner  ,mon,y/2+1)
+        else
+          wCent(gid ,mon,y/2+3)
+        end
+        
+        wCent("Tap to disconnect...",mon,y/2 + 3)
       end
-      os.pullEvent("monitor_touch")
+      repeat
+        os.startTimer(1)
+        theE = os.pullEvent()
+      until (star.isConnected() == false and star.isDialing() == false) or theE == "monitor_touch"
       star.disconnect()
     end
     if eq == "refresh" then
@@ -440,6 +475,15 @@ local function monitors()
 end
 
 do -- A few tests
+  cs(term)
+  if autoUpdate then -- Check for update
+    print("Checking for updates...")
+    if gitUpdate("stargatetouch", shell.getRunningProgram(), Version) == true then
+      print("Updates found, updating!")
+      shell.run(shell.getRunningProgram())
+    end
+    sleep(1)
+  end
   stargates = listPer("stargate")
   if #stargates < 1 then
     error("No Stargates found.")
@@ -449,6 +493,18 @@ do -- A few tests
   if #mons < 1 then
     error("No monitors found.")
     return
+  end
+  
+  if term.isColor() == false then
+    print("Terminal and monitors must be coloured.")
+    return exit
+  end
+  for i,v in pairs(mons) do
+    mon = peripheral.wrap(v)
+    if mon.isColor() == false then
+      print("Terminal and monitors must be coloured.")
+      return exit
+    end
   end
 end
 
@@ -464,7 +520,7 @@ end
 star = peripheral.wrap(stargates[1])
 star.disconnect()
 
-parallel.waitForAll(terminal,monitors)
+parallel.waitForAll(terminal,monitors,stopHelper)
 
 --[[
   db
