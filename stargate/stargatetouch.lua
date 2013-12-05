@@ -4,7 +4,7 @@ autoUpdate = true
 gateTimeoutPeriod = 30
 
 --Global Vars
-Version = 1.203
+Version = 1.204
 cpage = 1
 --Taken from DarkAPI
 function gitUpdate(ProgramName, Filename, ProgramVersion)
