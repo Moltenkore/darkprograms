@@ -4,7 +4,7 @@ autoUpdate = true
 gateTimeoutPeriod = 30
 
 --Global Vars
-Version = 1.202
+Version = 1.203
 cpage = 1
 --Taken from DarkAPI
 function gitUpdate(ProgramName, Filename, ProgramVersion)
@@ -178,7 +178,7 @@ local function tab_popup(per,name)
   elseif star.hasFuel() == true then
     star.dial(name)
     sc(per,"white","blue") wCent(" Gate Dialing... ", per, y/2-1) cc(per)
-    wCent("Tab to disconnect...", per, y/2 + 2)
+    wCent("Tap to disconnect...", per, y/2 + 2)
     
     if db.gateList[name] then
       wCent(name..", ".. db.gateList[name].name ..", ".. db.gateList[name].owner  ,mon,y/2+1)
@@ -196,7 +196,7 @@ local function tab_popup(per,name)
         cs(per)
         sc(per,"white","green") wCent(" Gate Connected ",per, y/2-1) cc(per)
         wCent("Time Left : "..i,per,(y/2)+1)
-        wCent("Tab to disconnect...", per, y/2 + 2)
+        wCent("Tap to disconnect...", per, y/2 + 2)
         sleep(1)
         if star.isConnected() == false then break end
       end
