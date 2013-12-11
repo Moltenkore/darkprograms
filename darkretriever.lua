@@ -1,4 +1,4 @@
-Version = 2.115
+Version = 2.116
 x,y = term.getSize()
 if not http then
   print("Herp derp, forget to enable http?")
@@ -284,7 +284,7 @@ function runMenu()
       csel = osel[level]
     end
     
-    page = math.floor(csel / (ava + 1))
+    page = math.floor((csel - 1) / ava)
     
   end
 end
