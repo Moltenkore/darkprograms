@@ -1,5 +1,5 @@
 --Title: Dark Client
-Version = 4.201
+Version = 4.251
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 AutoUpdate = true
@@ -17,6 +17,7 @@ if fs.exists("dark") == false then -- load darkAPI
   file.close() 
 end
 os.loadAPI("dark")
+dark.cs()
 function rednetSendE(ID, Message)
   if not config.enCode then
     Message = dark.repCrypt(Message, 1)
@@ -63,9 +64,9 @@ function keycard_mainProgram()
         SendString = textutils.serialize(com2)
         rednetSendE(config.serverID, SendString)
       
-        S, M = rednetReceiveE(2)
+        S, M, D = rednetReceiveE(2)
         
-        if M == "#granted" then
+        if M == "#granted" and D == config.serverDistance then
           disk.eject(eventinfo)
           rs.setOutput(config.doorside, true)
           sleep(config.pulseTime)
@@ -101,12 +102,12 @@ function userandpassword_mainProgram()
     
     if ((User ~= nil) and (password ~= nil)) then
       rednetSendE(config.serverID, SendString)
-      ID, MES = rednetReceiveE(2)
+      ID, MES, SD = rednetReceiveE(2)
       if MES == nil then
       print("\nWrong or no response from server.")
       sleep(2)
       else
-        if MES == "#granted" then
+        if MES == "#granted" and SD == config.serverDistance then
           dark.printC("Correct", 5, 5)
           rs.setOutput(config.doorside, true)
           sleep(config.pulseTime)
@@ -149,6 +150,7 @@ if fs.exists(".DarkC_conf") == false then
     com.ping = true
     rednetSendE(config.serverID, textutils.serialize(com))
     s,m,d = rednetReceiveE(2)
+    config.serverDistance = d
     if m and m == "#pong" then
       print("Server responded, test complete.")
       break
@@ -236,6 +238,17 @@ end
 
 config = dark.db.load(".DarkC_conf")
 
+if not config.serverDistance then
+  repeat
+    com = {ping = true}
+    rednetSendE(config.serverID, textutils.serialize(com))
+    s,m,d = rednetReceiveE(2)
+    config.serverDistance = d
+    print(m)
+  until m
+  dark.db.save(".DarkC_conf", config)
+end
+
 if config.tType == "keycard" then
   parallel.waitForAll(keycard_mainProgram, stealthUpdate)
 elseif config.tType == "password" then
@@ -243,4 +256,5 @@ elseif config.tType == "password" then
 elseif config.tType == "both" then
   parallel.waitForAll(userandpassword_mainProgram, keycard_mainProgram, stealthUpdate)
 end
+
 os.pullEvent = oldEvent
