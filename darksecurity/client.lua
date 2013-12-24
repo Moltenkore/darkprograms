@@ -66,7 +66,7 @@ function keycard_mainProgram()
       
         S, M, D = rednetReceiveE(2)
         
-        if M == "#granted" and D == config.serverDistance then
+        if M == "#granted" and S == config.serverID then
           disk.eject(eventinfo)
           rs.setOutput(config.doorside, true)
           sleep(config.pulseTime)
@@ -107,7 +107,7 @@ function userandpassword_mainProgram()
       print("\nWrong or no response from server.")
       sleep(2)
       else
-        if MES == "#granted" and SD == config.serverDistance then
+        if MES == "#granted" and ID == config.serverID then
           dark.printC("Correct", 5, 5)
           rs.setOutput(config.doorside, true)
           sleep(config.pulseTime)
