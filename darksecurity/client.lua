@@ -1,5 +1,5 @@
 --Title: Dark Client
-Version = 4.251
+Version = 4.252
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 AutoUpdate = true
@@ -91,7 +91,7 @@ function userandpassword_mainProgram()
     
     write(">  Username: ") 
     status, User = pcall(read)
-    com.userQuery = User
+    com.userQuery = string.lower(User)
     
     write(">  Password: ") 
     status, password = pcall(read, "*")
