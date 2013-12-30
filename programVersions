@@ -1,7 +1,7 @@
 {
   ["server"]={
     ["GitURL"]="https://raw.github.com/darkrising/darkprograms/darkprograms/darksecurity/server.lua",
-    ["Version"]=6.301,
+    ["Version"]=6.351,
     ["Type"]="program",
     ["Name"]="Dark Programs Server",
     ["Description"]="Dark Programs Base Security Server",
@@ -10,7 +10,7 @@
   },
   ["client"]={
     ["GitURL"]="https://raw.github.com/darkrising/darkprograms/darkprograms/darksecurity/client.lua",
-    ["Version"]=4.201,
+    ["Version"]=4.251,
     ["Type"]="program",
     ["Name"]="Dark Programs Client",
     ["Description"]="Dark Programs Base Security Client",

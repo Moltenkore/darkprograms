@@ -1,5 +1,5 @@
 --Title: Dark Server
-Version = 6.301
+Version = 6.351
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 if fs.exists("dark") == false then
