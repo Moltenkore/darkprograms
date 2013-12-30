@@ -1,5 +1,5 @@
 --Title: Dark Server
-Version = 6.302
+Version = 6.301
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 if fs.exists("dark") == false then
@@ -14,7 +14,6 @@ if fs.exists("dark") == false then
   sleep(0.5)
 end
 os.loadAPI("dark")
-dark.cs()
 --Search for a modem
 S = dark.findPeripheral("modem")
 if S == false then
