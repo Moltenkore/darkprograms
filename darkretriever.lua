@@ -1,4 +1,4 @@
-Version = 2.116
+Version = 2.117
 x,y = term.getSize()
 if not http then
   print("Herp derp, forget to enable http?")
@@ -31,6 +31,13 @@ end
 local function writeC(text,line)
   term.setCursorPos((x / 2) - (#text / 2),line)
   term.write(text)
+end
+term.oldWrite = term.write
+function term.write(text)
+  if not text then
+    text = ""
+  end
+  term.oldWrite(text)
 end
 local function header(text)
   tc("white","blue")
