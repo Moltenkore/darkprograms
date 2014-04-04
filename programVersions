@@ -19,7 +19,7 @@
   },  
   ["dark"]={
     ["GitURL"]="https://raw.github.com/darkrising/darkprograms/darkprograms/api/dark.lua",
-    ["Version"]=3.246,
+    ["Version"]=3.247,
     ["Type"]="api",
     ["Name"]="Dark API",
     ["Description"]="API that is used in most Dark Programs",
