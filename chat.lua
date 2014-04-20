@@ -1,12 +1,24 @@
+--Args
+args = {...}
+--[[
+  optional arguments
+  1: username
+  2: channel (default will be 10)
+  3: autoupdate (false to disable)
+]]--
 --changeable
 HistoryNum = 200 --how many lines of history to keep
-autoupdate = true -- turn on or off auto update
+if args[3] and args[3] == "false" then
+  autoupdate = false
+else
+  autoupdate = true -- turn on or off auto update
+end
 --Non changeable!
 chat = {}
 lineCount = 1
 modifier = 0
 X, Y = term.getSize()
-Version = 1.431
+Version = 1.5
 BottomText = "Message: "
 KeyCount = 0
 user = ""
@@ -206,7 +218,7 @@ function startUp()
   if autoupdate == true then
   print("Checking for updates...")
     if gitUpdate("chat", shell.getRunningProgram(), Version) == true then
-      print("Download new version, restarting...")
+      print("Downloaded new version, restarting...")
       sleep(1.5)
       os.reboot()
     else
@@ -312,6 +324,13 @@ comD = {
     end,
     help = ""
   },
+  ["quit"] = {
+    run = function()
+      rSend("has quit.", true)
+      os.queueEvent("exit")
+    end,
+    help = ""
+  },
   ["me"] = {
     run = function(Words)
       local StringRe = ""
@@ -378,12 +397,12 @@ comD = {
 14: backspace
 ]]--
 term.clear() term.setCursorPos(1,1)
-if fs.exists(".darkChatConf") == true then
+if (fs.exists(".darkChatConf") == true) and (#args == 0) then
   F = fs.open(".darkChatConf", "r")
   Data = F.readAll()
   F.close()
   config = textutils.unserialize(Data)
-else
+elseif #args == 0 then
   config = {}
   repeat
     print("Do you want your username to be stored? (Private Mode)")
@@ -409,6 +428,16 @@ else
   print("Setup Complete!")
   sleep(1)
 end
+if args[1] then
+  config = {}
+  config.private = true
+  config.user = args[1]
+  config.channel = 10  
+end
+if args[2] and tonumber(args[2]) then
+  config.channel = tonumber(args[2])
+end
+
 startUp()
 if config.private == true then
   privateMode()
