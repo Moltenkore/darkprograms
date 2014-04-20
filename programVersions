@@ -10,7 +10,7 @@
   },
   ["client"]={
     ["GitURL"]="https://raw.github.com/darkrising/darkprograms/darkprograms/darksecurity/client.lua",
-    ["Version"]=4.252,
+    ["Version"]=4.253,
     ["Type"]="program",
     ["Name"]="Dark Programs Client",
     ["Description"]="Dark Programs Base Security Client",

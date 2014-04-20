@@ -1,5 +1,5 @@
 --Title: Dark Client
-Version = 4.252
+Version = 4.253
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
 AutoUpdate = true
@@ -16,7 +16,9 @@ if fs.exists("dark") == false then -- load darkAPI
   file.write(getGit)
   file.close() 
 end
-os.loadAPI("dark")
+if not dark then
+  os.loadAPI("dark")
+end
 function rednetSendE(ID, Message)
   if not config.enCode then
     Message = dark.repCrypt(Message, 1)
