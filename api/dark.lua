@@ -1,5 +1,5 @@
 --Written by darkrising
-DARKversion = 3.247
+DARKversion = 3.248
 
 db = {}
 db.__index = db
@@ -60,12 +60,14 @@ function db.insertString(Filename, AString)
 end
 
 --Fix buggy write function
-term.oldWrite = term.write
-function term.write(text)
-  if not text then
-    text = ""
+if not term.oldWrite then
+  term.oldWrite = term.write
+  function term.write(text)
+    if not text then
+      text = ""
+    end
+    term.oldWrite(text)
   end
-  term.oldWrite(text)
 end
 
 --Generalised functions
