@@ -1,4 +1,4 @@
-Version = 2.117
+Version = 2.12
 x,y = term.getSize()
 if not http then
   print("Herp derp, forget to enable http?")
@@ -48,7 +48,12 @@ local function header(text)
 end
 local function gitUpdate(ProgramName, Filename, ProgramVersion)
   if http then
-    local getGit = http.get("https://raw.github.com/darkrising/darkprograms/darkprograms/programVersions")
+    local status, getGit = pcall(http.get, "https://raw.github.com/darkrising/darkprograms/darkprograms/programVersions")
+    if not status then
+      print("\nFailed to get Program Versions file.")
+      print("Error: ".. getGit)
+      return exit
+    end 
     local getGit = getGit.readAll()
     NVersion = textutils.unserialize(getGit)
     if NVersion[ProgramName].Version > ProgramVersion then

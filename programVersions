@@ -82,7 +82,7 @@
   },
   ["darkretriever"]={
     ["GitURL"]="https://raw.github.com/darkrising/darkprograms/darkprograms/darkretriever.lua",
-    ["Version"]=2.117,
+    ["Version"]=2.12,
     ["Type"]="program",
     ["Name"]="Dark Retriever",
     ["Description"]="Downloads programs from github",
