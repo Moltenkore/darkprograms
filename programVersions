@@ -46,7 +46,7 @@
   },
   ["chat"]={
     ["GitURL"]="https://raw.github.com/darkrising/darkprograms/darkprograms/chat.lua",
-    ["Version"]=1.5,
+    ["Version"]=1.51,
     ["Type"]="program",
     ["Name"]="Dark Chat",
     ["Description"]="A standalone rednet chat program",

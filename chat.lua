@@ -18,7 +18,7 @@ chat = {}
 lineCount = 1
 modifier = 0
 X, Y = term.getSize()
-Version = 1.5
+Version = 1.51
 BottomText = "Message: "
 KeyCount = 0
 user = ""
@@ -33,7 +33,10 @@ function findPeripheral(Perihp)
 end
 function gitUpdate(ProgramName, Filename, ProgramVersion)
   if http then
-    local getGit = http.get("https://raw.github.com/darkrising/darkprograms/darkprograms/programVersions")
+    status, getGit = pcall(http.get, "https://raw.github.com/darkrising/darkprograms/darkprograms/programVersions")
+    if not status then 
+      return(getGit)
+    end    
     local getGit = getGit.readAll()
     NVersion = textutils.unserialize(getGit)
     if NVersion[ProgramName].Version > ProgramVersion then
@@ -217,7 +220,12 @@ function startUp()
   term.clear() term.setCursorPos(1,1)
   if autoupdate == true then
   print("Checking for updates...")
-    if gitUpdate("chat", shell.getRunningProgram(), Version) == true then
+  local updateStatus = gitUpdate("chat", shell.getRunningProgram(), Version)
+    if type(updateStatus) == "string" then
+      print("Cannot check for updates:")
+      print(updateStatus)
+      sleep(1)
+    elseif updateStatus == true then
       print("Downloaded new version, restarting...")
       sleep(1.5)
       os.reboot()
