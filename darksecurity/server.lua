@@ -1,11 +1,18 @@
 --Title: Dark Server
-Version = 6.351
+Version = 6.37
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
+term.clear()
+term.setCursorPos(1,1)
 if fs.exists("dark") == false then
   print("Missing DarkAPI")
   print("Attempting to download...")
-  getGit = http.get("https://raw.github.com/darkrising/darkprograms/darkprograms/api/dark.lua")
+  status, getGit = pcall(http.get, "https://raw.github.com/darkrising/darkprograms/darkprograms/api/dark.lua")
+  if not status then
+    print("\nFailed to get Dark API")
+    print("Error: ".. getGit)
+    return exit
+  end
   getGit = getGit.readAll()
   file = fs.open("dark", "w")
   file.write(getGit)
@@ -30,6 +37,8 @@ slevel = 1
 cliVent = {}
 co = "blue"
 mLog = {}
+--Fixes
+
 --Communication
 function logDat(Message)
   table.insert(mLog, Message)
