@@ -1,9 +1,26 @@
 {
+  ["eas-server"]={
+    ["GitURL"]="https://raw.github.com/minebuild3543/CC-EAS/1.6/server"
+    ["Type"]="program",
+    ["Name"]="CC-EAS Server 1.6",
+    ["Description"]="Emergency Alert System in CC, server application",
+    ["Author"]="minebuild3543",
+    ["Package"]="CC-EAS",
+  },
+  ["eas-decoder"]={
+    ["GitURL"]="https://raw.github.com/minebuild3543/CC-EAS/1.6/decoder",
+    ["Version"]=1.6,
+    ["Type"]="program",
+    ["Name"]="CC-EAS Decoder 1.6",
+    ["Description"]="Emergency Alert System in CC, decoder application",
+    ["Author"]="minebuild3543",
+    ["Package"]="CC-EAS",
+  },
   ["server"]={
     ["GitURL"]="https://raw.github.com/darkrising/darkprograms/darkprograms/darksecurity/server.lua",
     ["Version"]=6.37,
     ["Type"]="program",
-    ["Name"]="Dark Programs Server",
+    ["Name"]="Dark Programs BS Server",
     ["Description"]="Dark Programs Base Security Server",
     ["Author"]="Darkrising",
     ["Package"]="Dark Security",
@@ -12,7 +29,7 @@
     ["GitURL"]="https://raw.github.com/darkrising/darkprograms/darkprograms/darksecurity/client.lua",
     ["Version"]=4.26,
     ["Type"]="program",
-    ["Name"]="Dark Programs Client",
+    ["Name"]="Dark Programs BS Client",
     ["Description"]="Dark Programs Base Security Client",
     ["Author"]="Darkrising",
     ["Package"]="Dark Security",
