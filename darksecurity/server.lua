@@ -5,11 +5,11 @@ Version = 6.37
 term.clear()
 term.setCursorPos(1,1)
 if fs.exists("dark") == false then
-  print("Missing DarkAPI")
+  print("Missing OSI API")
   print("Attempting to download...")
   status, getGit = pcall(http.get, "https://raw.githubusercontent.com/rservices/darkprograms/darkprograms/api/dark.lua")
   if not status then
-    print("\nFailed to get Dark API")
+    print("\nFailed to get OSI API")
     print("Error: ".. getGit)
     return exit
   end
@@ -350,7 +350,7 @@ Co = {
         printR("[8] Shell", 8) 
       end
       dark.printL("-", y, nil, co, co)
-      dark.printA("by darkrising", x-13, y, nil, "yellow", co)
+      dark.printA("by OutragedMetro", x-13, y, nil, "yellow", co)
 	    dark.printA("                 ", 1, y, nil, co, co)
       dark.printA("Current Security Level: "..slevel, 1, y, nil, "white", co)
     end,
