@@ -48,7 +48,7 @@ local function header(text)
 end
 local function gitUpdate(ProgramName, Filename, ProgramVersion)
   if http then
-    local status, getGit = pcall(http.get, "https://raw.github.com/darkrising/darkprograms/darkprograms/programVersions")
+    local status, getGit = pcall(http.get, "https://raw.githubusercontent.com/rservices/darkprograms/darkprograms/programVersions")
     if not status then
       print("\nFailed to get Program Versions file.")
       print("Error: ".. getGit)
