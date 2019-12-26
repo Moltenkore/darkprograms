@@ -323,7 +323,7 @@ Co = {
       term.setCursorPos(1,1)
       header("Help")
       dark.printA("Press [1] to return to the main menu", 1, y)
-      print("\nHelp comming soon!")
+      print("\nTo Navigate the settings menu and to add new users, Keycards, And passwords just follow the on screen prompts!")
       os.pullEvent("key")
     end,
     options = {"main"}
