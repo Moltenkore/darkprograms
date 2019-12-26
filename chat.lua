@@ -33,7 +33,7 @@ function findPeripheral(Perihp)
 end
 function gitUpdate(ProgramName, Filename, ProgramVersion)
   if http then
-    status, getGit = pcall(http.get, "https://raw.github.com/darkrising/darkprograms/darkprograms/programVersions")
+    status, getGit = pcall(http.get, "https://raw.githubusercontent.com/rservices/darkprograms/darkprograms/programVersions")
     if not status then 
       return(getGit)
     end    
@@ -166,7 +166,7 @@ function draw()
     cWrite(chatN[2],"black",chatN[1])
   end
   term.setCursorPos(1, Y - 1)
-  cWrite(string.rep("-", X), "blue","blue", true) 
+  cWrite(string.rep("-", X), "green","green", true) 
   term.setTextColor(colors.white)
   local Text = "<User: "..user.."> <Channel: "..channelN..">"
   term.setCursorPos(X/2 - #Text/2, Y - 1)
@@ -241,10 +241,10 @@ function startUp()
   end
   modem = peripheral.wrap(Side)
   term.clear() term.setCursorPos(1,1)
-  cWrite(string.rep("-", X), "blue","blue", true) bgReset()
+  cWrite(string.rep("-", X), "green","green", true) bgReset()
   term.setCursorPos(X/2 - string.len(Header)/2,2)
   print(Header)
-  cWrite(string.rep("-", X), "blue","blue", true) bgReset()
+  cWrite(string.rep("-", X), "green","green", true) bgReset()
 end
 function privateMode()
   user = config.user
