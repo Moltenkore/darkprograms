@@ -7,7 +7,7 @@ term.setCursorPos(1,1)
 if fs.exists("dark") == false then
   print("Missing DarkAPI")
   print("Attempting to download...")
-  status, getGit = pcall(http.get, "https://raw.github.com/darkrising/darkprograms/darkprograms/api/dark.lua")
+  status, getGit = pcall(http.get, "https://raw.githubusercontent.com/rservices/darkprograms/darkprograms/api/dark.lua")
   if not status then
     print("\nFailed to get Dark API")
     print("Error: ".. getGit)
@@ -35,7 +35,7 @@ AutoUpdate = true
 globalWait = 1
 slevel = 1
 cliVent = {}
-co = "blue"
+co = "green"
 mLog = {}
 --Fixes
 
@@ -112,7 +112,7 @@ function header(text, lText, rText)
   if debugMode and (debugMode == true) then
     co = "red"
   else
-    co = "blue"
+    co = "green"
   end
   dark.printL("-", 1, nil, co, co)
   dark.printA("|", x, 2, nil, co, co)
@@ -127,10 +127,10 @@ function footer()
   if debugMode and (debugMode == true) then
     co = "red"
   else
-    co = "blue"
+    co = "green"
   end
   dark.printL("-", y, nil, co, co)
-  dark.printA("by darkrising", x-13, y, nil, "yellow", co)
+  dark.printA("by OutragedMetro", x-13, y, nil, "yellow", co)
 end
 function displayTNameColumn(TName, Page, Extrater, Admin)
   if Extrater then
