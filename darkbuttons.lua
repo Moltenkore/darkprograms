@@ -7,12 +7,12 @@ if not term.isColour() then
 	return
 end
 if fs.exists("dark") == false then -- load darkAPI
-  print("Missing DarkAPI")
+  print("Missing OSI API")
   print("Attempting to download...")
   if not http then
-    error("Enable the HTTP API to download DarkAPI")
+    error("Enable the HTTP API to download OSI API")
   end
-  getGit = http.get("https://raw.github.com/darkrising/darkprograms/darkprograms/api/dark.lua")
+  getGit = http.get("https://raw.githubusercontent.com/rservices/darkprograms/darkprograms/api/dark.lua")
   getGit = getGit.readAll()
   file = fs.open("dark", "w")
   file.write(getGit)
@@ -28,10 +28,10 @@ AutoUpdate = true
 --General Functions
 function Header(text, lText, rText) -- builds a header using functions above from <text>
   local x,y = term.getSize()
-  dark.printL("-", 1, nil, "blue", "blue")
-  dark.printC(string.rep(" ", x+1), 2, nil, "white", "blue")
-  dark.printC(text, 2, nil, "white", "blue")
-  dark.printL("-", 3, 5, "blue", "blue")
+  dark.printL("-", 1, nil, "green, "green")
+  dark.printC(string.rep(" ", x+1), 2, nil, "white", "green")
+  dark.printC(text, 2, nil, "white", "green")
+  dark.printL("-", 3, 5, "green", "green")
 end
 function saveState()
   dark.db.save("state", buttons)
@@ -384,7 +384,7 @@ function wizard(mode)
     end
       happyness = checkTemp(hx,hy,txd,txu,tyd,tyu)
       if happyness ~= true then
-        textBox(":'(",txd,txu,tyd,tyu,colors.white,colors.blue)
+        textBox(":'(",txd,txu,tyd,tyu,colors.white,colors.green)
       else
         textBox(":)",txd,txu,tyd,tyu,colors.white,colors.green)
       end
