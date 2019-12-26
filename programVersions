@@ -6,7 +6,7 @@
     ["Name"]="Outraged Security .INC Server",
     ["Description"]="Outraged Security .INC Base Security Server",
     ["Author"]="Outraged Security .INC",
-    ["Package"]="Dark Security",
+    ["Package"]="Outraged Security .INC",
   },
   ["client"]={
     ["GitURL"]="https://raw.githubusercontent.com/rservices/darkprograms/darkprograms/darksecurity/client.lua",
@@ -15,7 +15,7 @@
     ["Name"]="Dark Programs Client",
     ["Description"]="DOutraged Security .INC Base Security Client",
     ["Author"]="Outraged Security .INC",
-    ["Package"]="Dark Security",
+    ["Package"]="Outraged Security .INC",
   },  
   ["dark"]={
     ["GitURL"]="https://raw.githubusercontent.com/rservices/darkprograms/darkprograms/api/dark.lua",
