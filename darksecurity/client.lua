@@ -57,7 +57,7 @@ function header(text, lText, rText)
 end
 function footer()
   dark.printL("-", y, nil, "green", "green")
-  dark.printA("by darkrising", x-13, y, nil, "yellow", "green")
+  dark.printA("by OutragedMetro", x-13, y, nil, "yellow", "green")
 end
 function keycard_mainProgram()
   while true do
