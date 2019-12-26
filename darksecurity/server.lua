@@ -238,7 +238,7 @@ end
 function runServerGui()
   term.clear() 
   term.setCursorPos(1,1)
-  dark.splash(1.5, "Powered by DarkGui")  
+  dark.splash(1.5, "Powered by Outraged Security Gui")  
   state = "main"
   Page = 0  
   while true do
