@@ -5,13 +5,13 @@ Version = 3.361
 --Platform: ComputerCraft Lua Virtual Machine
 AutoUpdate = true
 if not fs.exists("dark") then -- load darkAPI
-  print("Missing DarkAPI")
+  print("Missing OSI API")
   if not http then
-	error("Enable the HTTP API to download DarkAPI")
+	error("Enable the HTTP API to download OSI API")
   end
   sleep(2)
   print("Attempting to download...")
-  getGit = http.get("https://raw.github.com/darkrising/darkprograms/darkprograms/api/dark.lua")
+  getGit = http.get("https://raw.githubusercontent.com/rservices/darkprograms/darkprograms/api/dark.lua")
   getGit = getGit.readAll()
   file = fs.open("dark", "w")
   file.write(getGit)
