@@ -90,7 +90,7 @@
     ["Package"]="Standalone",
   },
     ["sign"]={
-    ["GitURL"]="https://raw.githubusercontent.com/rservices/darkprograms/darkprograms/signs/startup",
+    ["GitURL"]="https://raw.githubusercontent.com/rservices/darkprograms/darkprograms/signs/sign",
     ["Version"]=2.12,
     ["Type"]="program",
     ["Name"]="Outraged Security .INC Signs",
