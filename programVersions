@@ -89,4 +89,13 @@
     ["Author"]="Outraged Security .INC",
     ["Package"]="Standalone",
   },
+    ["Dark Signs"]={
+    ["GitURL"]="https://raw.githubusercontent.com/rservices/darkprograms/darkprograms/signs/startup",
+    ["Version"]=2.12,
+    ["Type"]="program",
+    ["Name"]="Outraged Security .INC Signs",
+    ["Description"]="Downloads Sign Program from github",
+    ["Author"]="Outraged Security .INC",
+    ["Package"]="Standalone",
+  },
 }
