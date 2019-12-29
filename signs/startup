@@ -1,0 +1,19 @@
+local pos = 18
+mon = peripheral.wrap("top")
+mon.clear()
+mon.setBackgroundColor(32768)
+mon.setTextColor(32)
+mon.setTextScale(5)
+
+while true do
+ if pos==-26 then
+  pos = 18
+ end
+ 
+ mon.clear()
+ mon.setCursorPos(pos,1)
+ mon.write("Insert Security Text Here")
+ pos = pos-1
+ 
+ os.sleep(0.15)
+end
