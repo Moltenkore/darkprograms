@@ -98,7 +98,7 @@
     ["Author"]="Outraged Security .INC",
     ["Package"]="Standalone",
   },
-      ["sign"]={
+      ["setup"]={
     ["GitURL"]="https://raw.githubusercontent.com/rservices/darkprograms/darkprograms/mineos/setup",
     ["Version"]=2.12,
     ["Type"]="program",
