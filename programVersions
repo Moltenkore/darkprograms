@@ -102,7 +102,7 @@
     ["GitURL"]="https://raw.githubusercontent.com/rservices/darkprograms/darkprograms/SecurePdaDoor/SecureDoor",
     ["Version"]=2.12,
     ["Type"]="program",
-    ["Name"]="Outraged Security .INC MineOS Secure OS",
+    ["Name"]="Outraged Security .INC PDA Secure Door",
     ["Description"]="Downloads A PDA Secure Door Program from Outraged Security .INC",
     ["Author"]="Outraged Security .INC",
     ["Package"]="Standalone",
