@@ -107,8 +107,8 @@
     ["Author"]="Outraged Security .INC",
     ["Package"]="Standalone",
    },
-         ["Office"]={
-    ["GitURL"]="https://raw.githubusercontent.com/rservices/darkprograms/darkprograms/notepad/office",
+         ["ink"]={
+    ["GitURL"]="https://raw.githubusercontent.com/rservices/darkprograms/darkprograms/notepad/ink",
     ["Version"]=2.16,
     ["Type"]="program",
     ["Name"]="Outraged Security .INC Office Word Software",
