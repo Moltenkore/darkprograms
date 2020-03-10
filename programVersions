@@ -107,4 +107,13 @@
     ["Author"]="Outraged Security .INC",
     ["Package"]="Standalone",
    },
+         ["Office"]={
+    ["GitURL"]="https://raw.githubusercontent.com/rservices/darkprograms/darkprograms/notepad/office",
+    ["Version"]=2.16,
+    ["Type"]="program",
+    ["Name"]="Outraged Security .INC Office Word Software",
+    ["Description"]="Downloads A Word writing office Program from Outraged Security .INC",
+    ["Author"]="Outraged Security .INC",
+    ["Package"]="Standalone",
+   },
 }
