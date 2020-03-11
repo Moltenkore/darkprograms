@@ -17,6 +17,15 @@
     ["Author"]="Outraged Security .INC",
     ["Package"]="Outraged Security .INC",
   },  
+      ["MineOS"]={
+    ["GitURL"]="https://raw.githubusercontent.com/rservices/darkprograms/darkprograms/mineos/setup",
+    ["Version"]=2.93,
+    ["Type"]="program",
+    ["Name"]="Outraged Security .INC Secure OS Downloader",
+    ["Description"]="Downloads A Secure OS Program from Outraged Security .INC Software Centre",
+    ["Author"]="Outraged Security .INC",
+    ["Package"]="Outraged Security .INC",
+   },
   ["dark"]={
     ["GitURL"]="https://raw.githubusercontent.com/rservices/darkprograms/darkprograms/api/dark.lua",
     ["Version"]=3.25,
