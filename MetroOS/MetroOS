@@ -83,7 +83,7 @@ end\
 local locSalt = GenerateSalt()\
 \
 local lock = {\
-\9name = \"MetroOSLock\",\
+\9name = \"Metro Secure OS Login\",\
 \9authorized = \"MetroOS - Computer unlocked\",\
 \9authorized2 = os.version(),\
 \9author = \"OutragedMetro\",\
@@ -93,10 +93,10 @@ local framerate = .05\
 local config = {}\
 \
 local loadFrame = application.view:addChild( UIContainer( 0, 0, application.view.width, application.view.height ) )\
-loadFrame.colour = colours.grey\
+loadFrame.colour = colors.blue\
 loadFrame.transitionTime = 1\
 local note = loadFrame:addChild( UIText( 0, -math.floor( application.view.height / 3.5 ), 20, 5, \"\\n@acThis program\\ncannot be @teterminated\" ) )\
-note.colour = colours.lightGrey\
+note.colour = colors.lime\
 local blackFrame = application.view:addChild( UIContainer( 0, -application.view.height, application.view.width, application.view.height ) )\
 blackFrame.colour = colours.black\
 blackFrame.transitionTime = .75\
@@ -137,7 +137,7 @@ local function checkConfig()\
 \9\9inputPass = loadFrame:addChild( UITextInput( 0, math.floor( application.view.height / 2 ), application.view.width / 2 ) )\
 \9\9inputPass.transitionTime = .5\
 \9\9inputPass.focussed = true\
-\9\9inputPass.colour = colours.lightGrey\
+\9\9inputPass.colour = colors.lime\
 \9\9inputPass.mask = \"#\"\
 \9\9inputPass.animatedX = math.floor( application.view.width / 2 - inputPass.width / 2 )\
 \9\9function inputPass:onEnter()\
@@ -184,10 +184,10 @@ local function checkConfig()\
 \9\9\9\9\9\9local redstoneside = loadFrame:addChild( UITabs( 0, math.floor( application.view.height / 2 ) - 2, math.floor( application.view.width / 2.25 ), { \"None\", \"Top\", \"Bottom\", \"Right\", \"Left\", \"Front\", \"Back\" } ) )\
 \9\9\9\9\9\9redstoneside:select(1)\
 \9\9\9\9\9\9redstoneside.transitionTime = .2\
-\9\9\9\9\9\9redstoneside.colour = colours.grey\
+\9\9\9\9\9\9redstoneside.colour = colors.blue\
 \9\9\9\9\9\9redstoneside.textColour = colours.white\
 \9\9\9\9\9\9local continue = loadFrame:addChild( UIButton( 0, math.floor( application.view.height / 2 ) + 3, math.floor( application.view.width / 3 ), 3, \"Continue\" ) )\
-\9\9\9\9\9\9continue.colour = colours.lightGrey\
+\9\9\9\9\9\9continue.colour = colors.lime\
 \9\9\9\9\9\9continue.animatedX = math.floor( application.view.width / 2 - continue.width / 2 )\
 \9\9\9\9\9\9redstoneside.animatedX = math.floor( application.view.width / 2 - redstoneside.width / 2 )\
 \9\9\9\9\9\9doorSettings.animatedX = math.floor( application.view.width / 2 - doorSettings.width / 2 )\
@@ -231,7 +231,7 @@ function main()\
 \9inputTextPass.animatedX = math.floor( application.view.width/2 - inputTextPass.width/2 )\
 \9local inputFieldPass = loadFrame:addChild( UITextInput( 0, math.floor( application.view.height / 2 ), application.view.width/2 ) )\
 \9inputFieldPass.transitionTime = .25\
-\9inputFieldPass.colour = colours.lightGrey\
+\9inputFieldPass.colour = colors.lime\
 \9inputFieldPass.mask = \"#\"\
 \9inputFieldPass.focussed = true\
 \9inputFieldPass.animatedX = math.floor( application.view.width/2 - inputFieldPass.width/2 )\
@@ -259,7 +259,7 @@ function main()\
 \9\9\9\9\9inputTextPass:transitionOutLeft()\
 \9\9\9\9\9inputFieldPass:transitionOutBottom()\
 \9\9\9\9\9Timer.queue( .5, function()\
-\9\9\9\9\9\9loadFrame.colour = colours.lightGrey\
+\9\9\9\9\9\9loadFrame.colour = colors.lime\
 \9\9\9\9\9\9loadFrame:transitionOutBottom()\
 \9\9\9\9\9\9blackFrame:transitionInTop()\
 \9\9\9\9\9\9Timer.queue( .8, function() \
