@@ -625,7 +625,7 @@ if not turtle then
   term.setBackgroundColour(colours.black)
   term.setTextColour(colours.orange)
   term.clear()
-  print("Programmed by KyStyle,")
+  print("Programmed by OutragedMetro,")
   print("Thanks for playing!")
   term.setTextColour(colours.white)
 else
