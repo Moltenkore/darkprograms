@@ -1,0 +1,133 @@
+local w,h = term.getSize()
+local pos = (w/2)-3
+local score = 0
+local fscore = 0
+local bricks = {}
+local ballx = (w/2)+0.5
+local bally = h-8
+local ballvx = 1
+local ballvy = 1
+local lose = false
+for i=1,3 do
+  for j=1,w do
+    local obj = {}
+    obj["x"] = j
+    obj["y"] = i+1
+    obj["broken"] = false
+    bricks[#bricks+1] = obj
+  end
+end
+term.setBackgroundColor(colors.black)
+term.clear()
+function keyPress()
+  while true do
+    event, key = os.pullEvent("key")
+    if key == keys.right then
+      pos = pos+1
+    end
+    if key == keys.left then
+      pos = pos-1
+    end
+    if key == keys.r then
+      pos = (w/2)-3
+      score = 0
+      fscore = 0
+      bricks = {}
+      ballx = (w/2)+0.5
+      bally = h-8
+      ballvx = 1
+      ballvy = 1
+      lose = false
+      for i=1,3 do
+        for j=1,w do
+          local obj = {}
+          obj["x"] = j
+          obj["y"] = i+1
+          obj["broken"] = false
+          bricks[#bricks+1] = obj
+        end
+      end
+    end
+    draw()
+  end
+end
+function draw()
+  term.setBackgroundColor(colors.black)
+  term.clear()
+  term.setBackgroundColor(colors.white)
+  for i=0,6 do
+    term.setCursorPos(pos+i, h-1)
+    term.write(" ")
+  end
+  term.setBackgroundColor(colors.lightGray)
+  for i=1,w do
+    term.setCursorPos(i, 1)
+    term.write(" ")
+  end
+  term.setTextColor(colors.white)
+  term.setCursorPos(1,1)
+  term.write(score)
+  for i=1,#bricks do
+    term.setBackgroundColor(colors.magenta)
+    term.setCursorPos(bricks[i]["x"], bricks[i]["y"])
+    if bricks[i]["broken"] == false then
+      term.write(" ")
+    end
+  end
+  term.setBackgroundColor(colors.white)
+  term.setTextColor(colors.black)
+  term.setCursorPos(ballx, bally)
+  term.write(" ")
+  if lose == true then
+    term.setBackgroundColor(colors.black)
+    term.setTextColor(colors.white)
+    term.clear()
+    fscore = score
+    centertext("Final Score: "..fscore, h/2)
+    centertext("Press R to restart", (h/2)+1)
+  end
+end
+function ballmove()
+  while true do
+    ballx = ballx + ballvx
+    bally = bally + ballvy
+    if ballx > pos and ballx < pos+6 and bally > h-3 and bally < h-1 then
+      bounce(1)
+    end
+    if bally < 2 then
+      bounce(1)
+    end
+    if ballx > w-1 then
+      bounce(2)
+    end
+    if ballx < 1 then
+      bounce(2)
+    end
+    if bally > h then
+      lose = true
+    end
+    for i=1,#bricks do
+      if bricks[i]["x"] == ballx and bricks[i]["y"] == bally and bricks[i]["broken"] == false then
+        bounce(1)
+        bricks[i]["broken"] = true
+        score = score+1
+      end
+    end
+    draw()
+    sleep(0.14)
+  end
+end
+function bounce(dir)
+  if dir == 1 then
+    ballvy = -ballvy
+  end
+  if dir == 2 then
+    ballvx = -ballvx
+  end
+end
+function centertext(text, height)
+  term.setCursorPos((w/2)-(string.len(text)/2), height)
+  term.write(text)  
+end
+draw()
+parallel.waitForAll(keyPress, ballmove)
