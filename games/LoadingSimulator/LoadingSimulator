@@ -126,4 +126,4 @@ else
     print("You survived "..tottim.." seconds of loading!")
 end
 print("")
-print("Created by Ale32bit")
+print("Created by OutragedMetro")
