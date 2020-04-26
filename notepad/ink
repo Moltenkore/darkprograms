@@ -1992,10 +1992,10 @@ end
 function SplashScreen()
 	local w = colours.white
 	local b = colours.black
-	local u = colours.blue
-	local lb = colours.lightBlue
+	local u = colours.green
+	local lb = colours.green
 	local splashIcon = {{w,w,w,b,w,w,w,b,w,w,w,},{w,w,w,b,w,w,w,b,w,w,w,},{w,w,w,b,u,u,u,b,w,w,w,},{w,b,b,u,u,u,u,u,b,b,w,},{b,u,u,lb,lb,u,u,u,u,u,b,},{b,u,lb,lb,u,u,u,u,u,u,b,},{b,u,lb,lb,u,u,u,u,u,u,b,},{b,u,u,u,u,u,u,u,u,u,b,},{w,b,b,b,b,b,b,b,b,b,w,},
-	["text"]={{" "," "," "," "," "," "," "," "," "," "," ",},{" "," "," "," "," "," "," "," "," "," "," ",},{" "," "," "," "," "," "," "," "," "," "," ",},{" "," "," "," "," "," "," "," "," "," "," ",},{" "," "," "," "," "," "," "," "," "," "," ",},{" "," "," "," ","I","n","k"," "," "," "," ",},{" "," "," "," "," "," "," "," "," "," "," ",},{" "," ","b","y"," ","o","e","e","d"," "," "},{" "," "," "," "," "," "," "," "," "," "," ",},},
+	["text"]={{" "," "," "," "," "," "," "," "," "," "," ",},{" "," "," "," "," "," "," "," "," "," "," ",},{" "," "," "," "," "," "," "," "," "," "," ",},{" "," "," "," "," "," "," "," "," "," "," ",},{" "," "," "," "," "," "," "," "," "," "," ",},{" "," "," "," ","I","n","k"," "," "," "," ",},{" "," "," "," "," "," "," "," "," "," "," ",},{" "," ","b","y"," ","O","u","t","r","a","g","e","d","M","e","t","r","o"},{" "," "," "," "," "," "," "," "," "," "," ",},},
 	["textcol"]={{w,w,w,w,w,w,w,w,w,w,w,},{w,w,w,w,w,w,w,w,w,w,w,},{w,w,w,w,w,w,w,w,w,w,w,},{w,w,w,w,w,w,w,w,w,w,w,},{w,w,w,w,w,w,w,w,w,w,w,},{w,w,w,w,w,w,w,w,w,w,w,},{w,w,w,w,w,w,w,w,w,w,w,},{lb,lb,lb,lb,lb,lb,lb,lb,lb,lb,lb,},{w,w,w,w,w,w,w,w,w,w,w,},},}
 	Drawing.Clear(colours.white)
 	Drawing.DrawImage((Drawing.Screen.Width - 11)/2, (Drawing.Screen.Height - 9)/2, splashIcon, 11, 9)
@@ -2434,7 +2434,7 @@ OpenDocumentWindow = {
 		for i, file in ipairs(self.Files) do
 			if i > self.Scroll and i - self.Scroll <= 11 then
 				if file == self.SelectedFile then
-					Drawing.DrawCharacters(self.X + 1, self.Y + i - self.Scroll, file, colours.white, colours.lightBlue)
+					Drawing.DrawCharacters(self.X + 1, self.Y + i - self.Scroll, file, colours.white, colours.green)
 				elseif string.find(file, '%.txt') or string.find(file, '%.text') or string.find(file, '%.ink') or fs.isDir(self.CurrentDirectory .. file) then
 					Drawing.DrawCharacters(self.X + 1, self.Y + i - self.Scroll, file, colours.black, colours.white)
 				else
@@ -2755,7 +2755,7 @@ SaveDocumentWindow = {
 		for i, file in ipairs(self.Files) do
 			if i > self.Scroll and i - self.Scroll <= 10 then
 				if file == self.SelectedFile then
-					Drawing.DrawCharacters(self.X + 1, self.Y + i - self.Scroll, file, colours.white, colours.lightBlue)
+					Drawing.DrawCharacters(self.X + 1, self.Y + i - self.Scroll, file, colours.white, colours.green)
 				elseif fs.isDir(self.CurrentDirectory .. file) then
 					Drawing.DrawCharacters(self.X + 1, self.Y + i - self.Scroll, file, colours.black, colours.white)
 				else
