@@ -3115,7 +3115,7 @@ function DoVanillaClose()
 	term.setTextColour(colours.lightGrey)
 	PrintCentered("Word Proccessor for ComputerCraft", (Drawing.Screen.Height/2))
 	term.setTextColour(colours.white)
-	PrintCentered("(c) oeed 2014", (Drawing.Screen.Height/2)+3)
+	PrintCentered("(c) OutragedMetro 2019", (Drawing.Screen.Height/2)+3)
 	term.setCursorPos(1, Drawing.Screen.Height)
 	error('', 0)
 end
