@@ -4,7 +4,7 @@ os.pullEvent = os.pullEventRaw
 msg = ""
 MHN = 1
 MH = {}
-MH[0] = "Loaded SMS"
+MH[0] = "Loaded Wireless One Chat"
 term.write("Name: ")
 name = read()
 clear = function()
