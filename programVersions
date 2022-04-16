@@ -35,7 +35,7 @@
     ["Author"]="Outraged Security .INC",
     ["Package"]="Outraged Security .INC",
    },
-      ["Pda Secure Door"]={
+      ["PdaSecureDoor"]={
     ["GitURL"]="https://raw.githubusercontent.com/OutragedMetro/darkprograms/darkprograms/SecurePdaDoor/SecureDoor",
     ["Version"]=2.94,
     ["Type"]="program",
