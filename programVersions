@@ -18,7 +18,7 @@
     ["Package"]="Outraged Security .INC",
   },  
       ["MetroOS"]={
-    ["GitURL"]="https://raw.githubusercontent.com/rservices/darkprograms/darkprograms/MetroOS/MetroOS",
+    ["GitURL"]="https://raw.githubusercontent.com/nothjarnan/axiom/master/install.lua install.lua",
     ["Version"]=2.94,
     ["Type"]="program",
     ["Name"]="Outraged Security .INC Secure OS Downloader",
