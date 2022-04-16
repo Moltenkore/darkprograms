@@ -13,7 +13,7 @@
     ["Version"]=4.26,
     ["Type"]="program",
     ["Name"]="Outraged Security .INC  Client",
-    ["Description"]="DOutraged Security .INC Base Security Client",
+    ["Description"]="Outraged Security .INC Base Security Client",
     ["Author"]="Outraged Security .INC",
     ["Package"]="Outraged Security .INC",
   },  
