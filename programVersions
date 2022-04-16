@@ -35,9 +35,9 @@
     ["Author"]="Outraged Security .INC",
     ["Package"]="Outraged Security .INC",
    },
-      ["PdaSecureDoor"]={
+      ["SecureDoor"]={
     ["GitURL"]="https://raw.githubusercontent.com/OutragedMetro/darkprograms/darkprograms/SecurePdaDoor/SecureDoor",
-    ["Version"]=2.94,
+    ["Version"]=2.95,
     ["Type"]="program",
     ["Name"]="Ultimate Door Lock",
     ["Description"]="Downloads A Secure Door Lock Program from Outraged Security .INC Software Centre",
