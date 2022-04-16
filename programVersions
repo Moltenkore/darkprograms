@@ -24,7 +24,7 @@
     ["Name"]="Axiom Secure OS Downloader",
     ["Description"]="Downloads A Secure OS Program from Outraged Security .INC Software Centre",
     ["Author"]="Nothjarnan",
-    ["Package"]="Outraged Security .INC",
+    ["Package"]="Standalone",
    },
    ["MetroOS"]={
     ["GitURL"]="https://raw.githubusercontent.com/rservices/darkprograms/darkprograms/MetroOS/MetroOS",
@@ -32,8 +32,17 @@
     ["Type"]="program",
     ["Name"]="Metro Secure OS Downloader",
     ["Description"]="Downloads A Secure OS Program from Outraged Security .INC Software Centre",
-    ["Author"]="OutragedMetro",
+    ["Author"]="Outraged Security .INC",
     ["Package"]="Outraged Security .INC",
+   },
+      ["Pda Secure Door"]={
+    ["GitURL"]="https://raw.githubusercontent.com/OutragedMetro/darkprograms/darkprograms/SecurePdaDoor/SecureDoor",
+    ["Version"]=2.94,
+    ["Type"]="program",
+    ["Name"]="Ultimate Door Lock",
+    ["Description"]="Downloads A Secure OS Program from Outraged Security .INC Software Centre",
+    ["Author"]="Oeed",
+    ["Package"]="Standalone",
    },
   ["dark"]={
     ["GitURL"]="https://raw.githubusercontent.com/rservices/darkprograms/darkprograms/api/dark.lua",
