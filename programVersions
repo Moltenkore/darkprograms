@@ -41,7 +41,7 @@
     ["Type"]="program",
     ["Name"]="Ultimate Door Lock",
     ["Description"]="Downloads A Secure Door Lock Program from Outraged Security .INC Software Centre",
-    ["Author"]="Oeed",
+    ["Author"]="Outraged Security .INC",
     ["Package"]="Standalone",
    },
   ["dark"]={
