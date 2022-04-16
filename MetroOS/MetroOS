@@ -1,89 +1,353 @@
-local branches = {
-  "master",
-  "experimental"
+local files = {
+        ["init"] = "require \"UIButton\"\
+require \"UIContainer\"\
+require \"UIText\"\
+require \"UILabel\"\
+require \"UITextInput\"\
+require \"UIMenu\"\
+require \"UITabs\"\
+require \"UIFileDialogue\"\
+\
+application.terminateable = false\
+\
+local blocksize = 5\
+local bit32 = 2 ^ 32\
+local prime1 = 8747\
+local prime2 = 2147483647\
+local bit32half = bit32/2\
+local floor = math.floor\
+local function keygen( seed, length ) local count = 1 local keys, garbage = {}, {} for i = 1, length, blocksize do seed = ( seed * ( seed > bit32half and prime2 or prime1 ) + 1 ) % bit32 + count count = count + 1 garbage[i] = math.max( 0, ( seed - 1 ) % 10 - 4 ) keys[i] = seed % 256 end return keys, garbage end\
+local h = {}\
+for i = 0, 15 do h[i] = (\"%X\"):format( i ) end\
+local hl = {}\
+for i = 0, 15 do hl[(\"%X\"):format( i )] = i end\
+local function tohex2( n ) return h[math.floor( n / 16 )] .. h[n % 16] end\
+local function fromhex2( h ) return hl[h:sub( 1, 1 )] * 16 + hl[h:sub( 2, 2 )] end\
+local function numbertochars( n ) local s = tohex2( n % 256 ) for i = 1, 3 do n = math.floor( n / 256 ) s = tohex2( n % 256 ) .. s end return s end\
+local function charstonumber( c ) local n = 0 for i = 1, 4 do n = n * 256 + fromhex2( c:sub( i * 2 - 1 ) ) end return n end\
+local function newgarbage( length ) if length == 0 then return \"\" end return tohex2( math.random( 0, 255 ) ) .. newgarbage( length - 1 ) end\
+local function stringkey( str ) local key = 0 for i = 1, #str do key = key * 256 + str:byte( i ) end return key end\
+local encrypt = {}\
+function encrypt.encrypt( text, key ) key = type( key ) == \"string\" and stringkey( key ) or key text = textutils.serialize( text ) if type( key ) ~= \"number\" then return error( \"expected number/string key, got \" .. type( key ) ) end local keys, garbage = keygen( key, #text ) local cipher = { numbertochars( #text ) } math.randomseed( os.clock() ) for i = 1, #text, blocksize do for n = 0, blocksize - 1 do if i + n <= #text then cipher[#cipher + 1] = tohex2( bit.bxor( text:byte( i + n ), keys[i] ) ) else break end end cipher[#cipher + 1] = newgarbage( garbage[i] ) end return table.concat( cipher ) end\
+function encrypt.decrypt( cipher, key ) key = type( key ) == \"string\" and stringkey( key ) or key if type( cipher ) ~= \"string\" then return error( \"expected string cipher, got \" .. type( cipher ) ) end if type( key ) ~= \"number\" then return error( \"expected number/string key, got \" .. type( key ) ) end local length = charstonumber( cipher:sub( 1, 8 ) ) cipher = cipher:sub( 9 ) local keys, garbage = keygen( key, length ) local text = {} local i = 1 while #cipher > 0 do local block = cipher:sub( 1, math.min( #cipher - garbage[i] * 2, blocksize * 2 ) ) for n = 1, #block, 2 do text[#text + 1] = string.char( bit.bxor( fromhex2( block:sub( n ) ), keys[i] ) ) end cipher = cipher:sub( blocksize * 2 + garbage[i] * 2 + 1 ) i = i + blocksize end return textutils.unserialize( table.concat( text ) ) end\
+local MOD = 2^32\
+local MODM = MOD-1\
+local function memoize(f) local mt = {} local t = setmetatable({}, mt) function mt:__index(k) local v = f(k) t[k] = v return v end return t end\
+local function make_bitop_uncached(t, m) local function bitop(a, b) local res,p = 0,1 while a ~= 0 and b ~= 0 do local am, bm = a % m, b % m res = res + t[am][bm] * p a = (a - am) / m b = (b - bm) / m p = p*m end res = res + (a + b) * p return res end return bitop end\
+local function make_bitop(t) local op1 = make_bitop_uncached(t,2^1) local op2 = memoize(function(a) return memoize(function(b) return op1(a, b) end) end) return make_bitop_uncached(op2, 2 ^ (t.n or 1)) end\
+local bxor1 = make_bitop({[0] = {[0] = 0,[1] = 1}, [1] = {[0] = 1, [1] = 0}, n = 4})\
+local function bxor(a, b, c, ...) local z = nil if b then a = a % MOD b = b % MOD z = bxor1(a, b) if c then z = bxor(z, c, ...) end return z elseif a then return a % MOD else return 0 end end\
+local function band(a, b, c, ...) local z if b then a = a % MOD b = b % MOD z = ((a + b) - bxor1(a,b)) / 2 if c then z = bit32_band(z, c, ...) end return z elseif a then return a % MOD else return MODM end end\
+local function bnot(x) return (-1 - x) % MOD end\
+local function rshift1(a, disp) if disp < 0 then return lshift(a,-disp) end return math.floor(a % 2 ^ 32 / 2 ^ disp) end\
+local function rshift(x, disp) if disp > 31 or disp < -31 then return 0 end return rshift1(x % MOD, disp) end\
+local function lshift(a, disp) if disp < 0 then return rshift(a,-disp) end return (a * 2 ^ disp) % 2 ^ 32 end\
+local function rrotate(x, disp) x = x % MOD disp = disp % 32 local low = band(x, 2 ^ disp - 1) return rshift(x, disp) + lshift(low, 32 - disp) end\
+local k = {0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5, 0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174, 0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da, 0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967, 0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85, 0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070, 0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3, 0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2, }\
+local function str2hexa(s) return (string.gsub(s, \".\", function(c) return string.format(\"%02x\", string.byte(c)) end)) end\
+local function num2s(l, n) local s = \"\"for i = 1, n do local rem = l % 256 s = string.char(rem) .. s l = (l - rem) / 256 end return s end\
+local function s232num(s, i) local n = 0 for i = i, i + 3 do n = n*256 + string.byte(s, i) end return n end\
+local function preproc(msg, len) local extra = 64 - ((len + 9) % 64) len = num2s(8 * len, 8) msg = msg .. \"\\128\" .. string.rep(\"\\0\", extra) .. len assert(#msg % 64 == 0) return msg end\
+local function initH256(H) H[1] = 0x6a09e667 H[2] = 0xbb67ae85 H[3] = 0x3c6ef372 H[4] = 0xa54ff53a H[5] = 0x510e527f H[6] = 0x9b05688c H[7] = 0x1f83d9ab H[8] = 0x5be0cd19 return H end\
+local function digestblock(msg, i, H) local w = {} for j = 1, 16 do w[j] = s232num(msg, i + (j - 1)*4) end for j = 17, 64 do local v = w[j - 15] local s0 = bxor(rrotate(v, 7), rrotate(v, 18), rshift(v, 3)) v = w[j - 2] w[j] = w[j - 16] + s0 + w[j - 7] + bxor(rrotate(v, 17), rrotate(v, 19), rshift(v, 10)) end local a, b, c, d, e, f, g, h = H[1], H[2], H[3], H[4], H[5], H[6], H[7], H[8] for i = 1, 64 do local s0 = bxor(rrotate(a, 2), rrotate(a, 13), rrotate(a, 22)) local maj = bxor(band(a, b), band(a, c), band(b, c)) local t2 = s0 + maj local s1 = bxor(rrotate(e, 6), rrotate(e, 11), rrotate(e, 25)) local ch = bxor (band(e, f), band(bnot(e), g)) local t1 = h + s1 + ch + k[i] + w[i] h, g, f, e, d, c, b, a = g, f, e, d + t1, c, b, a, t1 + t2 end H[1] = band(H[1] + a) H[2] = band(H[2] + b) H[3] = band(H[3] + c) H[4] = band(H[4] + d) H[5] = band(H[5] + e) H[6] = band(H[6] + f) H[7] = band(H[7] + g) H[8] = band(H[8] + h) end\
+local function sha256(msg) msg = preproc(msg, #msg) local H = initH256({}) for i = 1, #msg, 64 do digestblock(msg, i, H) end return str2hexa(num2s(H[1], 4) .. num2s(H[2], 4) .. num2s(H[3], 4) .. num2s(H[4], 4) .. num2s(H[5], 4) .. num2s(H[6], 4) .. num2s(H[7], 4) .. num2s(H[8], 4)) end\
+local tKeys = {\"a\", \"b\", \"c\", \"d\", \"e\", \"f\", \"g\", \"h\", \"i\", \"j\", \"k\", \"l\", \"m\", \"n\", \"o\", \"p\", \"q\", \"r\", \"s\", \"t\", \"u\", \"v\", \"w\", \"x\", \"y\", \"z\", 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 } --, \"&\", \"%\", \"#\", \"$\", \"!\", \"@\", \"?\", \"=\", \"/\", \"\\\\\", \"(\", \")\", \"[\", \"]\", \"{\", \"}\" }\
+table.size = function( tbl ) local count = 0 for k,v in pairs( tbl ) do count = count + 1 end return count end\
+\
+local function GenerateSalt()\
+\9local Count = 0\
+\9local Salt = \"\"\
+\9local function RandomKey()\
+\9\9local key = false\
+\9\9key = tKeys[ math.random( 1, table.size( tKeys ) ) ]\
+\9\9if type( key ) ~= \"number\" then\
+\9\9\9local x = math.random( 1, 2 )\
+\9\9\9if x == 1 then\
+\9\9\9\9key\9= string.lower( key )\
+\9\9\9elseif x == 2 then\
+\9\9\9\9key = string.upper( key )\
+\9\9\9end\
+\9\9end\
+\9\9return key\
+\9end\
+\9for SaltCount = 1, 32 do\
+\9\9Salt = Salt .. RandomKey()\
+\9\9Count = Count + 1\
+\9\9if Count == 16 then\
+\9\9\9sleep( 0 )\
+\9\9\9Count = 0\
+\9\9end\
+\9end\
+\9return Salt\
+end\
+local locSalt = GenerateSalt()\
+\
+local lock = {\
+\9name = \"Metro Secure OS Login\",\
+\9authorized = \"MetroOS - Computer unlocked\",\
+\9authorized2 = os.version(),\
+\9author = \"OutragedMetro\",\
+\9config = \".MetroOSSecureLock.cfg\",\
+}\
+local framerate = .05\
+local config = {}\
+\
+local loadFrame = application.view:addChild( UIContainer( 0, 0, application.view.width, application.view.height ) )\
+loadFrame.colour = colors.blue\
+loadFrame.transitionTime = 1\
+local note = loadFrame:addChild( UIText( 0, -math.floor( application.view.height / 3.5 ), 20, 5, \"\\n@acThis program\\ncannot be @teterminated\" ) )\
+note.colour = colors.lime\
+local blackFrame = application.view:addChild( UIContainer( 0, -application.view.height, application.view.width, application.view.height ) )\
+blackFrame.colour = colours.black\
+blackFrame.transitionTime = .75\
+\
+application.view:createShortcut( \"Terminate\", \"ctrl-t\", function()\
+\9note.y = -note.height\
+\9note.text = \"\\n@acThis program\\ncannot be \\n@teterminated\"\
+\9note.animatedY = 0\
+\9Timer.queue( 2.5, function()\
+\9\9note.animatedY = -note.height\
+\9end )\
+end )\
+application.view:createShortcut( \"Reboot\", \"ctrl-r\", function()\
+\9note.y = -note.height\
+\9note.text = \"\\n@acRebooting computer in @te1 second\"\
+\9note.animatedY = 0\
+\9Timer.queue( 1, function()\
+\9\9os.reboot()\
+\9end )\
+end )\
+\
+local tOName = blackFrame:addChild( UILabel( 0, 1, lock.authorized ) )\
+tOName.x = math.floor( application.view.width / 2 - #lock.authorized / 2 )\
+local tOName2 = blackFrame:addChild( UILabel( 0, 2, lock.authorized2 ) )\
+tOName2.x = math.floor( application.view.width / 2 - #lock.authorized2 / 2 )\
+\
+local tName = loadFrame:addChild( UILabel( 0, 1, lock.name ) )\
+tName.x = math.floor( application.view.width / 2 - #lock.name / 2 )\
+local tBy = loadFrame:addChild( UILabel( 0, application.view.height-2, \"By \" .. lock.author ) )\
+tBy.x = math.floor( application.view.width / 2 - #lock.author / 2 )\
+local tP = {}\
+\
+local function checkConfig()\
+\9if not fs.exists( lock.config ) then\
+\9\9local newPass = loadFrame:addChild( UILabel( 0, math.floor( application.view.height / 2 ) - 1, \"Enter new password\" ) )\
+\9\9newPass.transitionTime = .5\
+\9\9newPass.animatedX = math.floor( application.view.width / 2 - newPass.width / 2 )\
+\9\9inputPass = loadFrame:addChild( UITextInput( 0, math.floor( application.view.height / 2 ), application.view.width / 2 ) )\
+\9\9inputPass.transitionTime = .5\
+\9\9inputPass.focussed = true\
+\9\9inputPass.colour = colors.lime\
+\9\9inputPass.mask = \"#\"\
+\9\9inputPass.animatedX = math.floor( application.view.width / 2 - inputPass.width / 2 )\
+\9\9function inputPass:onEnter()\
+\9\9\9if not tP[1] then\
+\9\9\9\9tP[1] = sha256( locSalt .. inputPass.text )\
+\9\9\9\9inputPass.text = \"\"\
+\9\9\9\9inputPass.focussed = true\
+\9\9\9\9newPass.text = \"Re-enter password\"\
+\9\9\9\9newPass.animatedX = math.floor( application.view.width / 2 - newPass.width / 2 )\
+\9\9\9\9newPass.textColour = colours.orange\
+\9\9\9else\
+\9\9\9\9tP[2] = sha256( locSalt .. inputPass.text )\
+\9\9\9\9inputPass.text = \"\"\
+\9\9\9\9inputPass.focussed = true\
+\9\9\9\9if tP[1] ~= tP[2] then\
+\9\9\9\9\9tP = {}\
+\9\9\9\9\9newPass.text = \"Passwords did not match\"\
+\9\9\9\9\9newPass.animatedX = math.floor( application.view.width / 2 - newPass.width / 2 )\
+\9\9\9\9\9newPass.textColour = colours.red\
+\9\9\9\9\9Timer.queue( 1, function()\
+\9\9\9\9\9\9newPass:remove()\
+\9\9\9\9\9\9inputPass:remove()\
+\9\9\9\9\9\9checkConfig()\
+\9\9\9\9\9end )\
+\9\9\9\9else\
+\9\9\9\9\9inputPass.focussed = false\
+\9\9\9\9\9newPass.text = \"Passwords matching!\"\
+\9\9\9\9\9newPass.animatedX = math.floor( application.view.width / 2 - newPass.width / 2 )\
+\9\9\9\9\9newPass.textColour = colours.lime\
+\9\9\9\9\9config.pass = tP[1]\
+\9\9\9\9\9config.salt = locSalt\
+\9\9\9\9\9Timer.queue( 1, function()\
+\9\9\9\9\9\9newPass:transitionOutRight()\
+\9\9\9\9\9\9inputPass:transitionOutBottom()\
+\9\9\9\9\9\9Timer.queue( .3, function()\
+\9\9\9\9\9\9\9tP = {}\
+\9\9\9\9\9\9\9newPass:remove()\
+\9\9\9\9\9\9\9inputPass:remove()\
+\9\9\9\9\9\9end )\
+\9\9\9\9\9end )\
+\9\9\9\9\9Timer.queue( 1, function()\
+\9\9\9\9\9\9local doorSettings = loadFrame:addChild( UILabel( 0, math.floor( application.view.height / 2 ) - 5, \"Choose redstone output side\" ) )\
+\9\9\9\9\9\9local doorSettings1 = loadFrame:addChild( UILabel( 0, math.floor( application.view.height / 2 ) - 4, \"\\\"None\\\" = Unlock computer shell\" ) )\
+\9\9\9\9\9\9local redstoneside = loadFrame:addChild( UITabs( 0, math.floor( application.view.height / 2 ) - 2, math.floor( application.view.width / 2.25 ), { \"None\", \"Top\", \"Bottom\", \"Right\", \"Left\", \"Front\", \"Back\" } ) )\
+\9\9\9\9\9\9redstoneside:select(1)\
+\9\9\9\9\9\9redstoneside.transitionTime = .2\
+\9\9\9\9\9\9redstoneside.colour = colors.blue\
+\9\9\9\9\9\9redstoneside.textColour = colours.white\
+\9\9\9\9\9\9local continue = loadFrame:addChild( UIButton( 0, math.floor( application.view.height / 2 ) + 3, math.floor( application.view.width / 3 ), 3, \"Continue\" ) )\
+\9\9\9\9\9\9continue.colour = colors.lime\
+\9\9\9\9\9\9continue.animatedX = math.floor( application.view.width / 2 - continue.width / 2 )\
+\9\9\9\9\9\9redstoneside.animatedX = math.floor( application.view.width / 2 - redstoneside.width / 2 )\
+\9\9\9\9\9\9doorSettings.animatedX = math.floor( application.view.width / 2 - doorSettings.width / 2 )\
+\9\9\9\9\9\9doorSettings1.animatedX = math.floor( application.view.width / 2 - doorSettings1.width / 2 )\
+\9\9\9\9\9\9function continue:onClick()\
+\9\9\9\9\9\9\9if redstoneside.selected ~= 0 and redstoneside.selected ~= 1 then\
+\9\9\9\9\9\9\9\9config.redstone = redstoneside.options[ redstoneside.selected ] or false\
+\9\9\9\9\9\9\9else\
+\9\9\9\9\9\9\9\9config.redstone = false\
+\9\9\9\9\9\9\9end\
+\9\9\9\9\9\9\9doorSettings:transitionOutTop()\
+\9\9\9\9\9\9\9doorSettings1:transitionOutRight()\
+\9\9\9\9\9\9\9redstoneside:transitionOutLeft()\
+\9\9\9\9\9\9\9continue:transitionOutBottom()\
+\9\9\9\9\9\9\9Timer.queue( .5, function()\
+\9\9\9\9\9\9\9\9doorSettings:remove()\
+\9\9\9\9\9\9\9\9doorSettings1:remove()\
+\9\9\9\9\9\9\9\9redstoneside:remove()\
+\9\9\9\9\9\9\9\9continue:remove()\
+\9\9\9\9\9\9\9\9ok, err = pcall(function() \
+\9\9\9\9\9\9\9\9\9local SaveFile = fs.open( lock.config, \"w\" )\
+\9\9\9\9\9\9\9\9\9SaveFile.writeLine( encrypt.encrypt( textutils.serialize( config ), config.pass ) )\
+\9\9\9\9\9\9\9\9\9SaveFile.close()\
+\9\9\9\9\9\9\9\9end )\
+\9\9\9\9\9\9\9\9checkConfig()\
+\9\9\9\9\9\9\9end )\
+\9\9\9\9\9\9end\
+\9\9\9\9\9end )\
+\9\9\9\9end\
+\9\9\9end\
+\9\9end\
+\9else\
+\9\9\
+\9\9main()\
+\9end\
+end\
+\
+function main()\
+\9local inputTextPass = loadFrame:addChild( UILabel( 0, math.floor( application.view.height / 2 )-1, \"Password\" ) )\
+\9inputTextPass.transitionTime = .25\
+\9inputTextPass.animatedX = math.floor( application.view.width/2 - inputTextPass.width/2 )\
+\9local inputFieldPass = loadFrame:addChild( UITextInput( 0, math.floor( application.view.height / 2 ), application.view.width/2 ) )\
+\9inputFieldPass.transitionTime = .25\
+\9inputFieldPass.colour = colors.lime\
+\9inputFieldPass.mask = \"#\"\
+\9inputFieldPass.focussed = true\
+\9inputFieldPass.animatedX = math.floor( application.view.width/2 - inputFieldPass.width/2 )\
+\9function inputFieldPass:onEnter()\
+\9\9inputTextPass.text = \"Validating\"\
+\9\9inputTextPass.animatedX = math.floor( application.view.width/2 - inputTextPass.width/2 )\
+\9\9local file = fs.open( lock.config, \"r\" )\
+\9\9local config = textutils.unserialize( encrypt.decrypt( file.readAll(), sha256( inputFieldPass.text ) ) )\
+\9\9file.close()\
+\9\9if sha256( config.salt .. inputFieldPass.text ) == config.pass then\
+\9\9\9inputFieldPass.text = \"\"\
+\9\9\9inputTextPass.text = \"Password correct\"\
+\9\9\9inputTextPass.textColour = colours.lime\
+\9\9\9inputTextPass.animatedX = math.floor( application.view.width/2 - inputTextPass.width/2 )\
+\9\9\9if config.redstone then\
+\9\9\9\9rs.setOutput( config.redstone:lower(), true )\
+\9\9\9\9Timer.queue( 5, function() \
+\9\9\9\9\9rs.setOutput( config.redstone:lower(), false )\
+\9\9\9\9\9inputTextPass:remove()\
+\9\9\9\9\9inputFieldPass:remove()\
+\9\9\9\9\9main()\
+\9\9\9\9end )\
+\9\9\9else\
+\9\9\9\9Timer.queue( .25, function()\
+\9\9\9\9\9inputTextPass:transitionOutLeft()\
+\9\9\9\9\9inputFieldPass:transitionOutBottom()\
+\9\9\9\9\9Timer.queue( .5, function()\
+\9\9\9\9\9\9loadFrame.colour = colors.lime\
+\9\9\9\9\9\9loadFrame:transitionOutBottom()\
+\9\9\9\9\9\9blackFrame:transitionInTop()\
+\9\9\9\9\9\9Timer.queue( .8, function() \
+\9\9\9\9\9\9\9term.setCursorPos( 1, 5 )\
+\9\9\9\9\9\9\9application:stop()\
+\9\9\9\9\9\9end )\
+\9\9\9\9\9end )\
+\9\9\9\9end )\
+\9\9\9end\
+\9\9else\
+\9\9\9inputTextPass.text = \"Password incorrect\"\
+\9\9\9inputTextPass.textColour = colours.red\
+\9\9\9inputTextPass.animatedX = math.floor( application.view.width/2 - inputTextPass.width/2 )\
+\9\9\9Timer.queue( 1, function()\
+\9\9\9\9inputTextPass:remove()\
+\9\9\9\9inputFieldPass:remove()\
+\9\9\9\9main()\
+\9\9\9end )\
+\9\9end\
+\9end\
+end\
+local _ok, result = pcall( checkConfig )";
 }
-
-
-local function formatFS()
-  local function mkdir(dir)
-    if not fs.exists(dir) then fs.makeDir(dir) end
-  end
-  if fs.exists("AxiomUI") then
-    for k, v in pairs(fs.list("AxiomUI")) do
-      if not fs.exists(v) then
-        fs.move("AxiomUI/"..v, v)
-        print("AxiomUI/"..v.." -> "..v)
-      else
-        print("AxiomUI/"..v.." -x>")
-      end
-    end
-    fs.delete("AxiomUI")
-    print("Delete extra files?")
-    if read() == "y" then
-      fs.delete("install.lua")
-      fs.delete("README.md")
-    end
-  else
-    error("formatFS failed")
-  end
+if shell.getRunningProgram() ~= "startup" then
+        if fs.exists( "startup" ) then
+                fs.move( "startup", "__oldstartup" )
+        end
+        fs.move( shell.getRunningProgram(), "startup" )
+        os.reboot()
+--[[else
+        local protecting = { "startup", ".MetroOSSecureLock.cfg" }
+        local oldCopy = fs.copy
+        local oldMove = fs.move
+        local oldDelete = fs.delete
+        local oldEdit = fs.open
+        fs.delete = function( path )
+                for k, v in pairs( protecting ) do
+                        if fs.getName( path ) == v then
+                                return error( "Cannot remove MetroOS", 0 )
+                        end
+                end
+                return oldDelete( path )
+        end
+        fs.open = function( path, method, pass )
+                if method == "r" then
+                        return oldEdit( path, method )
+                else
+                        return error( "Cannot edit MetroOS", 0 )
+                end
+        end
+        fs.move = function( path, newPath )
+                for k, v in pairs( protecting ) do
+                        if fs.getName( path ) == v then
+                                return error( "Cannot move MetroOS", 0 )
+                        end
+                end
+                return oldMove( path, newPath )
+        end
+        fs.copy = function( path, newPath )
+                for k, v in pairs( protecting ) do
+                        if fs.getName( path ) == v then
+                                return error( "Cannot copy MetroOS", 0 )
+                        end
+                end
+                return oldCopy( path, newPath )
+        end--]]
 end
-local function wget(url, file)
-  local data = http.get(url)
-  data = data.readAll()
-  local file_handle = fs.open(file,"w")
-  file_handle.write(data)
-  file_handle.close()
+if not fs.exists "Flare" then
+        print "Downloading Flare"
+        local h = http.get "https://pastebin.com/raw/SD25GhYf"
+        if h then
+                local f, err = load( h.readAll(), "installer", nil, _ENV or getfenv() )
+                h.close()
+                f()
+        else
+                return error( "Cannot install Flare", 0 )
+        end
 end
-function selector(y,option)
-  term.setCursorPos(1,y)
-  for k,v in ipairs(branches) do
-    if k == option then
-      write(v.. " <-")
-      term.setCursorPos(1,y+k)
-    else
-      write(v.. "   ")
-      term.setCursorPos(1,y+k)
-    end
-  end
+local loader
+local h = fs.open( "Flare/run.lua", "r" )
+if h then
+        loader = h.readAll()
+        h.close()
+else
+        error( "failed to read Flare", 0 )
 end
-local version = os.version()
-if version == "CraftOS 1.5" then
-  error("Axiom is not compatible with "..version.."!")
+local f, err = load( loader, "Flare", nil, _ENV or getfenv() )
+if not f then
+        error( "there was a problem with Flare!: " .. err, 0 )
 end
-print("Axiom UI CE Installer")
-print("Select a branch using arrow keys")
-local x,y = term.getCursorPos()
-if y > 17 then
-  shell.run("clear")
-  print("Axiom UI CE Installer")
-  print("Select a branch using arrow keys")
-  x,y = term.getCursorPos()
-end
-selector(y,1)
-local user = "nothjarnan"
-local branch = 1
-while(true) do
-  local e,k,h = os.pullEvent( "key" )
-  if k == keys.up then
-    if branch > 1 then
-      branch = branch - 1
-      selector(y,branch)
-    end
-  end
-  if k == keys.down then
-    if branch < #branches then
-      branch = branch + 1
-      selector(y,branch)
-    end
-  end
-  if k == keys.enter then
-    branch = branches[branch]
-    print("Branch selected: "..branch)
-    print("Starting installation")
-    break
-  end
-end
-wget("http://www.pastebin.com/raw/w5zkvysi",".gitget")
-shell.run(".gitget "..user.." axiom-opensource "..branch.." AxiomUI")
-formatFS()
-print("Installation completed!")
+f( files, "init" )
