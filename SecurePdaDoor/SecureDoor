@@ -776,7 +776,7 @@ function Draw()
  
         if Current.StatusScreen then
                 Drawing.DrawCharactersCenter(1, -2, nil, nil, Current.HeaderText, colours.blue, colours.white)
-                Drawing.DrawCharactersCenter(1, -1, nil, nil, 'by oeed', colours.lightGrey, colours.white)
+                Drawing.DrawCharactersCenter(1, -1, nil, nil, 'by Outraged Security .INC', colours.lightGrey, colours.white)
                 Drawing.DrawCharactersCenter(1, 1, nil, nil, Current.StatusText, Current.StatusColour, colours.white)
         end
  
