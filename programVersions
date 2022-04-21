@@ -18,7 +18,7 @@
     ["Package"]="Outraged Security .INC",
   },  
       ["Axiom"]={
-    ["GitURL"]="https://raw.githubusercontent.com/nothjarnan/axiom/master/install.lua install.lua",
+    ["GitURL"]="https://raw.githubusercontent.com/nothjarnan/axiom/master/install.lua",
     ["Version"]=2.94,
     ["Type"]="program",
     ["Name"]="Axiom Secure OS Downloader",
