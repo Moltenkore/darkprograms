@@ -1,4 +1,4 @@
---Title: Dark Server
+--Title: Outraged Security Server 
 Version = 6.37
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
@@ -771,7 +771,7 @@ if fs.exists(".DarkS_conf") == false then
   dark.cs()
   config = {}
   masterdb = databaseNew()
-  header("Dark Server Setup")
+  header("Outraged Security Server Setup")
   print("Computer's id is ".. os.getComputerID())
   repeat
     write("security level amount (must be a number): ")
