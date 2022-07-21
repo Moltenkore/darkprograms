@@ -1,4 +1,4 @@
---Title: Dark Client
+--Title: Outraged Security Client
 Version = 4.26
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
@@ -146,7 +146,7 @@ if fs.exists(".DarkC_conf") == false then
   
   term.clear()
   term.setCursorPos(1,1)
-  header("Dark Client Setup")
+  header("Outraged Security Client Setup")
   
   print("Computer's id is ".. os.getComputerID())
   while true do
