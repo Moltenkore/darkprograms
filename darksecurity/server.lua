@@ -324,6 +324,7 @@ Co = {
       header("Help")
       dark.printA("Press [1] to return to the main menu", 1, y)
       print("\nTo Navigate the settings menu and to add new users, Keycards, And passwords just follow the on screen prompts!")
+      print("\nOutraged Security INC prides them selves in providing top notch security to its customers for more support contact Outraged Security INC for a geek squad visit.")
       os.pullEvent("key")
     end,
     options = {"main"}
