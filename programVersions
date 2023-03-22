@@ -19,7 +19,7 @@
   },  
       ["Axiom"]={
     ["GitURL"]="https://raw.githubusercontent.com/nothjarnan/axiom/master/install.lua",
-    ["Version"]=2.94,
+    ["Version"]=2.95,
     ["Type"]="program",
     ["Name"]="Axiom Secure OS Downloader",
     ["Description"]="Downloads A Secure OS Program from Outraged Security .INC Software Centre",
