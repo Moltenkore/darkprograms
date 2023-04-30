@@ -86,7 +86,7 @@ local lock = {\
 \9name = \"Metro Secure OS Login\",\
 \9authorized = \"MetroOS - Computer unlocked\",\
 \9authorized2 = os.version(),\
-\9author = \"OutragedMetro\",\
+\9author = \"Outraged Security .INC\",\
 \9config = \".MetroOSSecureLock.cfg\",\
 }\
 local framerate = .05\
@@ -147,7 +147,7 @@ local function checkConfig()\
 \9\9\9\9inputPass.focussed = true\
 \9\9\9\9newPass.text = \"Re-enter password\"\
 \9\9\9\9newPass.animatedX = math.floor( application.view.width / 2 - newPass.width / 2 )\
-\9\9\9\9newPass.textColour = colours.orange\
+\9\9\9\9newPass.text\ = colours.orange\
 \9\9\9else\
 \9\9\9\9tP[2] = sha256( locSalt .. inputPass.text )\
 \9\9\9\9inputPass.text = \"\"\
