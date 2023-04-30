@@ -130,7 +130,7 @@ function selection(no,list,totpage)
   term.setCursorPos(1,y)
   tc("white","blue")
   term.write("Page: ".. page + 1 .. "/" .. totpage)
-  term.setCursorPos(x - 10, y)
+  term.setCursorPos(x - 8, y)
   term.write("By OutragedMetro .INC")
   tc("white","black")
 end
