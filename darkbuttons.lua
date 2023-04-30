@@ -28,10 +28,10 @@ AutoUpdate = true
 --General Functions
 function Header(text, lText, rText) -- builds a header using functions above from <text>
   local x,y = term.getSize()
-  dark.printL("-", 1, nil, "green, "green")
-  dark.printC(string.rep(" ", x+1), 2, nil, "white", "green")
-  dark.printC(text, 2, nil, "white", "green")
-  dark.printL("-", 3, 5, "green", "green")
+  dark.printL("-", 1, nil, "blue", "blue")
+  dark.printC(string.rep(" ", x+1), 2, nil, "white", "blue")
+  dark.printC(text, 2, nil, "white", "blue")
+  dark.printL("-", 3, 5, "blue", "blue")
 end
 function saveState()
   dark.db.save("state", buttons)
@@ -384,9 +384,9 @@ function wizard(mode)
     end
       happyness = checkTemp(hx,hy,txd,txu,tyd,tyu)
       if happyness ~= true then
-        textBox(":'(",txd,txu,tyd,tyu,colors.white,colors.green)
+        textBox(":'(",txd,txu,tyd,tyu,colors.white,colors.blue)
       else
-        textBox(":)",txd,txu,tyd,tyu,colors.white,colors.green)
+        textBox(":)",txd,txu,tyd,tyu,colors.white,colors.blue)
       end
       sleep(1)
     until happyness == true
