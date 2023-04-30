@@ -52,7 +52,7 @@ function header(text, lText, rText)
   dark.printC(string.rep(" ", x), 2, nil, "white", "blue")
   if lText then dark.printA(lText, 1, 2, nil, "white", "blue") end
   if rText then dark.printA(rText, x - #rText, 2, nil, "white", "blue") end
-  dark.printC(text, 2, nil, "yellow", "blue")
+  dark.printC(text, 2, nil, "white", "blue")
   dark.printL("-", 3, 5, "blue", "blue")
 end
 function footer()
