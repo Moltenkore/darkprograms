@@ -1,7 +1,5 @@
 --Title: Dark buttons
 Version = 1.231
---Author: Darkrising (minecraft name djhannz)
---Platform: ComputerCraft Lua Virtual Machine
 if not term.isColour() then
 	print("Requires an Advanced Computer and an Advanced monitor.")
 	return
