@@ -1,7 +1,5 @@
 --Title: Outraged Security Server 
 Version = 6.37
---Author: Darkrising (minecraft name djhannz)
---Platform: ComputerCraft Lua Virtual Machine
 term.clear()
 term.setCursorPos(1,1)
 if fs.exists("dark") == false then
