@@ -33,7 +33,7 @@ AutoUpdate = true
 globalWait = 1
 slevel = 1
 cliVent = {}
-co = "green"
+co = "blue"
 mLog = {}
 --Fixes
 
@@ -110,7 +110,7 @@ function header(text, lText, rText)
   if debugMode and (debugMode == true) then
     co = "red"
   else
-    co = "green"
+    co = "blue"
   end
   dark.printL("-", 1, nil, co, co)
   dark.printA("|", x, 2, nil, co, co)
@@ -125,10 +125,10 @@ function footer()
   if debugMode and (debugMode == true) then
     co = "red"
   else
-    co = "green"
+    co = "blue"
   end
   dark.printL("-", y, nil, co, co)
-  dark.printA("by OutragedMetro", x-13, y, nil, "yellow", co)
+  dark.printA("by OutragedMetro", x-13, y, nil, "red", co)
 end
 function displayTNameColumn(TName, Page, Extrater, Admin)
   if Extrater then
