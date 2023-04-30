@@ -46,18 +46,18 @@ function rednetReceiveE(TimeA)
   end
 end
 function header(text, lText, rText)
-  dark.printL("-", 1, nil, "green", "green")
-  dark.printA("|", x, 2, nil, "green", "green")
-  dark.printA("|", 1, 2, nil, "green", "green")
-  dark.printC(string.rep(" ", x), 2, nil, "white", "green")
-  if lText then dark.printA(lText, 1, 2, nil, "white", "green") end
-  if rText then dark.printA(rText, x - #rText, 2, nil, "white", "green") end
-  dark.printC(text, 2, nil, "yellow", "green")
-  dark.printL("-", 3, 5, "green", "green")
+  dark.printL("-", 1, nil, "blue", "blue")
+  dark.printA("|", x, 2, nil, "blue", "blue")
+  dark.printA("|", 1, 2, nil, "blue", "blue")
+  dark.printC(string.rep(" ", x), 2, nil, "white", "blue")
+  if lText then dark.printA(lText, 1, 2, nil, "white", "blue") end
+  if rText then dark.printA(rText, x - #rText, 2, nil, "white", "blue") end
+  dark.printC(text, 2, nil, "yellow", "blue")
+  dark.printL("-", 3, 5, "blue", "blue")
 end
 function footer()
-  dark.printL("-", y, nil, "green", "green")
-  dark.printA("by OutragedMetro", x-13, y, nil, "yellow", "green")
+  dark.printL("-", y, nil, "blue", "blue")
+  dark.printA("by OutragedMetro", x-13, y, nil, "red", "blue")
 end
 function keycard_mainProgram()
   while true do
