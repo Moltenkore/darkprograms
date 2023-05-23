@@ -101,64 +101,62 @@ function loadingAnimation()
   end
 end
 
--- Modify the runMenu function to include the loading animation
-function runMenu()
-  cs()
-  print("Checking for updates...")
-  if gitUpdate("darkretriever", shell.getRunningProgram(), Version) == true then
-    print("Update found and downloaded.")
-    print("\nPlease run " .. shell.getRunningProgram() .. " again.")
-    return exit
-  else
-    print("Program up-to-date.")
-  end
-  sleep(1)
-
-  x, y = term.getSize()
-  cs()
-  write("-> Grabbing file...")
-  sleep(1)
-  write(" Done.")
-  sleep(1)
-  cs()
-  write("-> Decoding file...")
-  sleep(1)
-  write(" Done.")
-  sleep(1)
-  cs()
-  write("-> Importing file...")
-  local cat = getUrlFile("https://raw.github.com/darkrising/darkprograms/darkprograms/programList")
-  write(" Done.")
-  sleep(1)
-  cs()
-
-  local function printMenu()
-    header("Main Menu")
-    local yPrint = 3
-    for i = 1, #cat do
-      if cat[i].hidden ~= true then
-        term.setCursorPos(2, yPrint)
-        print(i .. " - " .. cat[i].name)
-        yPrint = yPrint + 1
-      end
-    end
-  end
-
-  printMenu()
-
-  while true do
-    local event, button, mx, my = os.pullEvent("mouse_click")
-    if mx >= 2 and my >= 3 and mx <= x - 1 and my <= y - 1 then
-      local selection = (my - 3) + 1
-      shell.run(cat[selection].location)
-    end
-    cs()
-    printMenu()
-  end
-end
-
 -- Call the loading animation function to start the program
 loadingAnimation()
 
--- Call the runMenu function to run the rest of the program
-runMenu()
+-- Rest of the program code
+
+cs()
+print("Checking for updates...")
+if gitUpdate("darkretriever", shell.getRunningProgram(), Version) == true then
+  print("Update found and downloaded.")
+  print("\nPlease run " .. shell.getRunningProgram() .. " again.")
+  return exit
+else
+  print("Program up-to-date.")
+end
+sleep(1)
+
+x, y = term.getSize()
+cs()
+write("-> Grabbing file")
+sleep(1)
+write("...")
+sleep(1)
+write(" Done.")
+sleep(1)
+cs()
+write("-> Decoding file...")
+sleep(1)
+write(" Done.")
+sleep(1)
+cs()
+write("-> Importing file...")
+local cat = getUrlFile("https://raw.github.com/darkrising/darkprograms/darkprograms/programList")
+write(" Done.")
+sleep(1)
+cs()
+
+local function printMenu()
+  header("Main Menu")
+  local yPrint = 3
+  for i = 1, #cat do
+    if cat[i].hidden ~= true then
+      term.setCursorPos(2, yPrint)
+      print(i .. " - " .. cat[i].name)
+      yPrint = yPrint + 1
+    end
+  end
+end
+
+printMenu()
+
+while true do
+  local event, button, mx, my = os.pullEvent("mouse_click")
+  if mx >= 2 and my >= 3 and mx <= x - 1 and my <= y - 1 then
+    local selection = (my - 3) + 1
+    shell.run(cat[selection].location)
+  end
+  cs()
+  printMenu()
+end
