@@ -1,3 +1,29 @@
+-- Function to display a loading animation
+local function displayLoadingAnimation()
+  local animationFrames = {"/", "-", "\\", "|"} -- Frames for the animation
+  local frameIndex = 1 -- Current frame index
+
+  -- Clear the terminal
+  term.clear()
+  term.setCursorPos(1, 1)
+
+  -- Display the animation
+  while true do
+    -- Print the current frame
+    term.write(animationFrames[frameIndex])
+    term.setCursorPos(1, 1)
+
+    -- Wait for a short duration
+    os.sleep(0.1)
+
+    -- Move to the next frame
+    frameIndex = frameIndex + 1
+    if frameIndex > #animationFrames then
+      frameIndex = 1
+    end
+  end
+end
+
 Version = 2.12
 x,y = term.getSize()
 if not http then
@@ -82,12 +108,18 @@ sleep(1)
 
 x,y = term.getSize()
 cs()
-write("-> Grabbing file...")
-cat = getUrlFile("https://raw.github.com/darkrising/darkprograms/darkprograms/programVersions")
-cat = textutils.unserialize(cat)
-write(" Done.")
-sleep(1)
-cs()
+
+local function fetchData()
+  write("-> Grabbing file...")
+  displayLoadingAnimation() -- Display the loading animation
+  cat = getUrlFile("https://raw.github.com/darkrising/darkprograms/darkprograms/programVersions")
+  cat = textutils.unserialize(cat)
+  write(" Done.")
+  sleep(1)
+  cs()
+end
+
+fetchData()
 
 menu = {}
 rawName = {}
@@ -131,7 +163,7 @@ function selection(no,list,totpage)
   tc("white","blue")
   term.write("Page: ".. page + 1 .. "/" .. totpage)
   term.setCursorPos(x - 14, y)
-  term.write("By Darkrising")
+  term.write("By OutragedMetro")
   tc("white","black")
 end
 function draw(tbl)
@@ -195,109 +227,153 @@ function runMenu()
     
     selection(csel, list, totpage)
     
-    e,key = os.pullEvent("key")  
-    
-    if key == keys.h then
-      cs()
-      header("Help")
-      term.setCursorPos(1,ind)
-      print("Use the up and down arrows to move through the list.")
-      print("use the right arrow to enter a menu item and the left arrow to exit")
-      print("")
-      _,cy = term.getCursorPos()
-      tc("yellow","black")
-      writeC("Press enter to continue.",cy)
-      tc("white","black")
-      read(" ")
-    end
-    
-    if key == keys.up then
-      csel = csel - 1
-    end
-    if key == keys.down then
-      csel = csel + 1
-    end
-    if key == keys.enter then
-      
-    end
-    if key == keys.right then
-      osel[level] = csel
-      level = level + 1
-       
-      if level == 2 then
-        auna = list[csel]       
-      elseif level == 3 then
-        pkg = list[csel]
-      elseif level == 4 then
-        pro = list[csel]
-      end
-      
-      if level > 4 then level = 4 end
-      
-      csel = 1
-      osel[level] = 1
-    end  
+    e,key = os.pullEvent("key")
     if key == keys.q then
+      return
+    elseif key == keys.h then
       cs()
-      return exit
-    end
-    if key == keys.rightBracket then
-      csel = csel + ava
-    end
-    if key == keys.leftBracket then
-      csel = csel - ava
-    end
-    
-    if key == keys.enter and level == 4 then
-      cs()
-      p = cat[pro]
-      writeC("Downloading ".. cat[rawName[pro]].Name .. " to /" .. rawName[pro], y/2)
-      status = getUrlFile(cat[rawName[pro]].GitURL)
-      sleep(1)
-      if status then
-        writeFile("/".. rawName[pro], status)
+      term.setTextColor(colors.yellow)
+      writeC("Herp Derp Retrieval Program v2.12",5)
+      writeC("Author: OutragedMetro",7)
+      term.setTextColor(colors.white)
+      writeC("To navigate the menu:",9)
+      writeC("Use arrow keys or 'w', 's' to navigate up and down.",11)
+      writeC("Press 'a' to enter a menu level or go back.",13)
+      writeC("Press 'd' to download a program or file.",15)
+      writeC("Press 'q' to quit the program.",17)
+      term.setTextColor(colors.yellow)
+      writeC("Press any key to continue...",y)
+      term.setTextColor(colors.white)
+      os.pullEvent("key")
+      level = 1
+    elseif key == keys.a then
+      if level == 1 then
+        return
+      elseif level == 2 then
+        level = 1
+        csel = osel[#osel - 1]
+        table.remove(osel,#osel)
+      elseif level == 3 then
+        level = 2
+        csel = osel[#osel - 1]
+        table.remove(osel,#osel)
+      elseif level == 4 then
+        level = 3
+        csel = osel[#osel - 1]
+        table.remove(osel,#osel)
       end
-      
-      cs()
-      writeC("Success!", y/2)
-      sleep(1)
-      
-      repeat
-        cs()
-        writeC("Would you like to generate a startup script? ", y/2)
-        writeC("Y / N : ",y/2 + 1)
-        answer = string.lower(read())
-      until answer == "y" or answer == "n"
-      
-      if answer == "y" then
-        cs()
-        writeC("Writing startup script...", y/2)
-        
-        star = fs.open("/startup","w")
-        star.write("shell.run('".. rawName[pro] .. "')")
-        star.close()
-        
-        cs()
-        writeC("Success! Hold [Ctrl] + R to reboot.", y/2)
+    elseif key == keys.s or key == keys.down then
+      if level == 1 then
+        if csel ~= #list then
+          csel = csel + 1
+        else
+          csel = 1
+        end
+      elseif level == 2 then
+        if csel ~= #list then
+          csel = csel + 1
+        else
+          csel = 1
+        end
+      elseif level == 3 then
+        if csel ~= #list then
+          csel = csel + 1
+        else
+          csel = 1
+        end
+      elseif level == 4 then
+        if csel ~= #list then
+          csel = csel + 1
+        else
+          csel = 1
+        end
+      end
+    elseif key == keys.w or key == keys.up then
+      if level == 1 then
+        if csel ~= 1 then
+          csel = csel - 1
+        else
+          csel = #list
+        end
+      elseif level == 2 then
+        if csel ~= 1 then
+          csel = csel - 1
+        else
+          csel = #list
+        end
+      elseif level == 3 then
+        if csel ~= 1 then
+          csel = csel - 1
+        else
+          csel = #list
+        end
+      elseif level == 4 then
+        if csel ~= 1 then
+          csel = csel - 1
+        else
+          csel = #list
+        end
+      end
+    elseif key == keys.d then
+      if level == 4 then
+        fetchString = fetchData(rawName[list[csel]].URL)
+        if fs.exists(rawName[list[csel]]) then
+          if fs.isDir(rawName[list[csel]]) then
+            print("Program exists as a directory.")
+          else
+            print("Program exists, overwriting.")
+          end
+        else
+          print("Program does not exist, creating new.")
+        end
+        if type(fetchString) ~= "string" then
+          print("Failed to get file.")
+          print("Error: ".. fetchString)
+        else
+          print("Downloading program.")
+          writeFile(rawName[list[csel]], fetchString)
+          print("Download complete.")
+        end
+        sleep(2)
+      end
+    elseif key == keys.enter then
+      if level == 1 then
+        level = 2
+        auna = list[csel]
+        table.insert(osel,csel)
+        csel = 1
+      elseif level == 2 then
+        level = 3
+        pkg = list[csel]
+        table.insert(osel,csel)
+        csel = 1
+      elseif level == 3 then
+        level = 4
+        pro = list[csel]
+        table.insert(osel,csel)
+        csel = 1
+      elseif level == 4 then
+        fetchString = fetchData(menu[auna][pkg][pro].URL)
+        if fs.exists(rawName[list[csel]]) then
+          if fs.isDir(rawName[list[csel]]) then
+            print("Program exists as a directory.")
+          else
+            print("Program exists, overwriting.")
+          end
+        else
+          print("Program does not exist, creating new.")
+        end
+        if type(fetchString) ~= "string" then
+          print("Failed to get file.")
+          print("Error: ".. fetchString)
+        else
+          print("Downloading program.")
+          writeFile(rawName[list[csel]], fetchString)
+          print("Download complete.")
+        end
         sleep(2)
       end
     end
-    
-    if csel < 1 then --Can't go below beginning of the list
-      csel = 1
-    end
-    if csel > #list then --Can't go above length of the list
-      csel = #list
-    end
-    
-    if key == keys.left then      
-      level = level - 1
-      if level < 1 then level = 1 end
-      csel = osel[level]
-    end
-    
-    page = math.floor((csel - 1) / ava)
-    
   end
 end
 
