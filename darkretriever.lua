@@ -1,15 +1,18 @@
 Version = 2.12
-x, y = term.getSize()
+local x, y = term.getSize()
 
 if not http then
   print("Herp derp, forget to enable http?")
-  return exit
+  return
 end
 
 local function getUrlFile(url)
-  local mrHttpFile = http.get(url)
-  mrHttpFile = mrHttpFile.readAll()
-  return mrHttpFile
+  local response = http.get(url)
+  if response then
+    local content = response.readAll()
+    response.close()
+    return content
+  end
 end
 
 local function writeFile(filename, data)
@@ -61,7 +64,7 @@ local function gitUpdate(ProgramName, Filename, ProgramVersion)
     if not status then
       print("\nFailed to get Program Versions file.")
       print("Error: " .. getGit)
-      return exit
+      return
     end
     local getGit = getGit.readAll()
     NVersion = textutils.unserialize(getGit)
@@ -111,7 +114,7 @@ print("Checking for updates...")
 if gitUpdate("darkretriever", shell.getRunningProgram(), Version) == true then
   print("Update found and downloaded.")
   print("\nPlease run " .. shell.getRunningProgram() .. " again.")
-  return exit
+  return
 else
   print("Program up-to-date.")
 end
@@ -123,16 +126,6 @@ write("-> Grabbing file")
 sleep(1)
 write("...")
 sleep(1)
-write(" Done.")
-sleep(1)
-cs()
-write("-> Decoding file...")
-sleep(1)
-write(" Done.")
-sleep(1)
-cs()
-write("-> Importing file...")
-local cat = getUrlFile("https://raw.github.com/darkrising/darkprograms/darkprograms/programList")
 write(" Done.")
 sleep(1)
 cs()
@@ -148,6 +141,13 @@ local function printMenu()
     end
   end
 end
+
+cat = getUrlFile("https://raw.github.com/darkrising/darkprograms/darkprograms/programList")
+if not cat then
+  print("Failed to retrieve program list.")
+  return
+end
+cat = textutils.unserialize(cat)
 
 printMenu()
 
