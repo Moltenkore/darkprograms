@@ -1,15 +1,19 @@
-Version = 2.12
-x, y = term.getSize()
-
+local Version = 2.12
+local x, y = term.getSize()
 if not http then
-  print("Herp derp, forget to enable http?")
-  return exit
+  print("Herp derp, forgot to enable HTTP?")
+  return
 end
 
 local function getUrlFile(url)
-  local mrHttpFile = http.get(url)
-  mrHttpFile = mrHttpFile.readAll()
-  return mrHttpFile
+  local response = http.get(url)
+  if response then
+    local fileContent = response.readAll()
+    response.close()
+    return fileContent
+  else
+    error("Failed to retrieve URL: " .. url)
+  end
 end
 
 local function writeFile(filename, data)
@@ -18,24 +22,25 @@ local function writeFile(filename, data)
   file.close()
 end
 
-local function cs()
+local function clearScreen()
   term.clear()
   term.setCursorPos(1, 1)
 end
 
-local function tc(tcolor, bcolor)
+local function setTextColor(textColor, backgroundColor)
   if term.isColor() then
-    if tcolor then
-      term.setTextColor(colors[tcolor])
+    if textColor then
+      term.setTextColor(colors[textColor])
     end
-    if bcolor then
-      term.setBackgroundColor(colors[bcolor])
+    if backgroundColor then
+      term.setBackgroundColor(colors[backgroundColor])
     end
   end
 end
 
-local function writeC(text, line)
-  term.setCursorPos((x / 2) - (#text / 2), line)
+local function centeredWrite(text, line)
+  local xPos = math.floor((x - #text) / 2) + 1
+  term.setCursorPos(xPos, line)
   term.write(text)
 end
 
@@ -47,59 +52,56 @@ function term.write(text)
   term.oldWrite(text)
 end
 
-local function header(text)
-  tc("white", "blue")
-  writeC(string.rep("  ", x), 1)
-  writeC(string.rep("  ", x), y)
-  writeC(text, 1)
-  tc("white", "black")
+local function printHeader(text)
+  setTextColor("white", "blue")
+  centeredWrite(string.rep("  ", x), 1)
+  centeredWrite(string.rep("  ", x), y)
+  centeredWrite(text, 1)
+  setTextColor("white", "black")
 end
 
-local function gitUpdate(ProgramName, Filename, ProgramVersion)
+local function gitUpdate(programName, filename, programVersion)
   if http then
     local status, getGit = pcall(http.get, "https://raw.githubusercontent.com/rservices/darkprograms/darkprograms/programVersions")
     if not status then
       print("\nFailed to get Program Versions file.")
       print("Error: " .. getGit)
-      return exit
+      return false
     end
     getGit = getGit.readAll()
-    NVersion = textutils.unserialize(getGit)
-    if NVersion[ProgramName].Version > ProgramVersion then
-      getGit = http.get(NVersion[ProgramName].GitURL)
+    local newVersion = textutils.unserialize(getGit)
+    if newVersion[programName].Version > programVersion then
+      getGit = http.get(newVersion[programName].GitURL)
       getGit = getGit.readAll()
-      local file = fs.open(Filename, "w")
-      file.write(getGit)
-      file.close()
+      writeFile(filename, getGit)
       return true
     end
-  else
-    return false
   end
+  return false
 end
 
-cs()
+clearScreen()
 print("Checking for updates...")
-if gitUpdate("darkretriever", shell.getRunningProgram(), Version) == true then
+if gitUpdate("darkretriever", shell.getRunningProgram(), Version) then
   print("Update found and downloaded.")
   print("\nPlease run " .. shell.getRunningProgram() .. " again.")
-  return exit
+  return
 else
   print("Program up-to-date.")
 end
 sleep(1)
 
 x, y = term.getSize()
-cs()
+clearScreen()
 write("-> Grabbing file...")
-cat = getUrlFile("https://raw.githubusercontent.com/rservices/darkprograms/darkprograms/programVersions")
+local cat = getUrlFile("https://raw.githubusercontent.com/rservices/darkprograms/darkprograms/programVersions")
 cat = textutils.unserialize(cat)
 write(" Done.")
 sleep(1)
-cs()
+clearScreen()
 
-menu = {}
-rawName = {}
+local menu = {}
+local rawName = {}
 
 --[[
 
@@ -122,147 +124,202 @@ for name, data in pairs(cat) do
   end
 end
 
-state = "top"
-csel = 1 --Current selected
-osel = 1 --Option selected
-pro = 1 --Selected program
+local state = "top"
+local csel = 1 -- Current selected
+local osel = {1} -- Breadcrumb
+local page = 0
+local ind = 3 -- Y indent
+local ava = y - ind -- Available space
+local level = 1
 
-selections = {}
+local function selection(no, list, totpage)
+  term.setCursorPos(1, (no - mod) + (ind - 1))
+  setTextColor("white")
+  term.write("[" .. list[no] .. "]")
+  setTextColor("white", "black")
+  term.setCursorPos(1, y)
+  setTextColor("white", "blue")
+  term.write("Page: " .. page + 1 .. "/" .. totpage)
+  term.setCursorPos(x - 8, y)
+  term.write("By OutragedMetro .INC")
+  setTextColor("white", "black")
+end
 
-while true do
-  if state == "top" then
-    selections = {}
-    for author, packages in pairs(menu) do
-      table.insert(selections, author)
-    end
-    header("Authors")
-    for i, v in pairs(selections) do
-      if i == csel then
-        tc("white", "black")
+local function draw(tbl)
+  local c = 1
+  local sdat = {}
+  local odat = {}
+  for n, d in pairs(tbl) do
+    table.insert(sdat, n)
+    table.insert(odat, d)
+    c = c + 1
+  end
+  if level ~= 4 then
+    table.sort(sdat)
+  end
+
+  local tpages = math.ceil(c / (y - ind))
+  local mod = page * (y - ind)
+
+  for i = 1, y - ind do
+    term.setCursorPos(2, i + ind - 1)
+    term.write(sdat[i + mod])
+
+    if level == 4 then
+      term.setCursorPos(15, i + ind - 1)
+      if type(odat[i + mod]) == "string" and #odat[i + mod] + 14 > x then
+        term.write(string.sub(odat[i + mod], 1, x - 14 - 2) .. "..")
       else
-        tc("black", "white")
+        term.write(odat[i + mod])
       end
-      writeC(v, i + 1)
     end
-    event, button = os.pullEvent("key")
-    if button == 200 then
-      csel = csel - 1
-      if csel < 1 then
-        csel = #selections
-      end
-    elseif button == 208 then
-      csel = csel + 1
-      if csel > #selections then
-        csel = 1
-      end
-    elseif button == 28 then
-      state = "packages"
-      psel = 1
-    elseif button == 14 then
-      state = "menu"
+  end
+
+  if level == 4 then
+    term.setCursorPos(1, y - 2)
+    centeredWrite("Press enter to download.", y - 2)
+  end
+
+  return sdat, tpages, mod
+end
+
+local function runMenu()
+  while true do
+    clearScreen()
+    if level == 1 then
+      local list, totpage, mod = draw(menu)
+      printHeader("Authors")
+      setTextColor("white", "black")
+      centeredWrite("Press 'h' for help, 'q' to quit.", 2)
+      setTextColor("white", "black")
+
+    elseif level == 2 then
+      local list, totpage, mod = draw(menu[auna])
+      printHeader("Packages")
+    elseif level == 3 then
+      local list, totpage, mod = draw(menu[auna][pkg])
+      printHeader("Programs")
+    elseif level == 4 then
+      printHeader("Program Data")
+      local list, totpage, mod = draw(menu[auna][pkg][pro])
     end
-  elseif state == "packages" then
-    selections = {}
-    for packages, programs in pairs(menu[selections[csel]]) do
-      table.insert(selections, packages)
+
+    selection(csel, list, totpage)
+
+    local event, key = os.pullEvent("key")
+
+    if key == keys.h then
+      clearScreen()
+      printHeader("Help")
+      term.setCursorPos(1, ind)
+      print("Use the up and down arrows to move through the list.")
+      print("Use the right arrow to enter a menu item and the left arrow to exit.")
+      print("https://outraged-metro.com")
+      setTextColor("white", "black")
+      centeredWrite("Press enter to continue.", y - 2)
+      os.pullEvent("key")
+      level = osel[#osel]
     end
-    header("Packages")
-    for i, v in pairs(selections) do
-      if i == psel then
-        tc("white", "black")
+
+    if key == keys.q then
+      clearScreen()
+      printHeader("Exit")
+      term.setCursorPos(1, ind)
+      print("Are you sure you want to exit?")
+      print("Press enter to confirm or any other key to cancel.")
+      local event, key = os.pullEvent("key")
+      if key == keys.enter then
+        clearScreen()
+        return
       else
-        tc("black", "white")
+        level = osel[#osel]
       end
-      writeC(v, i + 1)
     end
-    event, button = os.pullEvent("key")
-    if button == 200 then
-      psel = psel - 1
-      if psel < 1 then
-        psel = #selections
+
+    if key == keys.enter then
+      if level == 1 then
+        auna = list[csel + mod]
+        osel = {csel + mod}
+        level = 2
+      elseif level == 2 then
+        pkg = list[csel + mod]
+        osel[#osel + 1] = csel + mod
+        level = 3
+      elseif level == 3 then
+        pro = rawName[list[csel + mod]]
+        osel[#osel + 1] = csel + mod
+        level = 4
+      elseif level == 4 then
+        local rname = rawName[list[csel + mod]]
+        clearScreen()
+        printHeader("Download")
+        term.setCursorPos(1, ind)
+        print("Are you sure you want to download " .. rname .. "?")
+        print("Press enter to confirm or any other key to cancel.")
+        local event, key = os.pullEvent("key")
+        if key == keys.enter then
+          clearScreen()
+          write("-> Grabbing file...")
+          local file = getUrlFile(cat[rname].DownloadURL)
+          writeFile(rname, file)
+          print(" Done.")
+          sleep(1)
+          clearScreen()
+          print("File " .. rname .. " downloaded successfully!")
+          print("Press any key to continue.")
+          os.pullEvent("key")
+        end
+        level = osel[#osel]
       end
-    elseif button == 208 then
-      psel = psel + 1
-      if psel > #selections then
-        psel = 1
+    end
+
+    if key == keys.right then
+      if level ~= 4 then
+        osel[#osel + 1] = csel + mod
       end
-    elseif button == 28 then
-      state = "programs"
-      pro = 1
-    elseif button == 14 then
-      state = "top"
+      level = level + 1
     end
-  elseif state == "programs" then
-    selections = {}
-    for program, data in pairs(menu[selections[csel]][selections[psel]]) do
-      table.insert(selections, program)
-    end
-    header("Programs")
-    for i, v in pairs(selections) do
-      if i == pro then
-        tc("white", "black")
+
+    if key == keys.left then
+      if level == 1 then
+        clearScreen()
+        printHeader("Exit")
+        term.setCursorPos(1, ind)
+        print("Are you sure you want to exit?")
+        print("Press enter to confirm or any other key to cancel.")
+        local event, key = os.pullEvent("key")
+        if key == keys.enter then
+          clearScreen()
+          return
+        end
       else
-        tc("black", "white")
+        level = osel[#osel]
+        table.remove(osel, #osel)
       end
-      writeC(v, i + 1)
     end
-    event, button = os.pullEvent("key")
-    if button == 200 then
-      pro = pro - 1
-      if pro < 1 then
-        pro = #selections
+
+    if key == keys.down then
+      if csel < ava then
+        csel = csel + 1
+      else
+        if page + 1 < totpage then
+          page = page + 1
+          csel = 1
+        end
       end
-    elseif button == 208 then
-      pro = pro + 1
-      if pro > #selections then
-        pro = 1
-      end
-    elseif button == 28 then
-      state = "menu"
-      osel = 1
-    elseif button == 14 then
-      state = "packages"
     end
-  elseif state == "menu" then
-    header("Options")
-    if osel == 1 then
-      tc("white", "black")
-    else
-      tc("black", "white")
-    end
-    writeC("Run", 1)
-    if osel == 2 then
-      tc("white", "black")
-    else
-      tc("black", "white")
-    end
-    writeC("Install", 2)
-    event, button = os.pullEvent("key")
-    if button == 200 then
-      osel = osel - 1
-      if osel < 1 then
-        osel = 2
+
+    if key == keys.up then
+      if csel > 1 then
+        csel = csel - 1
+      else
+        if page - 1 >= 0 then
+          page = page - 1
+          csel = ava
+        end
       end
-    elseif button == 208 then
-      osel = osel + 1
-      if osel > 2 then
-        osel = 1
-      end
-    elseif button == 28 then
-      if osel == 1 then
-        term.clear()
-        term.setCursorPos(1, 1)
-        shell.run(menu[selections[csel]][selections[psel]][selections[pro]].Run)
-      elseif osel == 2 then
-        cs()
-        write("-> Downloading " .. menu[selections[csel]][selections[psel]][selections[pro]].Name .. "...")
-        writeFile(menu[selections[csel]][selections[psel]][selections[pro]].Name, getUrlFile(menu[selections[csel]][selections[psel]][selections[pro]].URL))
-        write(" Done.")
-        sleep(1)
-        state = "top"
-      end
-    elseif button == 14 then
-      state = "programs"
     end
   end
 end
+
+runMenu()
