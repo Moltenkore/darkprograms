@@ -131,7 +131,7 @@ function selection(no,list,totpage)
   tc("white","blue")
   term.write("Page: ".. page + 1 .. "/" .. totpage)
   term.setCursorPos(x - 14, y)
-  term.write("By Darkrising")
+  term.write("By Outraged")
   tc("white","black")
 end
 function draw(tbl)
