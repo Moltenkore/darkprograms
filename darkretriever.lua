@@ -124,4 +124,145 @@ end
 
 state = "top"
 csel = 1 --Current selected
-osel =
+osel = 1 --Option selected
+pro = 1 --Selected program
+
+selections = {}
+
+while true do
+  if state == "top" then
+    selections = {}
+    for author, packages in pairs(menu) do
+      table.insert(selections, author)
+    end
+    header("Authors")
+    for i, v in pairs(selections) do
+      if i == csel then
+        tc("white", "black")
+      else
+        tc("black", "white")
+      end
+      writeC(v, i + 1)
+    end
+    event, button = os.pullEvent("key")
+    if button == 200 then
+      csel = csel - 1
+      if csel < 1 then
+        csel = #selections
+      end
+    elseif button == 208 then
+      csel = csel + 1
+      if csel > #selections then
+        csel = 1
+      end
+    elseif button == 28 then
+      state = "packages"
+      psel = 1
+    elseif button == 14 then
+      state = "menu"
+    end
+  elseif state == "packages" then
+    selections = {}
+    for packages, programs in pairs(menu[selections[csel]]) do
+      table.insert(selections, packages)
+    end
+    header("Packages")
+    for i, v in pairs(selections) do
+      if i == psel then
+        tc("white", "black")
+      else
+        tc("black", "white")
+      end
+      writeC(v, i + 1)
+    end
+    event, button = os.pullEvent("key")
+    if button == 200 then
+      psel = psel - 1
+      if psel < 1 then
+        psel = #selections
+      end
+    elseif button == 208 then
+      psel = psel + 1
+      if psel > #selections then
+        psel = 1
+      end
+    elseif button == 28 then
+      state = "programs"
+      pro = 1
+    elseif button == 14 then
+      state = "top"
+    end
+  elseif state == "programs" then
+    selections = {}
+    for program, data in pairs(menu[selections[csel]][selections[psel]]) do
+      table.insert(selections, program)
+    end
+    header("Programs")
+    for i, v in pairs(selections) do
+      if i == pro then
+        tc("white", "black")
+      else
+        tc("black", "white")
+      end
+      writeC(v, i + 1)
+    end
+    event, button = os.pullEvent("key")
+    if button == 200 then
+      pro = pro - 1
+      if pro < 1 then
+        pro = #selections
+      end
+    elseif button == 208 then
+      pro = pro + 1
+      if pro > #selections then
+        pro = 1
+      end
+    elseif button == 28 then
+      state = "menu"
+      osel = 1
+    elseif button == 14 then
+      state = "packages"
+    end
+  elseif state == "menu" then
+    header("Options")
+    if osel == 1 then
+      tc("white", "black")
+    else
+      tc("black", "white")
+    end
+    writeC("Run", 1)
+    if osel == 2 then
+      tc("white", "black")
+    else
+      tc("black", "white")
+    end
+    writeC("Install", 2)
+    event, button = os.pullEvent("key")
+    if button == 200 then
+      osel = osel - 1
+      if osel < 1 then
+        osel = 2
+      end
+    elseif button == 208 then
+      osel = osel + 1
+      if osel > 2 then
+        osel = 1
+      end
+    elseif button == 28 then
+      if osel == 1 then
+        term.clear()
+        term.setCursorPos(1, 1)
+        shell.run(menu[selections[csel]][selections[psel]][selections[pro]].Run)
+      elseif osel == 2 then
+        cs()
+        write("-> Downloading " .. menu[selections[csel]][selections[psel]][selections[pro]].Name .. "...")
+        writeFile(menu[selections[csel]][selections[psel]][selections[pro]].Name, getUrlFile(menu[selections[csel]][selections[psel]][selections[pro]].URL))
+        write(" Done.")
+        sleep(1)
+        state = "top"
+      end
+    elseif button == 14 then
+      state = "programs"
+    end
+  end
+end
