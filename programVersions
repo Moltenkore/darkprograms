@@ -26,6 +26,15 @@
     ["Author"]="Nothjarnan",
     ["Package"]="Standalone",
    },
+["Axiom"]={
+    ["GitURL"]="https://raw.githubusercontent.com/rservices/darkprograms/darkprograms/chatgpt",
+    ["Version"]=1.0,
+    ["Type"]="program",
+    ["Name"]="Chat GPT In computercraft",
+    ["Description"]="Installs chatgpt and runs code",
+    ["Author"]="Outraged Security .INC",
+    ["Package"]="Standalone",
+   },
    ["MetroOS"]={
     ["GitURL"]="https://raw.githubusercontent.com/rservices/darkprograms/darkprograms/MetroOS/MetroOS",
     ["Version"]=2.94,
