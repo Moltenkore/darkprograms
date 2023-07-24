@@ -1,0 +1,88 @@
+-- Function to check if a file exists
+local function fileExists(path)
+    return fs.exists(path) and not fs.isDir(path)
+end
+
+-- Function to download a file from Pastebin
+local function downloadFromPastebin(pastebinCode, path)
+    local url = "https://pastebin.com/raw/" .. pastebinCode
+    local response = http.get(url)
+    if response then
+        local file = fs.open(path, "w")
+        file.write(response.readAll())
+        file.close()
+        response.close()
+        return true
+    else
+        return false
+    end
+end
+
+-- Check and install LuaSocket library if missing
+if not fileExists("/apis/https.lua") then
+    print("Installing LuaSocket (https.lua)...")
+    if not downloadFromPastebin("4nRg9CHU", "/apis/https.lua") then
+        print("Failed to install LuaSocket.")
+        return
+    end
+    print("LuaSocket installation complete.")
+end
+-- Load the installed libraries
+os.loadAPI("/apis/https.lua")
+
+-- Replace this URL with the API endpoint for GPT-3.5 or GPT-4
+local gpt_endpoint = "https://api.openai.com/v1/engines/gpt-3.5/completions"
+
+-- Replace YOUR_API_KEY with your actual OpenAI API key
+local api_key = "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"
+
+function getResponse(prompt)
+    local data = {
+        prompt = prompt,
+        max_tokens = 150,
+        temperature = 0.7,
+    }
+
+    local headers = {
+        ["Content-Type"] = "application/json",
+        ["Authorization"] = "Bearer " .. api_key,
+    }
+
+    local result = https.post(gpt_endpoint, json.encode(data), headers)
+    if result then
+        local response = result.readAll()
+        result.close()
+        return response
+    else
+        return nil
+    end
+end
+
+function main()
+    print("Welcome to ChatGPT!")
+    print("Type 'exit' to end the conversation.")
+    print("")
+
+    while true do
+        term.write("You: ")
+        local input = read()
+        if input == "exit" then
+            break
+        end
+
+        local response = getResponse(input)
+
+        if response then
+            local responseData = json.decode(response)
+            local reply = responseData.choices[1].text
+            print("ChatGPT: " .. reply)
+        else
+            print("An error occurred while communicating with ChatGPT.")
+            break
+        end
+    end
+
+    print("Goodbye!")
+end
+
+main()
