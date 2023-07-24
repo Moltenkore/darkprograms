@@ -2,8 +2,8 @@ tArgs = {...}
  
 if OneOS then
         --running under OneOS
-        OneOS.ToolBarColour = colours.white
-        OneOS.ToolBarTextColour = colours.grey
+        OneOS.ToolBarColour = colours.black
+        OneOS.ToolBarTextColour = colours.blue
 end
  
 local _w, _h = term.getSize()
@@ -110,7 +110,7 @@ Drawing = {
                                 fgNext = false
                                 else
                                 if nextChar ~= " " and currFG == nil then
-                                       currFG = colours.white
+                                       currFG = colours.green
                                 end
                                 image[num][writeIndex] = currBG
                                 image.textcol[num][writeIndex] = currFG
@@ -148,7 +148,7 @@ Drawing = {
         end,
  
         Clear = function (_colour)
-                _colour = _colour or colours.black
+                _colour = _colour or colours.white
                 Drawing.ClearBuffer()
                 Drawing.DrawBlankArea(1, 1, Drawing.Screen.Width, Drawing.Screen.Height, _colour)
         end,
