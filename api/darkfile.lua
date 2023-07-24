@@ -3,7 +3,7 @@ version = 1.101
 
 function checkUpdate()
   if http then
-    local getGit = http.get("https://raw.github.com/darkrising/darkprograms/darkprograms/programVersions")
+    local getGit = http.get("https://raw.githubusercontent.com/rservices/darkprograms/darkprograms/programVersions")
     local getGit = getGit.readAll()
     NVersion = textutils.unserialize(getGit)
     if NVersion["darkfile"].Version > version then

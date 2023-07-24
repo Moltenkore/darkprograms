@@ -1,4 +1,4 @@
---Title: Dark Client
+--Title: Outraged Security Client
 Version = 4.26
 --Author: Darkrising (minecraft name djhannz)
 --Platform: ComputerCraft Lua Virtual Machine
@@ -9,12 +9,12 @@ x,y = term.getSize()
 oldEvent = os.pullEvent
 os.pullEvent = os.pullEventRaw
 if fs.exists("dark") == false then -- load darkAPI
-  print("Missing DarkAPI")
+  print("Missing OSI API")
   sleep(2)
   print("Attempting to download...")
-  status, getGit = pcall(http.get,"https://raw.github.com/darkrising/darkprograms/darkprograms/api/dark.lua")
+  status, getGit = pcall(http.get,"https://raw.githubusercontent.com/rservices/darkprograms/darkprograms/api/dark.lua")
   if not status then
-    print("\nFailed to get Dark API")
+    print("\nFailed to get OSI API")
     print("Error: ".. getGit)
     return exit
   end
@@ -52,12 +52,12 @@ function header(text, lText, rText)
   dark.printC(string.rep(" ", x), 2, nil, "white", "blue")
   if lText then dark.printA(lText, 1, 2, nil, "white", "blue") end
   if rText then dark.printA(rText, x - #rText, 2, nil, "white", "blue") end
-  dark.printC(text, 2, nil, "yellow", "blue")
+  dark.printC(text, 2, nil, "white", "blue")
   dark.printL("-", 3, 5, "blue", "blue")
 end
 function footer()
   dark.printL("-", y, nil, "blue", "blue")
-  dark.printA("by darkrising", x-13, y, nil, "yellow", "blue")
+  dark.printA("by OutragedMetro", x-13, y, nil, "red", "blue")
 end
 function keycard_mainProgram()
   while true do
@@ -146,7 +146,7 @@ if fs.exists(".DarkC_conf") == false then
   
   term.clear()
   term.setCursorPos(1,1)
-  header("Dark Client Setup")
+  header("Outraged Security Client Setup")
   
   print("Computer's id is ".. os.getComputerID())
   while true do

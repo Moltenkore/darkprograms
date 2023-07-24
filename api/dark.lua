@@ -126,7 +126,7 @@ function getPBFile(PBCode, uPath) -- pastebin code of the file, and path to save
 end
 function gitUpdate(ProgramName, Filename, ProgramVersion)
   if http then
-    local status, getGit = pcall(http.get,"https://raw.github.com/darkrising/darkprograms/darkprograms/programVersions")
+    local status, getGit = pcall(http.get,"https://raw.githubusercontent.com/rservices/darkprograms/darkprograms/programVersions")
     if not status then
       return false
     end
