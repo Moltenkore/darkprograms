@@ -1,15 +1,13 @@
---Title: Dark Server
+--Title: Outraged Security Server 
 Version = 6.37
---Author: Darkrising (minecraft name djhannz)
---Platform: ComputerCraft Lua Virtual Machine
 term.clear()
 term.setCursorPos(1,1)
 if fs.exists("dark") == false then
-  print("Missing DarkAPI")
+  print("Missing OSI API")
   print("Attempting to download...")
-  status, getGit = pcall(http.get, "https://raw.github.com/darkrising/darkprograms/darkprograms/api/dark.lua")
+  status, getGit = pcall(http.get, "https://raw.githubusercontent.com/rservices/darkprograms/darkprograms/api/dark.lua")
   if not status then
-    print("\nFailed to get Dark API")
+    print("\nFailed to get OSI API")
     print("Error: ".. getGit)
     return exit
   end
@@ -130,7 +128,7 @@ function footer()
     co = "blue"
   end
   dark.printL("-", y, nil, co, co)
-  dark.printA("by darkrising", x-13, y, nil, "yellow", co)
+  dark.printA("by OutragedMetro", x-13, y, nil, "red", co)
 end
 function displayTNameColumn(TName, Page, Extrater, Admin)
   if Extrater then
@@ -238,7 +236,7 @@ end
 function runServerGui()
   term.clear() 
   term.setCursorPos(1,1)
-  dark.splash(1.5, "Powered by DarkGui")  
+  dark.splash(1.5, "Powered by Outraged Security Gui")  
   state = "main"
   Page = 0  
   while true do
@@ -323,7 +321,8 @@ Co = {
       term.setCursorPos(1,1)
       header("Help")
       dark.printA("Press [1] to return to the main menu", 1, y)
-      print("\nHelp comming soon!")
+      print("\nTo Navigate the settings menu and to add new users, Keycards, And passwords just follow the on screen prompts!")
+      print("\nOutraged Security INC prides them selves in providing top notch security to its customers for more support contact Outraged Security INC. For installation a geek squad visit may be required by a professional.")
       os.pullEvent("key")
     end,
     options = {"main"}
@@ -350,7 +349,7 @@ Co = {
         printR("[8] Shell", 8) 
       end
       dark.printL("-", y, nil, co, co)
-      dark.printA("by darkrising", x-13, y, nil, "yellow", co)
+      dark.printA("by OutragedMetro", x-13, y, nil, "yellow", co)
 	    dark.printA("                 ", 1, y, nil, co, co)
       dark.printA("Current Security Level: "..slevel, 1, y, nil, "white", co)
     end,
@@ -771,7 +770,7 @@ if fs.exists(".DarkS_conf") == false then
   dark.cs()
   config = {}
   masterdb = databaseNew()
-  header("Dark Server Setup")
+  header("Outraged Security Server Setup")
   print("Computer's id is ".. os.getComputerID())
   repeat
     write("security level amount (must be a number): ")
