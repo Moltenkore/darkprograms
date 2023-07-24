@@ -1,0 +1,93 @@
+local function installLuaSocket()
+    if not http then
+        print("Installing LuaSocket...")
+        local socket_url = "https://raw.githubusercontent.com/diegonehab/luasocket/master/src/luasocket/https.lua"
+        local json_url = "https://raw.githubusercontent.com/rxi/json.lua/master/json.lua"
+
+        local function download(url, path)
+            local response = http.get(url)
+            if response then
+                local file = fs.open(path, "w")
+                file.write(response.readAll())
+                file.close()
+                response.close()
+                return true
+            else
+                print("Failed to download " .. url)
+                return false
+            end
+        end
+
+        if not download(socket_url, "/apis/https.lua") or
+           not download(json_url, "/apis/json.lua") then
+            print("Failed to install required libraries.")
+            return false
+        end
+        print("Installation complete.")
+    end
+    return true
+end
+
+if not installLuaSocket() then
+    return
+end
+
+-- Load the installed libraries
+os.loadAPI("/apis/https.lua")
+os.loadAPI("/apis/json.lua")
+-- Replace this URL with the API endpoint for GPT-3.5 or GPT-4
+local gpt_endpoint = "https://api.openai.com/v1/engines/gpt-3.5/completions"
+
+-- Replace YOUR_API_KEY with your actual OpenAI API key
+local api_key = "YOUR_API_KEY"
+
+function getResponse(prompt)
+    local data = {
+        prompt = prompt,
+        max_tokens = 150,
+        temperature = 0.7,
+    }
+
+    local headers = {
+        ["Content-Type"] = "application/json",
+        ["Authorization"] = "Bearer " .. api_key,
+    }
+
+    local result = https.post(gpt_endpoint, json.encode(data), headers)
+    if result then
+        local response = result.readAll()
+        result.close()
+        return response
+    else
+        return nil
+    end
+end
+
+function main()
+    print("Welcome to ChatGPT!")
+    print("Type 'exit' to end the conversation.")
+    print("")
+
+    while true do
+        term.write("You: ")
+        local input = read()
+        if input == "exit" then
+            break
+        end
+
+        local response = getResponse(input)
+
+        if response then
+            local responseData = json.decode(response)
+            local reply = responseData.choices[1].text
+            print("ChatGPT: " .. reply)
+        else
+            print("An error occurred while communicating with ChatGPT.")
+            break
+        end
+    end
+
+    print("Goodbye!")
+end
+
+main()
