@@ -1,0 +1,54 @@
+Nr = ""
+ 
+shell.run("mkdir MineOS")
+shell.run("cd MineOS")
+term.setBackgroundColor(8)
+term.setTextColor(1)
+shell.run("clear")
+ 
+ 
+ 
+shell.run("rm kernel")
+shell.run("pastebin get mbrjKBv5 kernel")
+ 
+ 
+ 
+shell.run("mkdir Images")
+shell.run("cd Images")
+shell.run("rm background.image")
+shell.run("pastebin get nzuZuewk background.image")
+ 
+shell.run("cd /")
+shell.run("rm startup")
+shell.run("pastebin get KRGvFsqQ startup")
+ 
+term.setCursorPos(1,19)
+print("Rebooting in 5")
+sleep(1)
+term.setCursorPos(1,19)
+print("Rebooting in 4")
+sleep(1)
+term.setCursorPos(1,19)
+print("Rebooting in 3")
+sleep(1)
+term.setCursorPos(1,19)
+print("Rebooting in 2")
+sleep(1)
+term.setCursorPos(1,19)
+print("Rebooting in 1")
+shell.run("reboot")
+ 
+ 
+ 
+ 
+--Codes
+--
+--term.setCursorPos
+--print("")
+--textutils.slowPrint("")
+--edit
+--shell.run("")
+--shell.run("clear")
+--sleep()
+--term.setBackgroundColor
+--term.setTextColor

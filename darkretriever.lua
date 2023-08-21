@@ -1,23 +1,29 @@
 Version = 2.12
 x,y = term.getSize()
+
 if not http then
   print("Herp derp, forget to enable http?")
-  return exit
+  return
 end
+
 local function getUrlFile(url)
-  local mrHttpFile = http.get(url)
-  mrHttpFile = mrHttpFile.readAll()
-  return mrHttpFile
+  local response = http.get(url)
+  local contents = response.readAll()
+  response.close()
+  return contents
 end
+
 local function writeFile(filename, data)
   local file = fs.open(filename, "w")
   file.write(data)
   file.close()
 end
+
 local function cs()
   term.clear()
   term.setCursorPos(1,1)
 end
+
 local function tc(tcolor,bcolor)
   if term.isColor() then
     if tcolor then
@@ -28,10 +34,12 @@ local function tc(tcolor,bcolor)
     end
   end
 end
+
 local function writeC(text,line)
   term.setCursorPos((x / 2) - (#text / 2),line)
   term.write(text)
 end
+
 term.oldWrite = term.write
 function term.write(text)
   if not text then
@@ -39,6 +47,7 @@ function term.write(text)
   end
   term.oldWrite(text)
 end
+
 local function header(text)
   tc("white","blue")
   writeC(string.rep("  ",x),1)
@@ -46,16 +55,17 @@ local function header(text)
   writeC(text,1)
   tc("white","black")
 end
+
 local function gitUpdate(ProgramName, Filename, ProgramVersion)
   if http then
-    local status, getGit = pcall(http.get, "https://raw.github.com/darkrising/darkprograms/darkprograms/programVersions")
+    local status, getGit = pcall(http.get, "https://raw.githubusercontent.com/OutragedMetro/darkprograms/darkprograms/programVersions")
     if not status then
       print("\nFailed to get Program Versions file.")
       print("Error: ".. getGit)
       return exit
     end 
-    local getGit = getGit.readAll()
-    NVersion = textutils.unserialize(getGit)
+    getGit = getGit.readAll()
+    local NVersion = textutils.unserialize(getGit)
     if NVersion[ProgramName].Version > ProgramVersion then
       getGit = http.get(NVersion[ProgramName].GitURL)
       getGit = getGit.readAll()
@@ -80,10 +90,10 @@ else
 end
 sleep(1)
 
-x,y = term.getSize()
+x, y = term.getSize()
 cs()
 write("-> Grabbing file...")
-cat = getUrlFile("https://raw.github.com/darkrising/darkprograms/darkprograms/programVersions")
+cat = getUrlFile("https://raw.githubusercontent.com/OutragedMetro/darkprograms/darkprograms/programVersions")
 cat = textutils.unserialize(cat)
 write(" Done.")
 sleep(1)
@@ -100,7 +110,7 @@ rawName = {}
 
 ]]--
 
-for name,data in pairs(cat) do
+for name, data in pairs(cat) do
   if not menu[data.Author] then
     menu[data.Author] = {}
   end
@@ -131,9 +141,10 @@ function selection(no,list,totpage)
   tc("white","blue")
   term.write("Page: ".. page + 1 .. "/" .. totpage)
   term.setCursorPos(x - 14, y)
-  term.write("By Darkrising")
+  term.write("By Outraged")
   tc("white","black")
 end
+
 function draw(tbl)
   local c = 1
   local sdat = {}
@@ -171,42 +182,43 @@ function draw(tbl)
   
   return sdat, tpages, mod
 end
+
 function runMenu()
   while true do
     cs()
     if level == 1 then
-      list,totpage,mod = draw(menu)
+      list, totpage, mod = draw(menu)
       header("Authors")
       
       tc("yellow","black")
-      writeC("Press 'h' for help, 'q' to quit.",2)
+      writeC("Press 'h' for help, 'q' to quit.", 2)
       tc("white","black")
       
     elseif level == 2 then
-      list,totpage,mod = draw(menu[auna])
+      list, totpage, mod = draw(menu[auna])
       header("Packages")
     elseif level == 3 then
-      list,totpage,mod = draw(menu[auna][pkg])
+      list, totpage, mod = draw(menu[auna][pkg])
       header("Programs")
     elseif level == 4 then
       header("Program Data")
-      list,totpage,mod = draw(menu[auna][pkg][pro])
+      list, totpage, mod = draw(menu[auna][pkg][pro])
     end
     
     selection(csel, list, totpage)
     
-    e,key = os.pullEvent("key")  
+    e, key = os.pullEvent("key")  
     
     if key == keys.h then
       cs()
       header("Help")
-      term.setCursorPos(1,ind)
+      term.setCursorPos(1, ind)
       print("Use the up and down arrows to move through the list.")
-      print("use the right arrow to enter a menu item and the left arrow to exit")
+      print("Use the right arrow to enter a menu item and the left arrow to exit.")
       print("")
-      _,cy = term.getCursorPos()
+      _, cy = term.getCursorPos()
       tc("yellow","black")
-      writeC("Press enter to continue.",cy)
+      writeC("Press enter to continue.", cy)
       tc("white","black")
       read(" ")
     end
@@ -265,7 +277,7 @@ function runMenu()
       repeat
         cs()
         writeC("Would you like to generate a startup script? ", y/2)
-        writeC("Y / N : ",y/2 + 1)
+        writeC("Y / N : ", y/2 + 1)
         answer = string.lower(read())
       until answer == "y" or answer == "n"
       
@@ -273,7 +285,7 @@ function runMenu()
         cs()
         writeC("Writing startup script...", y/2)
         
-        star = fs.open("/startup","w")
+        star = fs.open("/startup", "w")
         star.write("shell.run('".. rawName[pro] .. "')")
         star.close()
         
@@ -283,10 +295,10 @@ function runMenu()
       end
     end
     
-    if csel < 1 then --Can't go below beginning of the list
+    if csel < 1 then --Can't go below the beginning of the list
       csel = 1
     end
-    if csel > #list then --Can't go above length of the list
+    if csel > #list then --Can't go above the length of the list
       csel = #list
     end
     
@@ -297,7 +309,6 @@ function runMenu()
     end
     
     page = math.floor((csel - 1) / ava)
-    
   end
 end
 

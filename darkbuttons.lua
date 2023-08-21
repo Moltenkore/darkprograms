@@ -1,18 +1,16 @@
 --Title: Dark buttons
 Version = 1.231
---Author: Darkrising (minecraft name djhannz)
---Platform: ComputerCraft Lua Virtual Machine
 if not term.isColour() then
 	print("Requires an Advanced Computer and an Advanced monitor.")
 	return
 end
 if fs.exists("dark") == false then -- load darkAPI
-  print("Missing DarkAPI")
+  print("Missing OSI API")
   print("Attempting to download...")
   if not http then
-    error("Enable the HTTP API to download DarkAPI")
+    error("Enable the HTTP API to download OSI API")
   end
-  getGit = http.get("https://raw.github.com/darkrising/darkprograms/darkprograms/api/dark.lua")
+  getGit = http.get("https://raw.githubusercontent.com/rservices/darkprograms/darkprograms/api/dark.lua")
   getGit = getGit.readAll()
   file = fs.open("dark", "w")
   file.write(getGit)
@@ -386,7 +384,7 @@ function wizard(mode)
       if happyness ~= true then
         textBox(":'(",txd,txu,tyd,tyu,colors.white,colors.blue)
       else
-        textBox(":)",txd,txu,tyd,tyu,colors.white,colors.green)
+        textBox(":)",txd,txu,tyd,tyu,colors.white,colors.blue)
       end
       sleep(1)
     until happyness == true
